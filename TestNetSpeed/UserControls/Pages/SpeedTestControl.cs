@@ -361,7 +361,10 @@ namespace TestNetSpeed.UserControls.Pages
             _lastResult = await _service.RunFullTestAsync(progress, _cts.Token);
 
             if (_lastResult.Success)
+            {
                 AppendHistory(_lastResult);
+                TestHistoryStore.Append(_lastResult);
+            }
 
             SetRunningState(false);
 

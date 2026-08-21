@@ -62,6 +62,7 @@ namespace TestNetSpeed.Helper
         public static List<string> AboutFeatures = new()
         {
             "Real-time internet speed test — download, upload, ping, jitter",
+            "Test history — every result saved locally, browsable anytime",
             "Detailed network adapter & connection info",
             "Built-in network tools — Ping, DNS Lookup, IP Lookup, Traceroute",
             "System tray support with notifications",
@@ -103,13 +104,14 @@ namespace TestNetSpeed.Helper
         // or manager code — NavigationManager renders and wires these up.
         //
         // Built out incrementally per doc/Internet Speed Checker Plus -
-        // Development Plan.md's build order — Dashboard, Test History,
-        // Network Info, Network Tools, and Export get added here as each is
-        // implemented, same as WiFiPasswordViewer's nav list grew one tab
-        // at a time rather than pre-declaring stubs for unbuilt pages.
+        // Development Plan.md's build order — Dashboard and Export are
+        // still to come, added here once each is implemented, same as
+        // WiFiPasswordViewer's nav list grew one tab at a time rather than
+        // pre-declaring stubs for unbuilt pages.
         public static List<NavItem> NavItems = new()
         {
             new NavItem { Label = "Speed Test", Icon = IconChar.GaugeHigh, IconColor = Color.FromArgb(59, 130, 246), ControlType = typeof(SpeedTestControl) },
+            new NavItem { Label = "Test History", Icon = IconChar.ClockRotateLeft, IconColor = Color.FromArgb(16, 185, 129), ControlType = typeof(TestHistoryControl) },
             new NavItem { Label = "Network Info", Icon = IconChar.NetworkWired, IconColor = Color.FromArgb(14, 165, 233), ControlType = typeof(NetworkInfoControl) },
             new NavItem { Label = "Network Tools", Icon = IconChar.Screwdriver, IconColor = Color.FromArgb(168, 85, 247), ControlType = typeof(NetworkToolsControl) },
             // ShowModal instead of ControlType — About is a dialog, not a

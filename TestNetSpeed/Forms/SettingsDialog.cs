@@ -6,13 +6,12 @@ using DpiCommon.Helper;
 namespace TestNetSpeed.Forms
 {
     /// <summary>
-    /// App settings dialog — Dark/Light mode and minimize-to-tray-on-close.
-    /// Reads/writes through SettingsService.Current, same as ThemeManager
-    /// and SidebarControl already do for these same two preferences.
-    /// A "Clear Test History" data action belongs here too once the Test
-    /// History tab exists (ported from WiFiPasswordViewer's Settings
-    /// dialog, which had a "Clear WiFi Profile Cache" action in the same
-    /// slot) — omitted for now since there's no history to clear yet.
+    /// App settings dialog — Dark/Light mode, minimize-to-tray-on-close,
+    /// and a "clear test history" action. Reads/writes through
+    /// SettingsService.Current, same as ThemeManager and SidebarControl
+    /// already do for the first two. The Data section mirrors
+    /// WiFiPasswordViewer's Settings dialog, which had a "Clear WiFi
+    /// Profile Cache" action in the same slot.
     /// </summary>
     public class SettingsDialog : Form
     {
@@ -22,6 +21,9 @@ namespace TestNetSpeed.Forms
         private Label _lblTitle;
         private CheckBox _chkDarkMode;
         private CheckBox _chkMinimizeToTray;
+        private Label _lblHistoryTitle;
+        private Label _lblHistoryHint;
+        private Button _btnClearHistory;
         private Button _btnClose;
         private readonly List<Panel> _dividers = new();
         private readonly List<Label> _sectionLabels = new();
@@ -105,9 +107,44 @@ namespace TestNetSpeed.Forms
 
             y = AddDivider(contentX, contentWidth, y);
 
-            // TODO(Test History tab): add a "Data" section here with a
-            // "Clear Test History" action, same slot the WiFi build used
-            // for "Clear WiFi Profile Cache".
+            // ── Data ──────────────────────────────────────────────────────────
+            y = AddSectionLabel("Data", contentX, y);
+
+            // Title + hint stacked full-width, button on its own row below —
+            // stacking (not hint-beside-button) avoids the hint text ever
+            // running under the button regardless of string length, font,
+            // or DPI (see the App Settings dialog bugfix in the WiFi build).
+            _lblHistoryTitle = new Label
+            {
+                Text = "Test History",
+                Font = new Font("Segoe UI", 9f, FontStyle.Bold),
+                Location = new Point(contentX, y),
+                AutoSize = true,
+                BackColor = Color.Transparent
+            };
+            Controls.Add(_lblHistoryTitle);
+            y += DpiAwareService.Scale(18);
+
+            _lblHistoryHint = new Label
+            {
+                Text = "Clears all saved speed test results. This cannot be undone.",
+                Font = new Font("Segoe UI", 8f),
+                Location = new Point(contentX, y),
+                Size = new Size(contentWidth, DpiAwareService.Scale(16)),
+                AutoSize = false,
+                AutoEllipsis = true,
+                BackColor = Color.Transparent
+            };
+            Controls.Add(_lblHistoryHint);
+            y += DpiAwareService.Scale(24);
+
+            _btnClearHistory = CreateActionButton("🗑  Clear History");
+            _btnClearHistory.Location = new Point(contentX + contentWidth - _btnClearHistory.Width, y);
+            _btnClearHistory.Click += BtnClearHistory_Click;
+            Controls.Add(_btnClearHistory);
+            y += _btnClearHistory.Height + DpiAwareService.Scale(8);
+
+            y = AddDivider(contentX, contentWidth, y);
 
             // ── Close button ──────────────────────────────────────────────────
             _btnClose = HeaderButtonService.CreateCloseButton((s, e) => Close(), DpiAwareService.Scale(90));
@@ -185,6 +222,21 @@ namespace TestNetSpeed.Forms
         }
 
         // ─────────────────────────────────────────────────────────────────────
+        // EVENTS
+        // ─────────────────────────────────────────────────────────────────────
+
+        private void BtnClearHistory_Click(object sender, EventArgs e)
+        {
+            bool confirmed = AlertService.Confirm(
+                "This deletes every saved speed test result.\n\nThis cannot be undone.",
+                "Clear Test History", AlertType.Warning, "Clear", "Cancel");
+            if (!confirmed) return;
+
+            TestHistoryStore.Clear();
+            NotificationManager.Instance.ShowSuccess("Test history cleared.");
+        }
+
+        // ─────────────────────────────────────────────────────────────────────
         // THEME
         // ─────────────────────────────────────────────────────────────────────
 
@@ -200,6 +252,14 @@ namespace TestNetSpeed.Forms
 
             _chkDarkMode.ForeColor = theme.TextColor;
             _chkMinimizeToTray.ForeColor = theme.TextColor;
+
+            _lblHistoryTitle.ForeColor = theme.TextColor;
+            _lblHistoryHint.ForeColor = theme.SecondaryTextColor;
+
+            _btnClearHistory.BackColor = theme.CardBackground;
+            _btnClearHistory.ForeColor = theme.TextColor;
+            _btnClearHistory.FlatAppearance.BorderColor = theme.BorderColor;
+            _btnClearHistory.FlatAppearance.MouseOverBackColor = theme.HoverColor;
 
             HeaderButtonService.ApplyBrandStyle(_btnClose);
 
