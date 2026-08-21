@@ -1,7 +1,7 @@
 using TestNetSpeed.Model;
 using TestNetSpeed.Service;
 
-namespace TestNetSpeed.UserControls.Wifi
+namespace TestNetSpeed.UserControls.Pages
 {
     /// <summary>
     /// "Network Tools" nav page — Ping, DNS Lookup, IP Lookup and Traceroute,

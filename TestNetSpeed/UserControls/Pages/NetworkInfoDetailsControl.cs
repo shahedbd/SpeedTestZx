@@ -1,9 +1,15 @@
-﻿using TestNetSpeed.Model;
+using TestNetSpeed.Model;
 using TestNetSpeed.Service;
 
-namespace TestNetSpeed.UserControls.Wifi
+namespace TestNetSpeed.UserControls.Pages
 {
-    public class WifiNetworkDetailsControl : DpiAwareUserControl
+    /// <summary>
+    /// Renders the current connection's adapter/IP/gateway/DNS/etc. as a
+    /// scrollable list of copyable rows. Ported from WiFiPasswordViewer's
+    /// WifiNetworkDetailsControl as-is (renamed only) — every field here
+    /// was already generic network info, nothing WiFi-specific.
+    /// </summary>
+    public class NetworkInfoDetailsControl : DpiAwareUserControl
     {
         // ── Service ───────────────────────────────────────────────────────────
         private readonly NetworkDetailsService _networkService;
@@ -39,7 +45,7 @@ namespace TestNetSpeed.UserControls.Wifi
         // ── Public event ──────────────────────────────────────────────────────
         public event Action<string>? StatusChanged;
 
-        public WifiNetworkDetailsControl(NetworkDetailsService networkService)
+        public NetworkInfoDetailsControl(NetworkDetailsService networkService)
         {
             _networkService = networkService;
 
@@ -370,7 +376,7 @@ namespace TestNetSpeed.UserControls.Wifi
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(
-                    $"[WifiNetworkDetailsControl] {ex.Message}");
+                    $"[NetworkInfoDetailsControl] {ex.Message}");
             }
             finally
             {

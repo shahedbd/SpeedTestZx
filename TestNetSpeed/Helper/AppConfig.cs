@@ -62,6 +62,8 @@ namespace TestNetSpeed.Helper
         public static List<string> AboutFeatures = new()
         {
             "Real-time internet speed test — download, upload, ping, jitter",
+            "Detailed network adapter & connection info",
+            "Built-in network tools — Ping, DNS Lookup, IP Lookup, Traceroute",
             "System tray support with notifications",
             "Dark / Light theme, DPI-aware from 100% to 200%",
             "Collapsible sidebar navigation",
@@ -108,6 +110,8 @@ namespace TestNetSpeed.Helper
         public static List<NavItem> NavItems = new()
         {
             new NavItem { Label = "Speed Test", Icon = IconChar.GaugeHigh, IconColor = Color.FromArgb(59, 130, 246), ControlType = typeof(SpeedTestControl) },
+            new NavItem { Label = "Network Info", Icon = IconChar.NetworkWired, IconColor = Color.FromArgb(14, 165, 233), ControlType = typeof(NetworkInfoControl) },
+            new NavItem { Label = "Network Tools", Icon = IconChar.Screwdriver, IconColor = Color.FromArgb(168, 85, 247), ControlType = typeof(NetworkToolsControl) },
             // ShowModal instead of ControlType — About is a dialog, not a
             // content page, so there's nothing to dock into the content panel.
             new NavItem { Label = "About",     Icon = IconChar.InfoCircle, IconColor = Color.FromArgb(148, 163, 184), ShowModal = () => new AboutForm().ShowDialog() },

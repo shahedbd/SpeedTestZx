@@ -26,6 +26,15 @@ Project Title: Test Net Speed
 
 
 
+
+
+****
+Old Project Info:
+WinAppPackaging_1.0.8.0_AnyCPU.appxbundle
+
+
+
+
 *********************************************************************************************************************************************************
 
 Now review full app feature and give me report did i miss any important feature 

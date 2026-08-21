@@ -1,20 +1,21 @@
 using TestNetSpeed.Service;
 
-namespace TestNetSpeed.UserControls.Wifi
+namespace TestNetSpeed.UserControls.Pages
 {
     /// <summary>
-    /// "Network Details" nav page — a dedicated, full-width home for
-    /// <see cref="WifiNetworkDetailsControl"/> (the same panel embedded in
-    /// the Dashboard's split view, promoted here to its own tab).
+    /// "Network Info" nav page — a dedicated, full-width home for
+    /// <see cref="NetworkInfoDetailsControl"/>. Ported from
+    /// WiFiPasswordViewer's NetworkDetailsControl as-is (renamed only) —
+    /// nothing here was WiFi-specific.
     /// </summary>
-    public class NetworkDetailsControl : DpiAwareUserControl
+    public class NetworkInfoControl : DpiAwareUserControl
     {
         private readonly NetworkDetailsService _networkService = new();
 
-        private WifiNetworkDetailsControl _details;
+        private NetworkInfoDetailsControl _details;
         private Label _lblStatus;
 
-        public NetworkDetailsControl()
+        public NetworkInfoControl()
         {
             this.BackColor = themeManager.CurrentTheme.ContentBackground;
             this.Padding = ScaledPadding(12);
@@ -41,7 +42,7 @@ namespace TestNetSpeed.UserControls.Wifi
 
             this.Controls.Add(outer);
 
-            _details = new WifiNetworkDetailsControl(_networkService)
+            _details = new NetworkInfoDetailsControl(_networkService)
             {
                 Dock = DockStyle.Fill,
                 Margin = new Padding(0, 0, 0, Scale(10))
