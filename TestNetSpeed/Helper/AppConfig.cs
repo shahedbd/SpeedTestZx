@@ -61,6 +61,7 @@ namespace TestNetSpeed.Helper
         // grew incrementally rather than describing unbuilt features.
         public static List<string> AboutFeatures = new()
         {
+            "At-a-glance dashboard — last result and connection status",
             "Real-time internet speed test — download, upload, ping, jitter",
             "Test history — every result saved locally, browsable anytime",
             "Detailed network adapter & connection info",
@@ -104,12 +105,17 @@ namespace TestNetSpeed.Helper
         // or manager code — NavigationManager renders and wires these up.
         //
         // Built out incrementally per doc/Internet Speed Checker Plus -
-        // Development Plan.md's build order — Dashboard and Export are
-        // still to come, added here once each is implemented, same as
-        // WiFiPasswordViewer's nav list grew one tab at a time rather than
-        // pre-declaring stubs for unbuilt pages.
+        // Development Plan.md's build order — Export is still to come,
+        // added here once implemented, same as WiFiPasswordViewer's nav
+        // list grew one tab at a time rather than pre-declaring stubs for
+        // unbuilt pages.
+        //
+        // Dashboard is listed first so NavigationManager's startup
+        // auto-click (first non-modal item) lands there — it's the app's
+        // landing page.
         public static List<NavItem> NavItems = new()
         {
+            new NavItem { Label = "Dashboard", Icon = IconChar.House, IconColor = Color.FromArgb(0, 95, 210), ControlType = typeof(DashboardControl) },
             new NavItem { Label = "Speed Test", Icon = IconChar.GaugeHigh, IconColor = Color.FromArgb(59, 130, 246), ControlType = typeof(SpeedTestControl) },
             new NavItem { Label = "Test History", Icon = IconChar.ClockRotateLeft, IconColor = Color.FromArgb(16, 185, 129), ControlType = typeof(TestHistoryControl) },
             new NavItem { Label = "Network Info", Icon = IconChar.NetworkWired, IconColor = Color.FromArgb(14, 165, 233), ControlType = typeof(NetworkInfoControl) },
