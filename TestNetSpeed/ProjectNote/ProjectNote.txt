@@ -1,0 +1,174 @@
+
+*********************************************************************************************************************************************************
+
+I have created app: TestNetSpeed, using Wifi Password Viewer
+Full Scource: 
+C:\Users\Public\src\MS_Store_App\TestNetSpeed\TestNetSpeed
+
+
+By following this doc now start implementing project.
+C:\Users\Public\src\MS_Store_App\TestNetSpeed\doc\Internet Speed Checker Plus - Development Plan.md
+
+Project Namespcae name: TestNetSpeed
+Project Title: Test Net Speed
+
+
+-for documentation, always write doc here: C:\Users\Public\src\MS_Store_App\TestNetSpeed\doc\
+-get approval after each tab feature implementaion is done.
+
+- Skip build, test, publish, deployment, migration, and package commands unless explicitly requested; I will handle them.
+- Follow the existing architecture, documentation, patterns, naming conventions, and coding style.
+- Reuse existing code and dependencies; avoid unnecessary refactoring or new dependencies.
+- Preserve existing behavior unless the task requires otherwise.
+- Keep responses concise and report only important changes, affected files, and caveats.
+
+
+
+
+
+*********************************************************************************************************************************************************
+
+Now review full app feature and give me report did i miss any important feature 
+which is must have for this type of app.
+
+
+
+*********************************************************************************************************************************************************
+Using DesktopAppTemplate Project I rewrite my TestNetSpeed Project.
+I have added Dashboard full module. Dashboard is working as expected.
+
+Updatedate TestNetSpeed Source:
+C:\Users\Public\src\MS_Store_App\TestNetSpeed\TestNetSpeed
+
+Old TestNetSpeed Project Source:
+C:\Users\Public\src\MS_Store_App\test_code\Wifi_old\TestNetSpeed
+
+Now you task is implement left over side menu tab feature one by one.
+Tab 01: Dashboard: Done 
+Tab 02: Saved Wifi 
+Tab 03: Network Details 
+Tab 04: Network Tools
+Tab 05: Speed Test 
+Tab 06: Export 
+Tab 07: About 
+
+Follow Project Structure and coding patterns.
+C:\Users\Public\src\MS_Store_App\TestNetSpeed\doc\Project Folder Structure.md
+
+-get left over tab feature from Old TestNetSpeed. If required refactor and imprve it. Unless same things implement by follow just project folder Structure.
+-for documentation, always write doc here: C:\Users\Public\src\MS_Store_App\TestNetSpeed\doc\
+-get approval after each tab feature implementaion is done.
+
+- Skip build, test, publish, deployment, migration, and package commands unless explicitly requested; I will handle them.
+- Follow the existing architecture, documentation, patterns, naming conventions, and coding style.
+- Reuse existing code and dependencies; avoid unnecessary refactoring or new dependencies.
+- Preserve existing behavior unless the task requires otherwise.
+- Keep responses concise and report only important changes, affected files, and caveats.
+
+
+*********************************************************************************************************************************************************
+
+Now implement Wifi Profile Cashe service.
+By following my another project code:
+C:\Users\Public\src\MS_Store_App\TestNetSpeed\TestNetSpeed\Helper\PowerHistoryDataCache.cs
+C:\Users\Public\src\MS_Store_App\TestNetSpeed\TestNetSpeed\Service\PowerHistoryService
+C:\Users\Public\src\MS_Store_App\TestNetSpeed\TestNetSpeed\UserControls\PowerHistoryControl.cs 
+
+I have added project data service: \DeviceData\ApplicationDataManager.cs
+Model: \DeviceData\AppSettingsVm.cs
+
+create new json file: C:\Users\User\AppData\Local\TestNetSpeed\WifiProfileCache.json
+
+*********************************************************************************************************************************************************
+
+
+Now implement app settings:
+-add dark mode and light mode feature. just save user preference in json file: C:\Users\User\AppData\Local\TestNetSpeed\appsettings.json
+Add a new boolean property in AppSettingsVm.cs: IsDarkMode.
+- add other must have app settings only. Do not add any extra settings.
+
+
+Set App Title bar color, header two button color from AppConfig. And color will be app logo core color. 
+
+
+
+Fix bug: Switching between dark mode and light mode active tab control is not changing theme. 
+It change when user click on other tab. 
+Fix it. Active tab control should change theme immediately when user switch between dark mode and light mode.
+
+
+
+
+
+
+
+*********************************************************************************************************************************************************
+Good news is entire app UI working perfectly both  
+my desktop monitor:  Resolution: 2560x1440, Scale: 100% 
+and my laptop screen:  Resolution: 2880x1800, Scale: 200%
+
+
+Only Dashboard stat card icon is broken in and my laptop screen:  Resolution: 2880x1800, Scale: 200%
+
+Fix StatTileControl.cs
+
+
+
+
+
+
+
+*********************************************************************************************************************************************************
+- Skip build, test, publish, deployment, migration, and package commands unless explicitly requested; I will handle them.
+- Follow the existing architecture, documentation, patterns, naming conventions, and coding style.
+- Reuse existing code and dependencies; avoid unnecessary refactoring or new dependencies.
+- Preserve existing behavior unless the task requires otherwise.
+- Keep responses concise and report only important changes, affected files, and caveats.
+*********************************************************************************************************************************************************
+
+
+
+Read all Project Docs:
+C:\Users\Public\src\MS_Store_App\TestNetSpeed\Doc\
+
+
+
+I have created project: TestNetSpeed, from my existing app. 
+Project Source:
+C:\Users\Public\src\MS_Store_App\TestNetSpeed\TestNetSpeed
+The goal is to build once, configure fast — so that spinning up a new app requires only editing a single central configuration file, with zero structural changes needed.
+
+
+
+Now you task is follow doc: 
+C:\Users\Public\src\MS_Store_App\TestNetSpeed\Doc
+Specially: Project UI Structure.md
+
+And update project. Remove unused and extra code.
+Make this project 100% Desktop App Starter Template. 
+
+
+*If required write doc always here:
+C:\Users\Public\src\MS_Store_App\TestNetSpeed\Doc
+
+
+- Skip build, test, publish, deployment, migration, and package commands unless explicitly requested; I will handle them.
+- Follow the existing architecture, documentation, patterns, naming conventions, and coding style.
+- Reuse existing code and dependencies; avoid unnecessary refactoring or new dependencies.
+- Preserve existing behavior unless the task requires otherwise.
+- Keep responses concise and report only important changes, affected files, and caveats.
+
+
+*******************************************************************************
+
+Now impropve title bar. make color difference 90 to 100, so that it can be easily distinguished from the rest of the app. 
+And improve sidebar top content position. three dot, icon and app name.
+
+*******************************************************************************
+
+
+Now review full project amd make sure it will be great starter template for desktop app. 
+And report me if any improvemnet list.
+
+*******************************************************************************
+

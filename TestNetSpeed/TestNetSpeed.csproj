@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>TestNetSpeed</AssemblyName>
+    <RootNamespace>TestNetSpeed</RootNamespace>
+    <Version>1.2.0</Version>
+    <Authors>Zero Byte Software Solutions, zerobytebd.com</Authors>
+    <Company>Zero Byte Software Solutions, zerobytebd.com</Company>
+    <Product>Desktop App Template</Product>
+    <Description>Reusable Windows Desktop application template — build once, configure fast via AppConfig.cs</Description>
+    <Copyright>Copyright © 2024 Zero Byte Software Solutions, zerobytebd.com. All rights reserved.</Copyright>
+    <PackageTags>winforms;desktop-app-template;starter-template</PackageTags>
+    <ApplicationIcon>Resources\favicon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FontAwesome.Sharp" Version="6.6.0" />
+    <PackageReference Include="QRCoder" Version="1.8.0" />
+    <PackageReference Include="System.Management" Version="9.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Resources\180x180.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\favicon.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
