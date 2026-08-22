@@ -7,8 +7,18 @@ Create each app card with app logo, app name, app description and a button to op
 Use Store protocol link to open App in Microsoft Store.
 C:\Users\Public\src\MS_Store_App\TestNetSpeed\doc\MS App Product Identity.md
 
-
 *********************************************
+In our App UI: 
+fix: action button is not showing
+Use icon: public static string MsStoreIconPath => Path.Combine(Application.StartupPath, "Resources", "ms_store_48x48.ico");
+Set button title: "Get from Microsoft Store"
+Show paid app first, then free apps.
+
+
+
+
+
+
 
 private static readonly string[] PingEndpoints =
         [
