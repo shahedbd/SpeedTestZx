@@ -23,6 +23,9 @@ Project Title: Test Net Speed
 - Keep responses concise and report only important changes, affected files, and caveats.
 
 
+********
+fix ui bug 01: test history is not loading all column data initially, i have to press refresh button
+fix ui bug 02: dashboard data card is not showing data: last download, last upload, last ping and last tested card. Though i did 3 test.
 
 
 

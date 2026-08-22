@@ -289,6 +289,14 @@ namespace TestNetSpeed.UserControls.Pages
             {
                 Location = new Point(0, y),
                 Size = new Size(_listContainer.Width - Scale(2), Scale(ROW_HEIGHT)),
+                // Rows are built while the page is still at its pre-dock
+                // default size (NavigationManager constructs pages before
+                // adding+docking them), so this width is initially wrong.
+                // Anchoring left+right keeps it in sync with _listContainer
+                // automatically once real layout resolves, instead of
+                // staying stuck at the too-narrow construction-time size
+                // until the next manual Refresh.
+                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
                 BackColor = rowBg
             };
 

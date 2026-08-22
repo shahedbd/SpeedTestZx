@@ -173,11 +173,17 @@ namespace TestNetSpeed.UserControls.Lib
 
         public void UpdateValue(string value)
         {
+            // Also updates _cfg, not just the live label — Rebuild() (fired
+            // by any later OnSizeChanged, e.g. this tile getting docked into
+            // its real container after an early update) reads from _cfg, so
+            // leaving it stale would silently revert this update on resize.
+            _cfg = _cfg with { Value = value };
             if (_lblValue != null) _lblValue.Text = value;
         }
 
         public void UpdateSubText(string sub)
         {
+            _cfg = _cfg with { SubText = sub };
             if (_lblSub != null) _lblSub.Text = sub;
         }
 
