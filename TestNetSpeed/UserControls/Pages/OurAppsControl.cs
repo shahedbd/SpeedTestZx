@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
+using DpiCommon.Helper;
 using FontAwesome.Sharp;
 using TestNetSpeed.Helper;
 
@@ -111,6 +112,12 @@ namespace TestNetSpeed.UserControls.Pages
 
         private void RenderRows()
         {
+            // TestHistoryControl's row loop wraps its Controls.Add calls in
+            // Suspend/ResumeLayout — this one didn't, and children added
+            // deep in a 17-iteration loop without it could pick up anchor
+            // margins mid-layout-thrash instead of against settled bounds.
+            _listContainer.SuspendLayout();
+
             var apps = AppConfig.OurApps;
             int y = 0;
             for (int i = 0; i < apps.Count; i++)
@@ -119,6 +126,8 @@ namespace TestNetSpeed.UserControls.Pages
                 _listContainer.Controls.Add(row);
                 y += row.Height;
             }
+
+            _listContainer.ResumeLayout();
         }
 
         private Panel BuildRow(OurApp app, int index, int y)
@@ -161,7 +170,9 @@ namespace TestNetSpeed.UserControls.Pages
             });
             row.Controls.Add(iconCircle);
 
-            int btnW = Scale(80);
+            // "Get from Microsoft Store" + icon needs real width — sized
+            // for that text at this font, not the old bare "Get" label.
+            int btnW = Scale(190);
             int textX = Scale(14) + circleSize + Scale(12);
             int textW = Math.Max(row.Width - textX - btnW - Scale(24), Scale(60));
 
@@ -209,7 +220,7 @@ namespace TestNetSpeed.UserControls.Pages
                     Font = new Font("Segoe UI", 7.5f),
                     ForeColor = themeManager.CurrentTheme.SecondaryTextColor,
                     BackColor = Color.Transparent,
-                    Location = new Point(row.Width - btnW - Scale(14), Scale(18)),
+                    Location = new Point(row.Width - btnW - Scale(14), Scale(16)),
                     Size = new Size(btnW, Scale(14)),
                     TextAlign = ContentAlignment.MiddleRight,
                     Anchor = AnchorStyles.Top | AnchorStyles.Right
@@ -218,16 +229,21 @@ namespace TestNetSpeed.UserControls.Pages
 
             var btnGet = new Button
             {
-                Text = "Get",
-                Font = new Font("Segoe UI", 8.5f, FontStyle.Bold),
-                Size = new Size(btnW, Scale(28)),
+                Text = "Get from Microsoft Store",
+                Image = GetStoreIcon(),
+                ImageAlign = ContentAlignment.MiddleCenter,
+                TextAlign = ContentAlignment.MiddleCenter,
+                TextImageRelation = TextImageRelation.ImageBeforeText,
+                Font = new Font("Segoe UI", 8f, FontStyle.Bold),
+                Size = new Size(btnW, Scale(30)),
                 Location = new Point(row.Width - btnW - Scale(14), Scale(34)),
                 FlatStyle = FlatStyle.Flat,
                 BackColor = AppConfig.PrimaryColor,
                 ForeColor = Color.White,
                 Cursor = Cursors.Hand,
                 Anchor = AnchorStyles.Top | AnchorStyles.Right,
-                TabStop = false
+                TabStop = false,
+                UseVisualStyleBackColor = false
             };
             btnGet.FlatAppearance.BorderSize = 0;
             btnGet.Click += (s, e) => OpenStoreLink(app.StoreLink);
@@ -244,6 +260,31 @@ namespace TestNetSpeed.UserControls.Pages
         // ══════════════════════════════════════════════════════════════════════
         //  UTILITY
         // ══════════════════════════════════════════════════════════════════════
+
+        // Loaded once and reused across all 17 button instances rather than
+        // re-reading the .ico file per row.
+        private static Image _storeIcon;
+
+        private static Image GetStoreIcon()
+        {
+            if (_storeIcon != null) return _storeIcon;
+
+            try
+            {
+                if (File.Exists(AppConfig.MsStoreIconPath))
+                {
+                    using var icon = new System.Drawing.Icon(AppConfig.MsStoreIconPath);
+                    _storeIcon = DpiAwareService.ScaleIcon(icon, 16);
+                }
+            }
+            catch
+            {
+                // Missing/corrupt icon file — button still works, just
+                // without the image.
+            }
+
+            return _storeIcon;
+        }
 
         private static string FormatInstallCount(int n) => n switch
         {

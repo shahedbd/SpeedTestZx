@@ -18,16 +18,18 @@ app's actual functionality above it.
 ## Data — `AppConfig.OurApps`
 
 A `List<OurApp>` (`record OurApp(Name, Description, Icon, IconColor,
-StoreLink, Acquisitions)`), sourced from `doc/MS App Product Identity.md`
-— 17 entries, excluding this app's own listing (Internet Speed Checker
-Plus). Each app's `StoreLink` is its `ms-windows-store://pdp/?productid=...`
-protocol link straight from that doc.
+StoreLink, Acquisitions, IsPaid)`), sourced from `doc/MS App Product
+Identity.md` — 17 entries, excluding this app's own listing (Internet
+Speed Checker Plus). Each app's `StoreLink` is its
+`ms-windows-store://pdp/?productid=...` protocol link straight from that
+doc.
 
-**Ordered by `Acquisitions`** (lifetime installs, descending) — most
-proven apps lead the list. `Acquisitions` also drives the install-count
-badge on each card ("1M+ installs", "27K+ installs", etc. — see
-`FormatInstallCount`). WiFi Password Viewer and Invoice Gen aren't on the
-developer's tracking sheet, so their `Acquisitions` is `0`; they sort
+**Ordered `IsPaid` first, then by `Acquisitions`** (lifetime installs,
+descending) within each group — paid apps get first billing, then most
+proven apps lead the free ones. `Acquisitions` also drives the
+install-count badge on each card ("1M+ installs", "27K+ installs", etc. —
+see `FormatInstallCount`). WiFi Password Viewer and Invoice Gen aren't on
+the developer's tracking sheet, so their `Acquisitions` is `0`; they sort
 last and skip the badge entirely rather than showing "0".
 
 **Descriptions are inferred one-liners**, not pulled from the real Store
@@ -48,13 +50,28 @@ list, alternating row shading, hover highlight) but each row is a richer
 "card": a colored icon circle standing in for the app's logo (no real
 logo art available locally — reuses the colored-circle language already
 established by `StatTileControl` and the sidebar's icon colors), name,
-description, and a "Get" button.
+description, and a **"Get from Microsoft Store"** button carrying
+`AppConfig.MsStoreIconPath` as its `Button.Image`.
 
-**"Get" button** → `Process.Start(new ProcessStartInfo { FileName =
+**Bug fixed:** the action column (badge + button) was rendering as a
+sliver on every row. Root cause — `RenderRows()`'s 17-iteration loop
+added rows to `_listContainer.Controls` without `SuspendLayout()` /
+`ResumeLayout()`, unlike `TestHistoryControl`'s equivalent loop, which
+has always had it. Added the missing Suspend/Resume pair, and while
+rebuilding this section also set `UseVisualStyleBackColor = false` on the
+button (WinForms can otherwise ignore an explicit `BackColor` on some
+flat-styled buttons depending on the active visual style).
+
+**Button click** → `Process.Start(new ProcessStartInfo { FileName =
 app.StoreLink, UseShellExecute = true })`, same pattern `AboutForm` already
 uses for its website/email links — `UseShellExecute = true` is what lets
 Windows hand the `ms-windows-store://` URI to the Store app's protocol
 handler.
+
+**Icon** — `AppConfig.MsStoreIconPath` (`Resources/ms_store_48x48.ico`)
+loaded once via `DpiAwareService.ScaleIcon` and cached in a static field
+(`GetStoreIcon()`), reused across all 17 button instances rather than
+re-reading the file per row.
 
 ## Not touched
 

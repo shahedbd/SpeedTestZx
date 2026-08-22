@@ -133,10 +133,11 @@ namespace TestNetSpeed.Helper
         };
 
         // ── Other apps by the same developer ────────────────────────────────
-        // Shown on the "Our Apps" tab, ordered by lifetime Acquisitions
-        // (most-installed first) — most credible apps lead the list. Names,
-        // descriptions, and store links sourced from doc/MS App Product
-        // Identity.md; Acquisitions from the developer's tracking sheet.
+        // Shown on the "Our Apps" tab. Sorted paid-first, then by lifetime
+        // Acquisitions descending within each group — most credible apps
+        // lead the list, paid ones get first billing. Names, descriptions,
+        // and store links sourced from doc/MS App Product Identity.md;
+        // Acquisitions and IsPaid from the developer's tracking sheet.
         // Excludes this app's own listing (Internet Speed Checker Plus).
         // Descriptions are short one-liners inferred from each app's
         // name/category, not pulled from their actual Store listings —
@@ -146,23 +147,25 @@ namespace TestNetSpeed.Helper
         // and skip the install-count badge rather than showing "0".
         public static List<OurApp> OurApps = new()
         {
-            new("Net Speed Meter", "Simple real-time bandwidth monitor", IconChar.GaugeHigh, Color.FromArgb(34, 197, 94), "ms-windows-store://pdp/?productid=9NMBX01PXZ4L", 1_020_306),
-            new("CPU ZX", "Quick CPU and hardware identification", IconChar.Microchip, Color.FromArgb(245, 158, 11), "ms-windows-store://pdp/?productid=9P5G6W4FPNS2", 118_452),
-            new("Net Monitor", "Monitor network activity and connections", IconChar.NetworkWired, Color.FromArgb(14, 165, 233), "ms-windows-store://pdp/?productid=9NXDTMLPSNDJ", 57_945),
-            new("Net Speed Meter Plus", "Real-time internet speed monitor with history", IconChar.GaugeHigh, Color.FromArgb(16, 185, 129), "ms-windows-store://pdp/?productid=9P00PF8JTJ1L", 27_298),
-            new("Resource Monitors", "Live CPU, memory, and disk monitoring", IconChar.GaugeHigh, Color.FromArgb(59, 130, 246), "ms-windows-store://pdp/?productid=9N98PRCFC5G6", 16_879),
-            new("Image Resizer App", "Batch resize and compress images", IconChar.Image, Color.FromArgb(245, 158, 11), "ms-windows-store://pdp/?productid=9NK3ZJ1GXC09", 10_305),
-            new("PC Health Optimizer", "Clean junk files and speed up your PC", IconChar.HeartPulse, Color.FromArgb(244, 63, 94), "ms-windows-store://pdp/?productid=9NS6VX9KQ7VB", 7_531),
-            new("DU Net Meter", "Track daily and monthly data usage", IconChar.ChartLine, Color.FromArgb(16, 185, 129), "ms-windows-store://pdp/?productid=9NSJ7K77H0DG", 7_025),
-            new("Anything Search", "Find any file on your PC instantly", IconChar.MagnifyingGlass, Color.FromArgb(99, 102, 241), "ms-windows-store://pdp/?productid=9P4NR3J63FVP", 5_292),
-            new("YT Downloader Z", "Download YouTube videos and audio", IconChar.Download, Color.FromArgb(239, 68, 68), "ms-windows-store://pdp/?productid=9N9L7T4G8XGN", 2_782),
-            new("IP Address App", "Check your local and public IP address instantly", IconChar.Globe, Color.FromArgb(6, 182, 212), "ms-windows-store://pdp/?productid=9N988P6T8DKF", 2_081),
-            new("Screen Capture Plus", "Capture and annotate screenshots in seconds", IconChar.Camera, Color.FromArgb(14, 165, 233), "ms-windows-store://pdp/?productid=9N6LF7LXX915", 642),
-            new("CPU ZX Pro", "Detailed CPU, GPU, and system specs at a glance", IconChar.Microchip, Color.FromArgb(245, 158, 11), "ms-windows-store://pdp/?productid=9N5RXJCZB734", 434),
-            new("Video Noise Reducer", "Cleans up grainy, noisy video footage", IconChar.Film, Color.FromArgb(168, 85, 247), "ms-windows-store://pdp/?productid=9PBW159C660S", 245),
-            new("Clipboard History Mini", "Keeps a running history of everything you copy", IconChar.Clipboard, Color.FromArgb(59, 130, 246), "ms-windows-store://pdp/?productid=9NSS9STD30LK", 181),
-            new("WiFi Password Viewer", "View and manage saved WiFi passwords", IconChar.Wifi, Color.FromArgb(168, 85, 247), "ms-windows-store://pdp/?productid=9NJBJ525FNTD", 0),
-            new("Invoice Gen", "Create and manage invoices for your business", IconChar.FileInvoiceDollar, Color.FromArgb(16, 185, 129), "ms-windows-store://pdp/?productid=9NZVS7X3WV30", 0),
+            // ── Paid ──
+            new("Net Speed Meter Plus", "Real-time internet speed monitor with history", IconChar.GaugeHigh, Color.FromArgb(16, 185, 129), "ms-windows-store://pdp/?productid=9P00PF8JTJ1L", 27_298, true),
+            new("CPU ZX Pro", "Detailed CPU, GPU, and system specs at a glance", IconChar.Microchip, Color.FromArgb(245, 158, 11), "ms-windows-store://pdp/?productid=9N5RXJCZB734", 434, true),
+            // ── Free ──
+            new("Net Speed Meter", "Simple real-time bandwidth monitor", IconChar.GaugeHigh, Color.FromArgb(34, 197, 94), "ms-windows-store://pdp/?productid=9NMBX01PXZ4L", 1_020_306, false),
+            new("CPU ZX", "Quick CPU and hardware identification", IconChar.Microchip, Color.FromArgb(245, 158, 11), "ms-windows-store://pdp/?productid=9P5G6W4FPNS2", 118_452, false),
+            new("Net Monitor", "Monitor network activity and connections", IconChar.NetworkWired, Color.FromArgb(14, 165, 233), "ms-windows-store://pdp/?productid=9NXDTMLPSNDJ", 57_945, false),
+            new("Resource Monitors", "Live CPU, memory, and disk monitoring", IconChar.GaugeHigh, Color.FromArgb(59, 130, 246), "ms-windows-store://pdp/?productid=9N98PRCFC5G6", 16_879, false),
+            new("Image Resizer App", "Batch resize and compress images", IconChar.Image, Color.FromArgb(245, 158, 11), "ms-windows-store://pdp/?productid=9NK3ZJ1GXC09", 10_305, false),
+            new("PC Health Optimizer", "Clean junk files and speed up your PC", IconChar.HeartPulse, Color.FromArgb(244, 63, 94), "ms-windows-store://pdp/?productid=9NS6VX9KQ7VB", 7_531, false),
+            new("DU Net Meter", "Track daily and monthly data usage", IconChar.ChartLine, Color.FromArgb(16, 185, 129), "ms-windows-store://pdp/?productid=9NSJ7K77H0DG", 7_025, false),
+            new("Anything Search", "Find any file on your PC instantly", IconChar.MagnifyingGlass, Color.FromArgb(99, 102, 241), "ms-windows-store://pdp/?productid=9P4NR3J63FVP", 5_292, false),
+            new("YT Downloader Z", "Download YouTube videos and audio", IconChar.Download, Color.FromArgb(239, 68, 68), "ms-windows-store://pdp/?productid=9N9L7T4G8XGN", 2_782, false),
+            new("IP Address App", "Check your local and public IP address instantly", IconChar.Globe, Color.FromArgb(6, 182, 212), "ms-windows-store://pdp/?productid=9N988P6T8DKF", 2_081, false),
+            new("Screen Capture Plus", "Capture and annotate screenshots in seconds", IconChar.Camera, Color.FromArgb(14, 165, 233), "ms-windows-store://pdp/?productid=9N6LF7LXX915", 642, false),
+            new("Video Noise Reducer", "Cleans up grainy, noisy video footage", IconChar.Film, Color.FromArgb(168, 85, 247), "ms-windows-store://pdp/?productid=9PBW159C660S", 245, false),
+            new("Clipboard History Mini", "Keeps a running history of everything you copy", IconChar.Clipboard, Color.FromArgb(59, 130, 246), "ms-windows-store://pdp/?productid=9NSS9STD30LK", 181, false),
+            new("WiFi Password Viewer", "View and manage saved WiFi passwords", IconChar.Wifi, Color.FromArgb(168, 85, 247), "ms-windows-store://pdp/?productid=9NJBJ525FNTD", 0, false),
+            new("Invoice Gen", "Create and manage invoices for your business", IconChar.FileInvoiceDollar, Color.FromArgb(16, 185, 129), "ms-windows-store://pdp/?productid=9NZVS7X3WV30", 0, false),
         };
     }
 
@@ -189,6 +192,7 @@ namespace TestNetSpeed.Helper
     /// <summary>One entry on the "Our Apps" tab — another Store app by the
     /// same developer. Acquisitions is lifetime install count (0 = unknown,
     /// not lack of installs) — drives both the sort order and whether the
-    /// install-count badge shows at all.</summary>
-    public record OurApp(string Name, string Description, IconChar Icon, Color IconColor, string StoreLink, int Acquisitions);
+    /// install-count badge shows at all. IsPaid sorts ahead of everything
+    /// free.</summary>
+    public record OurApp(string Name, string Description, IconChar Icon, Color IconColor, string StoreLink, int Acquisitions, bool IsPaid);
 }
