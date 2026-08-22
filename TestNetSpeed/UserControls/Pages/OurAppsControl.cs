@@ -170,9 +170,25 @@ namespace TestNetSpeed.UserControls.Pages
             });
             row.Controls.Add(iconCircle);
 
-            // "Get from Microsoft Store" + icon needs real width — sized
-            // for that text at this font, not the old bare "Get" label.
+            // ── Action column (badge + "Get from Microsoft Store" button) ──
+            // Was Anchor=Top|Right on the button directly — pure
+            // repositioning (no stretch), whose margin gets captured once
+            // against the row's tiny pre-dock width. Widening the button to
+            // fit "Get from Microsoft Store" made that captured X go
+            // negative and it never recovered correctly. Dock=Right instead
+            // — WinForms recomputes a Docked child's position fresh on
+            // every layout pass, not from a captured margin, the same fix
+            // class already used for SpeedTestControl's gauge panel and
+            // DashboardControl's welcome card.
             int btnW = Scale(190);
+            var actionPanel = new Panel
+            {
+                Dock = DockStyle.Right,
+                Width = btnW,
+                BackColor = Color.Transparent
+            };
+            row.Controls.Add(actionPanel);
+
             int textX = Scale(14) + circleSize + Scale(12);
             int textW = Math.Max(row.Width - textX - btnW - Scale(24), Scale(60));
 
@@ -184,12 +200,9 @@ namespace TestNetSpeed.UserControls.Pages
                 BackColor = Color.Transparent,
                 Location = new Point(textX, Scale(16)),
                 Size = new Size(textW, Scale(18)),
-                // Row panels stretch to their real width once docked (via
-                // their own Anchor below in RenderRows/BuildRow), but that
-                // only resizes the row itself — children need their own
-                // Anchor to follow, otherwise they stay stuck at the tiny
-                // width the row had before this page was docked into its
-                // real container, clipping name/description to a few chars.
+                // Stretches with the row on resize (Left+Right anchor) —
+                // this one's proven to work correctly, unlike the pure
+                // repositioning case above.
                 Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
                 AutoEllipsis = true
             };
@@ -212,19 +225,18 @@ namespace TestNetSpeed.UserControls.Pages
             // Acquisitions numbers behind the sort order. Omitted (not
             // "0 installs") when there's no data; the button's own position
             // stays fixed either way so rows line up consistently.
+            Label lblBadge = null;
             if (app.Acquisitions > 0)
             {
-                row.Controls.Add(new Label
+                lblBadge = new Label
                 {
                     Text = FormatInstallCount(app.Acquisitions),
                     Font = new Font("Segoe UI", 7.5f),
                     ForeColor = themeManager.CurrentTheme.SecondaryTextColor,
                     BackColor = Color.Transparent,
-                    Location = new Point(row.Width - btnW - Scale(14), Scale(16)),
-                    Size = new Size(btnW, Scale(14)),
-                    TextAlign = ContentAlignment.MiddleRight,
-                    Anchor = AnchorStyles.Top | AnchorStyles.Right
-                });
+                    TextAlign = ContentAlignment.MiddleRight
+                };
+                actionPanel.Controls.Add(lblBadge);
             }
 
             var btnGet = new Button
@@ -235,19 +247,41 @@ namespace TestNetSpeed.UserControls.Pages
                 TextAlign = ContentAlignment.MiddleCenter,
                 TextImageRelation = TextImageRelation.ImageBeforeText,
                 Font = new Font("Segoe UI", 8f, FontStyle.Bold),
-                Size = new Size(btnW, Scale(30)),
-                Location = new Point(row.Width - btnW - Scale(14), Scale(34)),
                 FlatStyle = FlatStyle.Flat,
                 BackColor = AppConfig.PrimaryColor,
                 ForeColor = Color.White,
                 Cursor = Cursors.Hand,
-                Anchor = AnchorStyles.Top | AnchorStyles.Right,
                 TabStop = false,
                 UseVisualStyleBackColor = false
             };
             btnGet.FlatAppearance.BorderSize = 0;
             btnGet.Click += (s, e) => OpenStoreLink(app.StoreLink);
-            row.Controls.Add(btnGet);
+            actionPanel.Controls.Add(btnGet);
+
+            // actionPanel.Height tracks the row's real height (Dock=Right
+            // stretches it vertically to match), so this recomputes fresh
+            // every time instead of trusting a captured value.
+            void LayoutAction()
+            {
+                int w = actionPanel.Width;
+                int h = actionPanel.Height;
+                if (w <= 0 || h <= 0) return;
+
+                int btnH = Scale(30);
+                int badgeH = Scale(16);
+                int blockH = btnH + (lblBadge != null ? badgeH : 0);
+                int top = (h - blockH) / 2;
+
+                if (lblBadge != null)
+                {
+                    lblBadge.SetBounds(0, top, w - Scale(4), badgeH);
+                    top += badgeH;
+                }
+                btnGet.SetBounds(0, top, w, btnH);
+            }
+
+            actionPanel.SizeChanged += (s, e) => LayoutAction();
+            LayoutAction();
 
             row.MouseEnter += (s, e) => row.BackColor = themeManager.IsDarkTheme
                 ? Color.FromArgb(50, 50, 60)

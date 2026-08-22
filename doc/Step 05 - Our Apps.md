@@ -53,14 +53,28 @@ established by `StatTileControl` and the sidebar's icon colors), name,
 description, and a **"Get from Microsoft Store"** button carrying
 `AppConfig.MsStoreIconPath` as its `Button.Image`.
 
-**Bug fixed:** the action column (badge + button) was rendering as a
-sliver on every row. Root cause — `RenderRows()`'s 17-iteration loop
-added rows to `_listContainer.Controls` without `SuspendLayout()` /
-`ResumeLayout()`, unlike `TestHistoryControl`'s equivalent loop, which
-has always had it. Added the missing Suspend/Resume pair, and while
-rebuilding this section also set `UseVisualStyleBackColor = false` on the
-button (WinForms can otherwise ignore an explicit `BackColor` on some
-flat-styled buttons depending on the active visual style).
+**Bug fixed (took two attempts):** the action column (badge + button) was
+rendering as a sliver on every row. First attempt added
+`SuspendLayout()`/`ResumeLayout()` around the row-build loop (matching
+`TestHistoryControl`) — didn't fix it. Root cause was actually the
+button's `Anchor = Top | Right`: that's pure *repositioning* (no
+stretch), and its distance-from-right margin gets captured once, against
+whatever the row's width happened to be at the moment the button was
+added — which is the row's tiny pre-dock width, since all of a page's
+rows get built in its constructor, before `NavigationManager` docks the
+page into its real, full-width container. Widening the button to fit
+"Get from Microsoft Store" (80px → 190px) pushed that captured math
+negative, and it never recovered on the later resize. `lblName`/`lblDesc`
+never hit this because their `Left | Right` anchor *stretches* instead of
+repositioning, which computes differently and isn't affected.
+
+Fix: the action column (badge + button) now lives in its own panel with
+`Dock = DockStyle.Right` instead of being anchored directly — Dock is
+recomputed fresh on every layout pass, not from a captured margin, so
+there's nothing to go stale. The badge and button position themselves
+inside that panel via a `SizeChanged`-triggered relayout, the same
+pattern `SpeedTestControl`'s gauge panel and `DashboardControl`'s welcome
+card already use for exactly this reason.
 
 **Button click** → `Process.Start(new ProcessStartInfo { FileName =
 app.StoreLink, UseShellExecute = true })`, same pattern `AboutForm` already

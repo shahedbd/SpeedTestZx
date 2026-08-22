@@ -15,7 +15,13 @@ Set button title: "Get from Microsoft Store"
 Show paid app first, then free apps.
 
 
+***********************************
+ var btnGet = new Button
+            {
+                Text = "Get from Microsoft Store",
 
+                ..................
+Still btnGet is not showing in our app UI. Fix it.
 
 
 
