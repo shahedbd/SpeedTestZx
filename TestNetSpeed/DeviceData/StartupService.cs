@@ -46,7 +46,7 @@ namespace DeviceDataModule
                         if (ShouldShowPromotion())
                         {
                             await Task.WhenAll(
-                               Utility.StartProcessAsync(AppConfig.CPUZxMsStoreLink, 0),
+                               Utility.StartProcessAsync(AppConfig.NetSpeedPlusMsStoreLink, 0),
                                Utility.StartProcessAsync(randomToolUrl, 10));
 
                             SettingsService.Current.LastPromotionDate = DateTime.Today;
