@@ -87,7 +87,10 @@ namespace TestNetSpeed.Helper
         // for the sampling approach) — TitleBarColor and
         // HeaderButtonService's brand colors both derive from this value,
         // so fixing it here is enough to re-brand the whole app.
-        public static Color PrimaryColor = Color.FromArgb(0, 95, 210); // #005FD2 — placeholder
+        //public static Color PrimaryColor = Color.FromArgb(0, 95, 210); // #005FD2 — placeholder
+        public static Color PrimaryColor = Color.FromArgb(49, 46, 196); // #312EC4
+
+
 
         public static Color BackgroundColor = Color.FromArgb(18, 18, 18);
         public static Color SurfaceColor = Color.FromArgb(35, 35, 35);

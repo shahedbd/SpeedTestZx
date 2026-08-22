@@ -157,15 +157,30 @@ namespace TestNetSpeed.Helper
         // ══════════════════════════════════════════════════════════════════════
         //  STAT BOX FACTORY — returns (valueLabel, containerPanel)
         // ══════════════════════════════════════════════════════════════════════
-        public static (Label ValueLabel, Panel Box) MakeStatBox(string title, string initialValue)
+        public static (Label ValueLabel, Panel Box) MakeStatBox(string title, string initialValue, Color accentColor)
         {
             int s(int v) => DpiAwareService.Scale(v);
 
             var box = new Panel
             {
-                Margin = new Padding(s(3)),
-                BackColor = Color.FromArgb(28, 28, 38),
-                Padding = new Padding(s(4))
+                Margin = new Padding(s(4)),
+                BackColor = Color.FromArgb(28, 28, 38)
+            };
+
+            // Colored top strip ties each card to the same metric colors
+            // used on the Dashboard tiles and the Test History table, so a
+            // user reads "blue = download" consistently across the app.
+            var strip = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = s(3),
+                BackColor = accentColor
+            };
+
+            var content = new Panel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(s(4), s(3), s(4), s(4))
             };
 
             var lblTitle = new Label
@@ -183,36 +198,22 @@ namespace TestNetSpeed.Helper
             var lblValue = new Label
             {
                 Text = initialValue,
-                Font = new Font("Segoe UI", 13f, FontStyle.Bold),
+                Font = new Font("Segoe UI", 14f, FontStyle.Bold),
                 AutoSize = false,
                 Dock = DockStyle.Fill,
                 BackColor = Color.Transparent,
-                ForeColor = Color.White,
+                ForeColor = accentColor,
                 TextAlign = ContentAlignment.MiddleCenter
             };
 
             // Add Fill first, then Top — so Top docks above Fill.
-            box.Controls.Add(lblValue);
-            box.Controls.Add(lblTitle);
+            content.Controls.Add(lblValue);
+            content.Controls.Add(lblTitle);
+
+            box.Controls.Add(content);
+            box.Controls.Add(strip);
 
             return (lblValue, box);
-        }
-
-        // ══════════════════════════════════════════════════════════════════════
-        //  HISTORY ENTRY BUILDER — (text, color) segments for a RichTextBox
-        // ══════════════════════════════════════════════════════════════════════
-        public static IEnumerable<(string Text, Color Color)> BuildHistoryEntry(SpeedTestResult r)
-        {
-            yield return ($"\n── {r.TestedAt:HH:mm:ss} ────────────────\n",
-                Color.FromArgb(59, 130, 246));
-            yield return ("  ↓ Download : ", Color.FromArgb(140, 140, 160));
-            yield return ($"{r.DownloadMbps:F2} Mbps\n", Color.FromArgb(16, 185, 129));
-            yield return ("  ↑ Upload   : ", Color.FromArgb(140, 140, 160));
-            yield return ($"{r.UploadMbps:F2} Mbps\n", Color.FromArgb(14, 165, 233));
-            yield return ("  Ping       : ", Color.FromArgb(140, 140, 160));
-            yield return ($"{r.PingMs:F0} ms\n", Color.FromArgb(245, 158, 11));
-            yield return ("  Jitter     : ", Color.FromArgb(140, 140, 160));
-            yield return ($"{r.JitterMs:F0} ms\n", Color.FromArgb(168, 85, 247));
         }
 
         // ── Big label text ───────────────────────────────────────────────────

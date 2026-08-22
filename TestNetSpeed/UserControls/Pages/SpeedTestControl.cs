@@ -1,14 +1,18 @@
 using TestNetSpeed.Helper;
+using TestNetSpeed.Managers;
 using TestNetSpeed.Model;
 using TestNetSpeed.Service;
 
 namespace TestNetSpeed.UserControls.Pages
 {
     /// <summary>
-    /// "Speed Test" nav page — animated gauge + Ping/Download/Upload test
-    /// against Cloudflare's speed endpoints, with a running history log.
-    /// Ported from WiFiPasswordViewer as-is — this control never had any
-    /// WiFi-specific coupling.
+    /// "Speed Test" nav page — a single centered gauge-first layout: animated
+    /// speedometer, Download/Upload/Ping/Jitter stat cards, Start/Cancel, and
+    /// a link to the dedicated Test History tab. Originally ported from
+    /// WiFiPasswordViewer with a split gauge/history-log layout; the inline
+    /// history log was dropped once Test History became its own tab (step 3)
+    /// — showing the same data twice added nothing, and the freed width lets
+    /// the gauge be the page's actual focal point.
     /// </summary>
     public class SpeedTestControl : DpiAwareUserControl
     {
@@ -35,8 +39,7 @@ namespace TestNetSpeed.UserControls.Pages
         private Panel _progressFill;
         private Panel _statRow;
         private Label _lblDownVal, _lblUpVal, _lblPingVal, _lblJitterVal;
-        private Button _btnStart, _btnCancel;
-        private RichTextBox _historyBox;
+        private Button _btnStart, _btnCancel, _btnViewHistory;
 
         public SpeedTestControl()
         {
@@ -91,32 +94,17 @@ namespace TestNetSpeed.UserControls.Pages
             };
             outer.Controls.Add(_lblStatus, 0, 1);
 
-            // ── Two-column body: gauge (left) / history (right) ────────────────
-            var columns = new TableLayoutPanel
-            {
-                Dock = DockStyle.Fill,
-                ColumnCount = 2,
-                RowCount = 1,
-                BackColor = Color.Transparent
-            };
-            columns.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 55f));
-            columns.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 45f));
-            columns.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
-
-            columns.Controls.Add(BuildGaugePanel(), 0, 0);
-            columns.Controls.Add(BuildHistoryPanel(), 1, 0);
-            card.Controls.Add(columns);
+            card.Controls.Add(BuildTestPanel());
         }
 
-        // ── Gauge panel ───────────────────────────────────────────────────────
+        // ── Test panel — gauge, stats, controls, all centered as one block ──────
 
-        private Panel BuildGaugePanel()
+        private Panel BuildTestPanel()
         {
             var panel = new Panel
             {
                 Dock = DockStyle.Fill,
-                BackColor = Color.Transparent,
-                Margin = new Padding(0, 0, Scale(8), 0)
+                BackColor = Color.Transparent
             };
 
             _gaugePanel = new Panel { BackColor = Color.Transparent };
@@ -129,7 +117,7 @@ namespace TestNetSpeed.UserControls.Pages
             _lblBigValue = new Label
             {
                 Text = "—",
-                Font = new Font("Segoe UI", 32f, FontStyle.Bold),
+                Font = new Font("Segoe UI", 40f, FontStyle.Bold),
                 AutoSize = false,
                 BackColor = Color.Transparent,
                 TextAlign = ContentAlignment.MiddleCenter,
@@ -174,10 +162,10 @@ namespace TestNetSpeed.UserControls.Pages
 
             _statRow = new Panel { BackColor = Color.Transparent };
 
-            (_lblDownVal, var downBox) = SpeedTestUIHelper.MakeStatBox("↓ Download", "—");
-            (_lblUpVal, var upBox) = SpeedTestUIHelper.MakeStatBox("↑ Upload", "—");
-            (_lblPingVal, var pingBox) = SpeedTestUIHelper.MakeStatBox("Ping", "—");
-            (_lblJitterVal, var jitterBox) = SpeedTestUIHelper.MakeStatBox("Jitter", "—");
+            (_lblDownVal, var downBox) = SpeedTestUIHelper.MakeStatBox("↓ Download", "—", Color.FromArgb(59, 130, 246));
+            (_lblUpVal, var upBox) = SpeedTestUIHelper.MakeStatBox("↑ Upload", "—", Color.FromArgb(16, 185, 129));
+            (_lblPingVal, var pingBox) = SpeedTestUIHelper.MakeStatBox("Ping", "—", Color.FromArgb(245, 158, 11));
+            (_lblJitterVal, var jitterBox) = SpeedTestUIHelper.MakeStatBox("Jitter", "—", Color.FromArgb(168, 85, 247));
             _statRow.Controls.AddRange(new Control[] { downBox, upBox, pingBox, jitterBox });
 
             _btnStart = CreateButton("▶  Start Test", Color.FromArgb(59, 130, 246));
@@ -187,115 +175,83 @@ namespace TestNetSpeed.UserControls.Pages
             _btnCancel.Enabled = false;
             _btnCancel.Click += (s, e) => _cts?.Cancel();
 
+            // Only entry point back to Test History now that this page no
+            // longer shows an inline log of its own.
+            _btnViewHistory = new Button
+            {
+                Text = "View Full History →",
+                Font = new Font("Segoe UI", 8.5f),
+                FlatStyle = FlatStyle.Flat,
+                Cursor = Cursors.Hand,
+                AutoSize = true,
+                ForeColor = themeManager.CurrentTheme.SecondaryTextColor,
+                BackColor = Color.Transparent,
+                TabStop = false
+            };
+            _btnViewHistory.FlatAppearance.BorderSize = 0;
+            _btnViewHistory.Click += (s, e) => NavigationManager.Instance.NavigateTo("Test History");
+
             panel.Controls.AddRange(new Control[]
             {
                 _gaugePanel, _lblBigValue, lblUnit, _lblPhase,
-                _progressTrack, _statRow, _btnStart, _btnCancel
+                _progressTrack, _statRow, _btnStart, _btnCancel, _btnViewHistory
             });
 
-            panel.SizeChanged += (s, e) => LayoutGaugePanel(panel, lblUnit);
-            panel.HandleCreated += (s, e) => LayoutGaugePanel(panel, lblUnit);
+            panel.SizeChanged += (s, e) => LayoutTestPanel(panel, lblUnit);
+            panel.HandleCreated += (s, e) => LayoutTestPanel(panel, lblUnit);
 
             return panel;
         }
 
-        // ── Gauge layout (absolute positioning) ─────────────────────────────
+        // ── Layout (absolute positioning, centered within a capped width) ───
 
-        private void LayoutGaugePanel(Panel panel, Label lblUnit)
+        private void LayoutTestPanel(Panel panel, Label lblUnit)
         {
             int w = panel.ClientSize.Width;
             int h = panel.ClientSize.Height;
             if (w <= 0 || h <= 0) return;
 
-            int gaugeSize = Math.Min(w - Scale(32), (int)(h * 0.40));
-            gaugeSize = Math.Max(gaugeSize, Scale(140));
-            int gaugeX = (w - gaugeSize) / 2;
-            int gaugeY = Scale(8);
+            _btnViewHistory.Location = new Point(w - _btnViewHistory.Width - Scale(4), Scale(4));
+
+            // Capped so the block stays a well-proportioned centerpiece
+            // instead of stretching edge-to-edge on a wide window now that
+            // it no longer shares the row with a history panel.
+            int contentW = Math.Min(w - Scale(24), Scale(480));
+            int contentX = (w - contentW) / 2;
+
+            int gaugeSize = Math.Min(contentW - Scale(40), (int)(h * 0.44));
+            gaugeSize = Math.Max(gaugeSize, Scale(160));
+            int gaugeX = contentX + (contentW - gaugeSize) / 2;
+            int gaugeY = Scale(28);
 
             _gaugePanel.SetBounds(gaugeX, gaugeY, gaugeSize, gaugeSize);
 
-            int y = gaugeY + gaugeSize - Scale(18);
+            int y = gaugeY + gaugeSize - Scale(20);
 
-            _lblBigValue.SetBounds(0, y, w, Scale(48));
-            y += Scale(46);
+            _lblBigValue.SetBounds(contentX, y, contentW, Scale(56));
+            y += Scale(54);
 
-            lblUnit.SetBounds(0, y, w, Scale(20));
-            y += Scale(22);
+            lblUnit.SetBounds(contentX, y, contentW, Scale(20));
+            y += Scale(24);
 
-            _lblPhase.SetBounds(Scale(8), y, w - Scale(16), Scale(20));
-            y += Scale(26);
+            _lblPhase.SetBounds(contentX + Scale(8), y, contentW - Scale(16), Scale(20));
+            y += Scale(28);
 
-            _progressTrack.SetBounds(Scale(8), y, w - Scale(16), Scale(6));
-            y += Scale(14);
+            _progressTrack.SetBounds(contentX + Scale(8), y, contentW - Scale(16), Scale(6));
+            y += Scale(18);
 
-            int statH = Scale(52);
-            _statRow.SetBounds(0, y, w, statH);
-            int boxW = w / 4;
+            int statH = Scale(58);
+            _statRow.SetBounds(contentX, y, contentW, statH);
+            int boxW = contentW / 4;
             for (int i = 0; i < _statRow.Controls.Count; i++)
                 _statRow.Controls[i].SetBounds(i * boxW, 0, boxW, statH);
-            y += statH + Scale(12);
+            y += statH + Scale(16);
 
-            int btnH = Scale(34);
-            int btnW = (w - Scale(20)) / 2;
-            _btnStart.SetBounds(Scale(4), y, btnW, btnH);
-            _btnCancel.SetBounds(Scale(12) + btnW, y, btnW, btnH);
-        }
-
-        // ── History panel ────────────────────────────────────────────────────
-
-        private Panel BuildHistoryPanel()
-        {
-            var panel = new Panel { Dock = DockStyle.Fill, BackColor = Color.Transparent };
-
-            var header = new Panel
-            {
-                Dock = DockStyle.Top,
-                Height = Scale(28),
-                BackColor = Color.Transparent
-            };
-
-            var lblHistory = new Label
-            {
-                Text = "Test History",
-                Font = new Font("Segoe UI", 9f, FontStyle.Bold),
-                ForeColor = themeManager.CurrentTheme.SecondaryTextColor,
-                AutoSize = true,
-                BackColor = Color.Transparent,
-                Location = ScaledPoint(0, 6)
-            };
-
-            var btnClear = new Button
-            {
-                Text = "Clear",
-                Font = new Font("Segoe UI", 8f),
-                FlatStyle = FlatStyle.Flat,
-                Cursor = Cursors.Hand,
-                AutoSize = true,
-                ForeColor = themeManager.CurrentTheme.SecondaryTextColor,
-                BackColor = Color.Transparent
-            };
-            btnClear.FlatAppearance.BorderSize = 0;
-            btnClear.Click += (s, e) => _historyBox.Clear();
-
-            header.Controls.AddRange(new Control[] { lblHistory, btnClear });
-            header.SizeChanged += (s, e) =>
-                btnClear.Location = new Point(header.Width - btnClear.Width - Scale(4), Scale(4));
-
-            _historyBox = new RichTextBox
-            {
-                Dock = DockStyle.Fill,
-                ReadOnly = true,
-                Font = new Font("Consolas", 8.5f),
-                BorderStyle = BorderStyle.None,
-                ScrollBars = RichTextBoxScrollBars.Vertical,
-                BackColor = Color.FromArgb(14, 14, 20),
-                ForeColor = Color.FromArgb(180, 190, 200)
-            };
-
-            panel.Controls.Add(_historyBox);
-            panel.Controls.Add(header);
-
-            return panel;
+            int btnH = Scale(36);
+            int btnGap = Scale(12);
+            int btnW = (contentW - btnGap) / 2;
+            _btnStart.SetBounds(contentX, y, btnW, btnH);
+            _btnCancel.SetBounds(contentX + btnW + btnGap, y, btnW, btnH);
         }
 
         // ══════════════════════════════════════════════════════════════════════
@@ -361,10 +317,7 @@ namespace TestNetSpeed.UserControls.Pages
             _lastResult = await _service.RunFullTestAsync(progress, _cts.Token);
 
             if (_lastResult.Success)
-            {
-                AppendHistory(_lastResult);
                 TestHistoryStore.Append(_lastResult);
-            }
 
             SetRunningState(false);
 
@@ -413,18 +366,6 @@ namespace TestNetSpeed.UserControls.Pages
             }
 
             SetStatus(p.StatusText);
-        }
-
-        private void AppendHistory(SpeedTestResult r)
-        {
-            foreach (var (text, color) in SpeedTestUIHelper.BuildHistoryEntry(r))
-            {
-                _historyBox.SelectionStart = _historyBox.TextLength;
-                _historyBox.SelectionLength = 0;
-                _historyBox.SelectionColor = color;
-                _historyBox.AppendText(text);
-            }
-            _historyBox.ScrollToCaret();
         }
 
         // ══════════════════════════════════════════════════════════════════════

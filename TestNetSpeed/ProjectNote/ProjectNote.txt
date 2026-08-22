@@ -27,6 +27,10 @@ Project Title: Test Net Speed
 fix ui bug 01: test history is not loading all column data initially, i have to press refresh button
 fix ui bug 02: dashboard data card is not showing data: last download, last upload, last ping and last tested card. Though i did 3 test.
 
+*********
+Improve UI: As we have a test history deidcated tab, so do we need to keep Test History 40% size column in Speed test?
+If no, then please redesign Speed test tab, make it more professional, beautifull and best user experience UI.
+
 
 
 

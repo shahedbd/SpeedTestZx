@@ -69,6 +69,16 @@ namespace TestNetSpeed.Service
                 result.ErrorMessage = "Test cancelled.";
                 Report(progress, SpeedTestPhase.Failed, 0, 0, "Cancelled.");
             }
+            catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.TooManyRequests)
+            {
+                // Survives past SendWithRetryAsync's own backoff only if the
+                // server kept rate-limiting through every retry — a real,
+                // sustained 429, not a one-off blip. Worth a plain-English
+                // message instead of the raw exception text.
+                result.Success = false;
+                result.ErrorMessage = "The speed test server is rate-limiting requests right now. Please wait a bit before testing again.";
+                Report(progress, SpeedTestPhase.Failed, 0, 0, result.ErrorMessage);
+            }
             catch (Exception ex)
             {
                 result.Success = false;
@@ -139,8 +149,18 @@ namespace TestNetSpeed.Service
 
             Report(progress, SpeedTestPhase.Download, 5, 0, "Warming up...");
 
-            await DownloadStreamAsync(
-                $"https://speed.cloudflare.com/__down?bytes={512 * 1024}", null, ct);
+            try
+            {
+                await DownloadStreamAsync(
+                    $"https://speed.cloudflare.com/__down?bytes={512 * 1024}", null, ct);
+            }
+            catch (Exception) when (!ct.IsCancellationRequested)
+            {
+                // Warm-up failure (e.g. a transient rate limit) is non-fatal
+                // — same tolerance the upload warm-up below already has via
+                // UploadChunkAsync's own try/catch. The real measurement
+                // loop still runs and produces its own samples.
+            }
 
             Report(progress, SpeedTestPhase.Download, 10, 0, "Measuring download...");
 
@@ -168,6 +188,13 @@ namespace TestNetSpeed.Service
             catch (OperationCanceledException) when (!ct.IsCancellationRequested)
             {
                 // Time limit hit — not a user cancel
+            }
+            catch (HttpRequestException) when (!ct.IsCancellationRequested)
+            {
+                // One stream hit a hard HTTP failure that outlasted
+                // SendWithRetryAsync's retries (e.g. sustained rate
+                // limiting) — fall back to whatever samples the other
+                // stream already collected instead of failing the test.
             }
 
             if (ct.IsCancellationRequested)
@@ -224,6 +251,10 @@ namespace TestNetSpeed.Service
             {
                 // Time limit hit
             }
+            catch (HttpRequestException) when (!ct.IsCancellationRequested)
+            {
+                // Same tolerance as the download side above.
+            }
 
             if (ct.IsCancellationRequested)
                 ct.ThrowIfCancellationRequested();
@@ -243,7 +274,8 @@ namespace TestNetSpeed.Service
             IProgress<double>? liveProgress,
             CancellationToken ct)
         {
-            using var res = await _http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct);
+            using var res = await SendWithRetryAsync(
+                c => _http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, c), ct);
             res.EnsureSuccessStatusCode();
 
             var buffer = new byte[65536];
@@ -292,7 +324,7 @@ namespace TestNetSpeed.Service
 
                 try
                 {
-                    using var res = await _http.PostAsync(url, content, ct);
+                    using var res = await SendWithRetryAsync(c => _http.PostAsync(url, content, c), ct);
                     sw.Stop();
 
                     double mbps = chunkSize * 8.0 / sw.Elapsed.TotalSeconds / 1_000_000;
@@ -315,8 +347,29 @@ namespace TestNetSpeed.Service
             using var content = new ByteArrayContent(payload);
             content.Headers.ContentType =
                 new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
-            try { using var res = await _http.PostAsync(url, content, ct); }
+            try { using var res = await SendWithRetryAsync(c => _http.PostAsync(url, content, c), ct); }
             catch { /* warm-up failure is non-fatal */ }
+        }
+
+        // ── Retry wrapper — absorbs 429s with a short backoff before they
+        //    become a hard failure. Honors the server's Retry-After header
+        //    when present, otherwise a short fixed backoff; gives up after
+        //    maxRetries and returns the last (failing) response as-is.
+        private static async Task<HttpResponseMessage> SendWithRetryAsync(
+            Func<CancellationToken, Task<HttpResponseMessage>> send,
+            CancellationToken ct,
+            int maxRetries = 2)
+        {
+            for (int attempt = 0; ; attempt++)
+            {
+                var res = await send(ct);
+                if (res.StatusCode != HttpStatusCode.TooManyRequests || attempt >= maxRetries)
+                    return res;
+
+                var wait = res.Headers.RetryAfter?.Delta ?? TimeSpan.FromSeconds(1.5 * (attempt + 1));
+                res.Dispose();
+                await Task.Delay(wait, ct);
+            }
         }
 
         // ── Progress helper ──────────────────────────────────────────────────
