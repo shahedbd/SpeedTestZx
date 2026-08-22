@@ -7,11 +7,18 @@ namespace TestNetSpeed.Service
     public class SpeedTestService
     {
         // ── Endpoints ────────────────────────────────────────────────────────
+        // Spread across providers (Cloudflare, Microsoft, Google) so one
+        // slow/blocked host or provider doesn't skew the "best server" pick
+        // — MeasurePingAsync HEAD-tests all of these once and runs its 6
+        // timed samples against whichever responds fastest.
         private static readonly string[] PingEndpoints =
         [
             "https://speed.cloudflare.com/__down?bytes=1",
-            "https://www.google.com",
             "https://www.cloudflare.com",
+            "https://1.1.1.1",
+            "https://www.google.com",
+            "https://www.microsoft.com",
+            "https://www.bing.com",
         ];
 
         // ── Shared HttpClient ────────────────────────────────────────────────

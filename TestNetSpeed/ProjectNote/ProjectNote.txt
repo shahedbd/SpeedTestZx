@@ -8,13 +8,16 @@ private static readonly string[] PingEndpoints =
             "https://www.cloudflare.com",
         ];
 
-can we add more endpoints to this list for better ping testing? If yes, please provide a few reliable endpoints that can be used for ping tests.
+can we add more endpoints to this list for better ping testing and backup options? If yes, please provide a few reliable endpoints that can be used for ping tests.
 
-Write SpeedTestService, short precide and effective md file documentation.
+Write SpeedTestService, short precise and effective md file documentation.
 Here:
 C:\Users\Public\src\MS_Store_App\TestNetSpeed\doc
 
 
+
+
+*********************************************
 Now review and improve test runner UI layout. Make it more professional and user friendly.
 Both dark and light mode.
 
