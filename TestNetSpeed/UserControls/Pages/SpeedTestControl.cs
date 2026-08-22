@@ -228,8 +228,14 @@ namespace TestNetSpeed.UserControls.Pages
 
             int y = gaugeY + gaugeSize - Scale(20);
 
-            _lblBigValue.SetBounds(contentX, y, contentW, Scale(56));
-            y += Scale(54);
+            // Box height must clear the full glyph height of a 40pt bold
+            // font (ascender+descender), not just its point size — a box
+            // sized too close to the font size clips the top and bottom of
+            // the digits equally under MiddleCenter alignment. 56 (a 1.4x
+            // ratio) clipped; the rest of this layout uses a ~1.5-2x ratio
+            // for its other labels, so match that here too.
+            _lblBigValue.SetBounds(contentX, y, contentW, Scale(66));
+            y += Scale(64);
 
             lblUnit.SetBounds(contentX, y, contentW, Scale(20));
             y += Scale(24);
