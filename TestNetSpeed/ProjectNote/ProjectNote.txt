@@ -15,7 +15,8 @@ Here:
 C:\Users\Public\src\MS_Store_App\TestNetSpeed\doc
 
 
-
+Now review and improve test runner UI layout. Make it more professional and user friendly.
+Both dark and light mode.
 
 *********************************************************************************************************************************************************
 

@@ -112,7 +112,7 @@ namespace TestNetSpeed.UserControls.Pages
                 SpeedTestUIHelper.PaintGauge(
                     e.Graphics,
                     new Rectangle(0, 0, _gaugePanel.Width, _gaugePanel.Height),
-                    _gaugeValue, _gaugePeak);
+                    _gaugeValue, _gaugePeak, themeManager.IsDarkTheme);
 
             _lblBigValue = new Label
             {
@@ -121,7 +121,8 @@ namespace TestNetSpeed.UserControls.Pages
                 AutoSize = false,
                 BackColor = Color.Transparent,
                 TextAlign = ContentAlignment.MiddleCenter,
-                ForeColor = Color.White
+                // Was hardcoded white — invisible on a light-theme card.
+                ForeColor = themeManager.CurrentTheme.HeadingColor
             };
 
             var lblUnit = new Label
@@ -162,10 +163,11 @@ namespace TestNetSpeed.UserControls.Pages
 
             _statRow = new Panel { BackColor = Color.Transparent };
 
-            (_lblDownVal, var downBox) = SpeedTestUIHelper.MakeStatBox("↓ Download", "—", Color.FromArgb(59, 130, 246));
-            (_lblUpVal, var upBox) = SpeedTestUIHelper.MakeStatBox("↑ Upload", "—", Color.FromArgb(16, 185, 129));
-            (_lblPingVal, var pingBox) = SpeedTestUIHelper.MakeStatBox("Ping", "—", Color.FromArgb(245, 158, 11));
-            (_lblJitterVal, var jitterBox) = SpeedTestUIHelper.MakeStatBox("Jitter", "—", Color.FromArgb(168, 85, 247));
+            bool isDark = themeManager.IsDarkTheme;
+            (_lblDownVal, var downBox) = SpeedTestUIHelper.MakeStatBox("↓ Download", "—", Color.FromArgb(59, 130, 246), isDark);
+            (_lblUpVal, var upBox) = SpeedTestUIHelper.MakeStatBox("↑ Upload", "—", Color.FromArgb(16, 185, 129), isDark);
+            (_lblPingVal, var pingBox) = SpeedTestUIHelper.MakeStatBox("Ping", "—", Color.FromArgb(245, 158, 11), isDark);
+            (_lblJitterVal, var jitterBox) = SpeedTestUIHelper.MakeStatBox("Jitter", "—", Color.FromArgb(168, 85, 247), isDark);
             _statRow.Controls.AddRange(new Control[] { downBox, upBox, pingBox, jitterBox });
 
             _btnStart = CreateButton("▶  Start Test", Color.FromArgb(59, 130, 246));
