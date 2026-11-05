@@ -17,9 +17,9 @@ Plan: [Dashboard_plan.md](Dashboard_plan.md)
 
 | ID | Phase | Task | Type | Priority | Status |
 |---|---|---|---|---|---|
-| T41 | 1 | Traffic monitor service: live ↓ / ↑ from network adapter counters | New feature | High | To Do |
-| T42 | 1 | Live latency sampler: one ping to 1.1.1.1 every 2 s | New feature | High | To Do |
-| T43 | 1 | Rolling 60 s mode for the live graph (both lines at once) | Improvement | High | To Do |
+| T41 | 1 | Traffic monitor service: live ↓ / ↑ from network adapter counters | New feature | High | In Progress |
+| T42 | 1 | Live latency sampler: one ping to 1.1.1.1 every 2 s | New feature | High | In Progress |
+| T43 | 1 | Rolling 60 s mode for the live graph (both lines at once) | Improvement | High | In Progress |
 | T44 | 2 | Jitter card replaces "Last tested" (closes T02) | Improvement | High | To Do |
 | T45 | 2 | Live traffic panel: header + rolling graph + latency dots | New feature | High | To Do |
 | T46 | 2 | Last test card: time, numbers, quality verdicts, Run test button | New feature | High | To Do |

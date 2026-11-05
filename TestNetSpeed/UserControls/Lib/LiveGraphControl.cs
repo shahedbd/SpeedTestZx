@@ -18,6 +18,11 @@ namespace TestNetSpeed.UserControls.Lib
     /// Feed it with <see cref="AddThroughput"/> / <see cref="AddLatency"/>
     /// from the page's IProgress handler (UI thread), and <see cref="Reset"/>
     /// at the start of each test. Both axes auto-scale to the data.
+    ///
+    /// Rolling mode (Dashboard live traffic, T43): set
+    /// <see cref="WindowSeconds"/> &gt; 0 and feed <see cref="AddTraffic"/>
+    /// once per tick. Only the last WindowSeconds are kept and drawn, with
+    /// "now" at the right edge, and both lines move together.
     /// </summary>
     public class LiveGraphControl : Control
     {
@@ -45,6 +50,25 @@ namespace TestNetSpeed.UserControls.Lib
 
         public bool HasData => _down.Count > 0 || _up.Count > 0 || _latency.Count > 0;
 
+        /// <summary>
+        /// 0 (default) = the graph grows from the start until <see cref="Freeze"/>
+        /// (Speed Test). &gt; 0 = rolling: only the last this-many seconds are
+        /// kept and drawn, newest at the right edge.
+        /// </summary>
+        public double WindowSeconds { get; set; }
+
+        /// <summary>
+        /// Lowest top value for the Mbps axis. Keeps near-idle traffic drawn
+        /// as a low line instead of noise stretched over the whole chart.
+        /// 0 = no floor.
+        /// </summary>
+        public double MinMbpsScale { get; set; }
+
+        /// <summary>Text shown when there's nothing to draw yet.</summary>
+        public string EmptyHint { get; set; } = "Live speed and latency appear here during a test";
+
+        private bool Rolling => WindowSeconds > 0;
+
         public void Reset()
         {
             _down.Clear();
@@ -66,10 +90,48 @@ namespace TestNetSpeed.UserControls.Lib
             Invalidate();
         }
 
+        /// <summary>
+        /// Adds a download and an upload point at the same moment, for live
+        /// traffic where both run at once. Unlike <see cref="AddThroughput"/>,
+        /// zero is a real reading here (an idle line) and is kept.
+        /// </summary>
+        public void AddTraffic(double downMbps, double upMbps)
+        {
+            double t = Now();
+            _down.Add((t, Math.Max(0, downMbps)));
+            _up.Add((t, Math.Max(0, upMbps)));
+            Trim(t);
+            Invalidate();
+        }
+
         public void AddLatency(double? ms)
         {
-            _latency.Add((Now(), ms));
+            double t = Now();
+            _latency.Add((t, ms));
+            Trim(t);
             Invalidate();
+        }
+
+        /// <summary>
+        /// Rolling mode: drops points that have scrolled off the left edge.
+        /// One point just outside the window is kept per line so the line
+        /// still enters from the edge instead of starting mid-chart.
+        /// </summary>
+        private void Trim(double now)
+        {
+            if (!Rolling) return;
+
+            double cutoff = now - WindowSeconds;
+            TrimList(_down, cutoff);
+            TrimList(_up, cutoff);
+            TrimList(_latency, cutoff);
+        }
+
+        private static void TrimList<TValue>(List<(double T, TValue V)> list, double cutoff)
+        {
+            int drop = 0;
+            while (drop + 1 < list.Count && list[drop + 1].T < cutoff) drop++;
+            if (drop > 0) list.RemoveRange(0, drop);
         }
 
         /// <summary>Stops the clock so a finished graph doesn't keep stretching.</summary>
@@ -114,7 +176,7 @@ namespace TestNetSpeed.UserControls.Lib
                     g.DrawLine(gridPenEmpty, plot.Left, y, plot.Right, y);
                 }
 
-                const string hint = "Live speed and latency appear here during a test";
+                string hint = EmptyHint;
                 var sz = g.MeasureString(hint, axisFont);
                 g.DrawString(hint, axisFont, axisBrush,
                     plot.Left + (plot.Width - sz.Width) / 2, plot.Top + (plot.Height - sz.Height) / 2);
@@ -122,17 +184,26 @@ namespace TestNetSpeed.UserControls.Lib
             }
 
             // ── Scales ───────────────────────────────────────────────────────
-            double maxT = Math.Max(1, new[]
+            double lastT = new[]
             {
                 _down.Count > 0 ? _down[^1].T : 0,
                 _up.Count > 0 ? _up[^1].T : 0,
                 _latency.Count > 0 ? _latency[^1].T : 0,
-            }.Max());
+            }.Max();
 
-            double maxMbps = NiceCeiling(_down.Concat(_up).Select(p => p.Mbps).DefaultIfEmpty(10).Max());
-            double maxMs = NiceCeiling(_latency.Where(p => p.Ms != null).Select(p => p.Ms!.Value).DefaultIfEmpty(50).Max());
+            // Growing: 0 to latest. Rolling: (latest - window) to latest.
+            double minT = Rolling ? lastT - WindowSeconds : 0;
+            double spanT = Rolling ? WindowSeconds : Math.Max(1, lastT);
 
-            float X(double t) => plot.Left + (float)(t / maxT * plot.Width);
+            // Scale to what's on screen: in rolling mode the one kept
+            // off-screen point mustn't hold the axis up.
+            double maxMbps = NiceCeiling(Math.Max(MinMbpsScale,
+                _down.Concat(_up).Where(p => p.T >= minT).Select(p => p.Mbps)
+                    .DefaultIfEmpty(Rolling ? 0 : 10).Max()));
+            double maxMs = NiceCeiling(_latency.Where(p => p.T >= minT && p.Ms != null)
+                .Select(p => p.Ms!.Value).DefaultIfEmpty(50).Max());
+
+            float X(double t) => plot.Left + (float)((t - minT) / spanT * plot.Width);
             float YMbps(double v) => plot.Bottom - (float)(v / maxMbps * plot.Height);
             float YMs(double v) => plot.Bottom - (float)(Math.Min(v, maxMs) / maxMs * plot.Height);
 
@@ -144,7 +215,7 @@ namespace TestNetSpeed.UserControls.Lib
                     float y = plot.Top + plot.Height * i / 4f;
                     g.DrawLine(gridPen, plot.Left, y, plot.Right, y);
 
-                    string left = $"{maxMbps * (4 - i) / 4:0.#}";
+                    string left = $"{maxMbps * (4 - i) / 4:0.##}";
                     var lsz = g.MeasureString(left, axisFont);
                     g.DrawString(left, axisFont, axisBrush, plot.Left - lsz.Width - s(2), y - lsz.Height / 2);
 
@@ -158,9 +229,17 @@ namespace TestNetSpeed.UserControls.Lib
             var msSz = g.MeasureString("ms", axisFont);
             g.DrawString("ms", axisFont, axisBrush, Width - msSz.Width - s(2), plot.Bottom + s(6));
 
+            // Rolling mode keeps one point just past the left edge; clip so
+            // it can't draw over the axis labels.
+            var oldClip = g.Clip;
+            if (Rolling) g.SetClip(new Rectangle(plot.Left, 0, plot.Width + 1, Height));
+
             // ── Throughput lines ─────────────────────────────────────────────
-            DrawSeries(g, _down, DownColor, X, YMbps, plot);
-            DrawSeries(g, _up, UpColor, X, YMbps, plot);
+            // Speed test samples are smoothed over 3 points; rolling traffic
+            // is already one reading per second, so it's drawn as measured.
+            int smooth = Rolling ? 1 : 3;
+            DrawSeries(g, _down, DownColor, X, YMbps, plot, smooth);
+            DrawSeries(g, _up, UpColor, X, YMbps, plot, smooth);
 
             // ── Latency dots ─────────────────────────────────────────────────
             float dot = Math.Max(3f, s(4));
@@ -169,6 +248,7 @@ namespace TestNetSpeed.UserControls.Lib
             {
                 foreach (var (t, ms) in _latency)
                 {
+                    if (t < minT) continue;
                     float x = X(t);
                     if (ms is double v)
                         g.FillEllipse(latBrush, x - dot / 2, YMs(v) - dot / 2, dot, dot);
@@ -177,21 +257,22 @@ namespace TestNetSpeed.UserControls.Lib
                 }
             }
 
+            g.Clip = oldClip;
             DrawLegend(g, plot, axisFont, axisBrush);
         }
 
         private static void DrawSeries(
             Graphics g, List<(double T, double Mbps)> pts, Color color,
-            Func<double, float> x, Func<double, float> y, Rectangle plot)
+            Func<double, float> x, Func<double, float> y, Rectangle plot, int smoothPoints)
         {
             if (pts.Count == 0) return;
 
-            // Two streams report interleaved per-stream samples; a 3-point
-            // moving average keeps the line readable without hiding trends.
+            // Moving average over smoothPoints samples keeps a jumpy line
+            // readable without hiding trends (1 = draw as measured).
             var smoothed = new List<PointF>(pts.Count);
             for (int i = 0; i < pts.Count; i++)
             {
-                int from = Math.Max(0, i - 2);
+                int from = Math.Max(0, i - (Math.Max(1, smoothPoints) - 1));
                 double avg = 0;
                 for (int j = from; j <= i; j++) avg += pts[j].Mbps;
                 avg /= i - from + 1;

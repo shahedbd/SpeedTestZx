@@ -19,6 +19,9 @@ namespace TestNetSpeed.Service
     /// One instance per test run: the ICMP / TCP decision is made once in
     /// <see cref="MeasureIdleAsync"/> and reused for the loaded phases, so
     /// all three stages are measured the same way.
+    ///
+    /// The Dashboard's live latency uses <see cref="ProbeAsync"/> instead,
+    /// which makes the same ICMP → TCP decision on the fly.
     /// </summary>
     public class LatencyProbe
     {
@@ -91,6 +94,48 @@ namespace TestNetSpeed.Service
             // Replies still in flight are at most one timeout away.
             var results = await Task.WhenAll(pending);
             return Median(results.Where(r => r != null).Select(r => r!.Value).ToList());
+        }
+
+        // ══════════════════════════════════════════════════════════════════════
+        //  SINGLE — one probe at a time (Dashboard live latency, T42)
+        // ══════════════════════════════════════════════════════════════════════
+
+        // After this many ICMP misses in a row, check whether TCP answers —
+        // if it does, ICMP is blocked here and the probe switches to TCP.
+        private const int IcmpMissesBeforeTcpCheck = 3;
+        private int _icmpMisses;
+
+        /// <summary>
+        /// Sends one probe and returns its round-trip in ms, or null when it
+        /// was lost (no reply within the timeout). Starts with ICMP and
+        /// switches to TCP for the rest of this instance's life once ICMP
+        /// misses <see cref="IcmpMissesBeforeTcpCheck"/> times in a row while
+        /// TCP still answers. Never throws; takes at most about two timeouts.
+        /// Callers should await each call before starting the next.
+        /// </summary>
+        public async Task<double?> ProbeAsync()
+        {
+            if (_useTcp)
+                return await TcpConnectAsync();
+
+            double? rtt = await IcmpAsync();
+            if (rtt != null)
+            {
+                _icmpMisses = 0;
+                return rtt;
+            }
+
+            if (++_icmpMisses < IcmpMissesBeforeTcpCheck)
+                return null;
+
+            // ICMP has gone quiet. If TCP answers, the network blocks ICMP
+            // rather than being down: switch, and report this TCP reply.
+            _icmpMisses = 0;
+            double? tcp = await TcpConnectAsync();
+            if (tcp != null)
+                _useTcp = true;
+
+            return tcp;
         }
 
         // ══════════════════════════════════════════════════════════════════════

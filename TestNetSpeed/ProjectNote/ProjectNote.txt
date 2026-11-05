@@ -1,3 +1,14 @@
+MS Store:
+https://partner.microsoft.com/en-us/dashboard/products/9N6FRDSDXM8C/overview
+
+
+Repo:
+https://github.com/shahedbd/TestNetSpeed
+
+
+
+
+
 Internet Speed Test ZX or Speed Test 
 
 1. New App Name: Speed Test ZX - Internet Speed Checker
