@@ -11,13 +11,33 @@ namespace TestNetSpeed.UserControls.Layout
     /// on the left and Minimize/Close buttons on the right. No maximize button —
     /// fixed-layout template design.
     /// </summary>
-    public class TitleBarControl : UserControl
+    public partial class TitleBarControl : UserControl
     {
         // Segoe MDL2 Assets glyphs
         private const string GlyphMinimize = "\uE921";
         private const string GlyphClose = "\uE8BB";
 
+        /// <summary>
+        /// The bar is a horizontal gradient derived from the app icon's base
+        /// colour (AppConfig.PrimaryColor), so re-branding the app only needs
+        /// that one colour changed. ApplyTheme sets the stops per theme.
+        ///
+        /// Every child is BackColor.Transparent so the gradient shows through:
+        /// WinForms renders a transparent child by invoking the PARENT's
+        /// OnPaint, not merely copying its BackColor, which is what makes that
+        /// work. BackColor stays a flat fallback for the unpainted slivers
+        /// during a resize.
+        /// </summary>
+        private Color _gradientStart = AppConfig.PrimaryColor;
+        private Color _gradientEnd = AppConfig.PrimaryColor;
+
+        /// <summary>Caption text/glyph colour, measured against the gradient — see ApplyTheme.</summary>
+        private Color _captionForeColor = Color.White;
+
         private readonly ThemeManager _themeManager;
+        private Panel _iconPanel;
+        private PictureBox _pbAppIcon;
+        private Icon _appIcon;
         private Label _lblTitle;
         private Panel _captionButtonBar;
         private Button _btnMinimize;
@@ -35,8 +55,58 @@ namespace TestNetSpeed.UserControls.Layout
             ApplyTheme();
         }
 
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            // The brush spans ClientRectangle, so the gradient must be redrawn
+            // whenever that changes.
+            Invalidate();
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            // A minimized window lays its children out at zero width, and a
+            // restore from the taskbar paints once before the real size comes
+            // back. LinearGradientBrush throws on an empty rectangle, so skip
+            // that frame — the resize that follows invalidates and repaints.
+            if (ClientRectangle.Width <= 0 || ClientRectangle.Height <= 0)
+            {
+                base.OnPaint(e);
+                return;
+            }
+
+            using var brush = new System.Drawing.Drawing2D.LinearGradientBrush(
+                ClientRectangle, _gradientStart, _gradientEnd,
+                System.Drawing.Drawing2D.LinearGradientMode.Horizontal);
+
+            e.Graphics.FillRectangle(brush, ClientRectangle);
+
+            base.OnPaint(e);
+        }
+
         private void BuildLayout()
         {
+            // ── Left: app icon ────────────────────────────────────────────────
+            _pbAppIcon = new PictureBox
+            {
+                Image = LoadAppIcon(),
+                SizeMode = PictureBoxSizeMode.Zoom,
+                BackColor = Color.Transparent
+            };
+
+            _iconPanel = new Panel
+            {
+                Dock = DockStyle.Left,
+                Width = DpiAwareService.Scale(40),
+                BackColor = Color.Transparent
+            };
+            _iconPanel.Controls.Add(_pbAppIcon);
+
+            // The icon is part of the caption, so dragging it must move the
+            // window like the rest of the bar does.
+            _iconPanel.MouseDown += TitleBar_MouseDown;
+            _pbAppIcon.MouseDown += TitleBar_MouseDown;
+
             // Fixed-width right-side panel, hosting the caption buttons.
             _captionButtonBar = new Panel
             {
@@ -53,7 +123,7 @@ namespace TestNetSpeed.UserControls.Layout
             _btnClose = CreateCaptionButton(GlyphClose);
             _btnClose.FlatAppearance.MouseOverBackColor = Color.FromArgb(232, 17, 35);
             _btnClose.MouseEnter += (s, e) => _btnClose.ForeColor = Color.White;
-            _btnClose.MouseLeave += (s, e) => _btnClose.ForeColor = _themeManager.CurrentTheme.TextColor;
+            _btnClose.MouseLeave += (s, e) => _btnClose.ForeColor = _captionForeColor;
             _btnClose.Click += (s, e) => FindForm()?.Close();
 
             // Dock=Right on each button (add order: Minimize first, Close
@@ -85,6 +155,53 @@ namespace TestNetSpeed.UserControls.Layout
             // z-order can't hide either one behind the other.
             Controls.Add(_lblTitle);
             Controls.Add(_captionButtonBar);
+            Controls.Add(_iconPanel);
+
+            LayoutAppIcon();
+        }
+
+        /// <summary>Centres the icon inside its left panel at the current DPI.</summary>
+        private void LayoutAppIcon()
+        {
+            if (_pbAppIcon == null || _iconPanel == null) return;
+
+            int size = DpiAwareService.Scale(22);
+
+            _pbAppIcon.Size = new Size(size, size);
+            _pbAppIcon.Location = new Point(
+                (_iconPanel.Width - size) / 2,
+                (Height - size) / 2);
+        }
+
+        private Image LoadAppIcon()
+        {
+            try
+            {
+                if (!File.Exists(AppConfig.FaviconPath)) return null;
+
+                // Kept in a field so Dispose can release it: Icon.ToBitmap()
+                // returns a NEW bitmap, and the Icon itself stays a live GDI
+                // handle that the PictureBox never owns.
+                _appIcon = new Icon(AppConfig.FaviconPath);
+                return _appIcon.ToBitmap();
+            }
+            catch
+            {
+                // Decorative only — a missing or unreadable icon must never
+                // stop the window opening.
+                return null;
+            }
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _pbAppIcon?.Image?.Dispose();
+                _appIcon?.Dispose();
+            }
+
+            base.Dispose(disposing);
         }
 
         private Button CreateCaptionButton(string glyph)
@@ -126,64 +243,5 @@ namespace TestNetSpeed.UserControls.Layout
             SendMessage(form.Handle, WM_NCLBUTTONDOWN, HTCAPTION, 0);
         }
 
-        // ─────────────────────────────────────────────────────────────────────
-        // THEME
-        // ─────────────────────────────────────────────────────────────────────
-
-        public void ApplyTheme()
-        {
-            BackColor = _themeManager.CurrentTheme.TitleBarBackground;
-            _captionButtonBar.BackColor = _themeManager.CurrentTheme.TitleBarBackground;
-
-            if (_lblTitle != null)
-            {
-                _lblTitle.BackColor = Color.Transparent;
-                // Title text always reads against TitleBarBackground, which
-                // is a fixed medium gray in both themes — HeadingColor (pure
-                // white/black) keeps solid contrast in either case.
-                _lblTitle.ForeColor = _themeManager.CurrentTheme.HeadingColor;
-            }
-
-            foreach (var btn in new[] { _btnMinimize, _btnClose })
-            {
-                if (btn == null) continue;
-                btn.ForeColor = _themeManager.CurrentTheme.HeadingColor;
-            }
-
-            if (_btnMinimize != null)
-                _btnMinimize.FlatAppearance.MouseOverBackColor = GetHoverColor(_themeManager.CurrentTheme.TitleBarBackground);
-        }
-
-        /// <summary>
-        /// Nudges a color toward white or black (whichever contrasts more)
-        /// for a hover state. TitleBarBackground comes from
-        /// AppConfig.TitleBarColor and can be set to anything, so this can't
-        /// assume it's a dark or light shade the way a fixed literal could.
-        /// </summary>
-        private static Color GetHoverColor(Color baseColor)
-        {
-            int brightness = (baseColor.R + baseColor.G + baseColor.B) / 3;
-            int delta = brightness < 128 ? 30 : -30;
-
-            return Color.FromArgb(
-                Math.Clamp(baseColor.R + delta, 0, 255),
-                Math.Clamp(baseColor.G + delta, 0, 255),
-                Math.Clamp(baseColor.B + delta, 0, 255));
-        }
-
-        // ─────────────────────────────────────────────────────────────────────
-        // DPI REFRESH
-        // ─────────────────────────────────────────────────────────────────────
-
-        public void RefreshForDpi()
-        {
-            Height = DpiAwareService.Scale(AppConfig.TitleBarHeight);
-            _captionButtonBar.Width = DpiAwareService.Scale(96);
-
-            // Height is handled automatically by Dock=Right; only Width needs
-            // updating here.
-            foreach (var btn in new[] { _btnMinimize, _btnClose })
-                btn.Width = DpiAwareService.Scale(45);
-        }
     }
 }

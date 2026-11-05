@@ -4,6 +4,11 @@ Now create a new tab in side menu bottom: Our Apps Or Other Apps Or Try Our Apps
 Create each app card with app logo, app name, app description and a button to open app in Microsoft Store. Or suggest better way to show other apps.
 
 
+Internet Speed Test ZX or Speed Test ZX
+
+
+
+
 Use Store protocol link to open App in Microsoft Store.
 C:\Users\Public\src\MS_Store_App\TestNetSpeed\doc\MS App Product Identity.md
 

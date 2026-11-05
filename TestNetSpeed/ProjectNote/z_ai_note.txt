@@ -7,14 +7,15 @@
 - Preserve existing behavior unless the task requires otherwise.
 - Keep responses concise and report only important changes, affected files, and caveats.
 ********************************************************************************************************
-Understand app full doc:
+App full docs:
 G:\src\MS_Store_App\TestNetSpeed\doc\Requirements
 
-1. Update header, titlebar based on updated project:
+1. Update header, title bar based on updated project:
 G:\src\MS_Store_App\NetSpeedMeterPlus\NetSpeedMeterPlus
 
 
 2. Update our app side menu item using this project:
 G:\src\MS_Store_App\NetSpeedMeterPlus\NetSpeedMeterPlus
+
 
 

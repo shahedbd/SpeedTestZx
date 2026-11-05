@@ -8,18 +8,20 @@ using FontAwesome.Sharp;
 namespace TestNetSpeed.UserControls.Layout
 {
     /// <summary>
-    /// Part 02 — header bar. Left: PC name | Processor | RAM (via
-    /// SystemInfoService). Right: Theme + Settings action buttons.
-    /// Only spans the region to the right of the sidebar (see
-    /// Doc/UI layout.md) — MainForm nests this inside the content-side panel,
-    /// not directly under the title bar.
+    /// Part 02 — header bar, laid out like Net Speed Meter Plus's. Left: PC
+    /// name, processor, RAM, OS and uptime as coloured icon + text segments
+    /// (HeaderControl.Summary.cs; data loaded by <see cref="LoadSystemSummary"/>
+    /// in HeaderControl.SystemSummary.cs). Right: Settings + About + Theme
+    /// icon-only action buttons (colours in HeaderControl.ActionStyle.cs).
+    /// Only spans the region to the right of the sidebar — MainForm nests
+    /// this inside the content-side panel, not directly under the title bar.
     /// </summary>
-    public class HeaderControl : UserControl
+    public partial class HeaderControl : UserControl
     {
         // ── Public controls (MainForm reads/wires these) ───────────────────────
-        public Label LblSystemSummary { get; private set; }
         public Button BtnSettings { get; private set; }
         public Button BtnTheme { get; private set; }
+        public Button BtnAbout { get; private set; }
 
         private readonly ThemeManager _themeManager;
         private readonly ToolTip _toolTip;
@@ -41,21 +43,21 @@ namespace TestNetSpeed.UserControls.Layout
 
         private void BuildLayout()
         {
-            // Fixed-width right-side panel — its own Width/Height are known
-            // immediately (not inherited from the not-yet-laid-out parent),
-            // so button positioning inside it is deterministic at construction
-            // time and never depends on resize-event timing.
+            // Right-side panel sized to its button group (PositionButtons) —
+            // its own Width/Height are known immediately, so button positioning
+            // is deterministic at construction time and never depends on
+            // resize-event timing.
             _buttonBar = new Panel
             {
                 Dock = DockStyle.Right,
-                Width = DpiAwareService.Scale(170),
-                Height = Height // seed from HeaderControl's own Height (already
-                                 // set) — Dock hasn't parented this yet, so its
-                                 // own Height would otherwise still be the
-                                 // Panel default, not the real header height.
+                Height = Height // seed from HeaderControl's own Height — Dock
+                                 // hasn't parented this yet.
             };
 
-            BtnSettings = HeaderButtonService.CreateLabeledButton("Settings", IconChar.Gear, BtnSettings_Click);
+            BtnSettings = HeaderButtonService.CreateIconOnlyButton(
+                IconChar.ScrewdriverWrench, "Settings", BtnSettings_Click, _toolTip);
+            BtnAbout = HeaderButtonService.CreateIconOnlyButton(
+                IconChar.CircleInfo, $"About {AppConfig.AppName}", BtnAbout_Click, _toolTip);
             BtnTheme = HeaderButtonService.CreateIconOnlyButton(
                 _themeManager.IsDarkTheme ? IconChar.Sun : IconChar.Moon,
                 _themeManager.IsDarkTheme ? "Switch to Light Mode" : "Switch to Dark Mode",
@@ -63,28 +65,21 @@ namespace TestNetSpeed.UserControls.Layout
                 _toolTip);
 
             _buttonBar.Controls.Add(BtnSettings);
+            _buttonBar.Controls.Add(BtnAbout);
             _buttonBar.Controls.Add(BtnTheme);
             PositionButtons();
 
-            LblSystemSummary = new Label
-            {
-                Text = "Loading system information...",
-                Font = new Font("Segoe UI", 9f, FontStyle.Regular),
-                BackColor = Color.Transparent,
-                AutoSize = false,
-                TextAlign = ContentAlignment.MiddleLeft,
-                Dock = DockStyle.Fill,
-                Padding = new Padding(DpiAwareService.Scale(16), 0, 0, 0)
-            };
+            _summaryStrip = BuildSummaryStrip();
+            RenderSummary();
 
             _leftAccent = new Panel { Dock = DockStyle.Left, Width = DpiAwareService.Scale(3) };
 
             // Add order (first → last): Fill content first (innermost), then
             // Left accent, then Right button bar, then Bottom border — each
             // later addition claims its edge from the full remaining area
-            // first. The Fill label and Right button bar never overlap in
+            // first. The Fill strip and Right button bar never overlap in
             // bounds, so z-order can't hide either one behind the other.
-            Controls.Add(LblSystemSummary);
+            Controls.Add(_summaryStrip);
             Controls.Add(_leftAccent);
             Controls.Add(_buttonBar);
             Controls.Add(_bottomBorder = new Panel { Dock = DockStyle.Bottom, Height = DpiAwareService.Scale(1) });
@@ -92,11 +87,23 @@ namespace TestNetSpeed.UserControls.Layout
 
         private void PositionButtons()
         {
+            // Right-to-left: the last entry ends up left-most.
+            var buttons = new[] { BtnTheme, BtnAbout, BtnSettings };
+            int rightMargin = DpiAwareService.Scale(12);
+
+            _buttonBar.Width = HeaderButtonService.GroupWidth(buttons, rightMargin) + DpiAwareService.Scale(8);
+
             HeaderButtonService.PositionButtonsRightAligned(
                 parentWidth: _buttonBar.Width,
                 parentHeight: _buttonBar.Height,
-                rightMargin: DpiAwareService.Scale(12),
-                buttons: new Button[] { BtnTheme, BtnSettings });
+                rightMargin: rightMargin,
+                buttons: buttons);
+        }
+
+        private void BtnAbout_Click(object sender, EventArgs e)
+        {
+            using var about = new AboutForm();
+            about.ShowDialog(FindForm());
         }
 
         private void BtnTheme_Click(object sender, EventArgs e)
@@ -107,7 +114,7 @@ namespace TestNetSpeed.UserControls.Layout
         private void BtnSettings_Click(object sender, EventArgs e)
         {
             using var dlg = new SettingsDialog();
-            dlg.ShowDialog(this.FindForm());
+            dlg.ShowDialog(FindForm());
         }
 
         // ─────────────────────────────────────────────────────────────────────
@@ -121,23 +128,11 @@ namespace TestNetSpeed.UserControls.Layout
             _leftAccent.BackColor = HeaderButtonService.BrandColor;
             _buttonBar.BackColor = _themeManager.CurrentTheme.HeaderBackground;
 
-            LblSystemSummary.BackColor = Color.Transparent;
-            LblSystemSummary.ForeColor = _themeManager.CurrentTheme.TextColor;
+            // Segment labels take their colour at build time — rebuild them.
+            RenderSummary();
 
-            foreach (var btn in new[] { BtnSettings, BtnTheme })
-                HeaderButtonService.ApplyBrandStyle(btn);
-
-            UpdateThemeButtonIcon();
-        }
-
-        public void UpdateThemeButtonIcon()
-        {
-            if (BtnTheme is not IconButton iconBtn) return;
-
-            bool isDark = _themeManager.IsDarkTheme;
-            iconBtn.IconChar = isDark ? IconChar.Sun : IconChar.Moon;
-
-            _toolTip.SetToolTip(BtnTheme, isDark ? "Switch to Light Mode" : "Switch to Dark Mode");
+            // Colourful icons on a neutral surface — HeaderControl.ActionStyle.cs.
+            StyleActionButtons();
         }
 
         // ─────────────────────────────────────────────────────────────────────
@@ -147,11 +142,13 @@ namespace TestNetSpeed.UserControls.Layout
         public void RefreshForDpi()
         {
             Height = DpiAwareService.Scale(AppConfig.HeaderHeight);
-            _buttonBar.Width = DpiAwareService.Scale(170);
             _buttonBar.Height = Height;
+            _summaryStrip.Padding = SummaryPadding();
+            RenderSummary();
 
             int btnH = HeaderButtonService.ButtonHeight;
-            BtnSettings.Size = new Size(HeaderButtonService.MeasureButtonWidth("Settings"), btnH);
+            BtnSettings.Size = new Size(HeaderButtonService.IconOnlyWidth, btnH);
+            BtnAbout.Size = new Size(HeaderButtonService.IconOnlyWidth, btnH);
             BtnTheme.Size = new Size(HeaderButtonService.IconOnlyWidth, btnH);
 
             PositionButtons();
