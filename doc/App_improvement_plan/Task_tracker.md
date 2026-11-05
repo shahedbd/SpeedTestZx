@@ -20,11 +20,11 @@ Plan: [Dashboard_plan.md](Dashboard_plan.md)
 | T41 | 1 | Traffic monitor service: live ↓ / ↑ from network adapter counters | New feature | High | In Progress |
 | T42 | 1 | Live latency sampler: one ping to 1.1.1.1 every 2 s | New feature | High | In Progress |
 | T43 | 1 | Rolling 60 s mode for the live graph (both lines at once) | Improvement | High | In Progress |
-| T44 | 2 | Jitter card replaces "Last tested" (closes T02) | Improvement | High | To Do |
-| T45 | 2 | Live traffic panel: header + rolling graph + latency dots | New feature | High | To Do |
-| T46 | 2 | Last test card: time, numbers, quality verdicts, Run test button | New feature | High | To Do |
-| T47 | 2 | Recent tests card: last 10 tests chart, avg / best / worst | New feature | Medium | To Do |
-| T48 | 2 | Welcome card only when history is empty; stack below 700 px | Improvement | Medium | To Do |
+| T44 | 2 | Jitter card replaces "Last tested" (closes T02) | Improvement | High | In Progress |
+| T45 | 2 | Live traffic panel: header + rolling graph + latency dots | New feature | High | In Progress |
+| T46 | 2 | Last test card: time, numbers, quality verdicts, Run test button | New feature | High | In Progress |
+| T47 | 2 | Recent tests card: last 10 tests chart, avg / best / worst | New feature | Medium | In Progress |
+| T48 | 2 | Welcome card only when history is empty; stack below 700 px | Improvement | Medium | In Progress |
 
 ### Speed Test
 
@@ -85,7 +85,7 @@ Plan: [Dashboard_plan.md](Dashboard_plan.md)
 | T03 | 0 | Drop failed ping samples instead of recording 999 ms (inflates jitter) | Bug | High | To Do |
 | T39 | 0 | Download / upload averaged per-stream rates instead of summing them (≈ half real speed); fast lines ran out of data | Bug | High | In Progress |
 | T01 | 0 | Move Settings to the bottom of the sidebar (above Our Apps / About) | Improvement | High | In Progress |
-| T02 | 0 | Add Jitter tile to the Dashboard (done by T44) | Improvement | High | To Do |
+| T02 | 0 | Add Jitter tile to the Dashboard (done by T44) | Improvement | High | In Progress |
 | T40 | 0 | Dashboard data cards and larger sidebar icons, following NetPulseApp | Improvement | Medium | In Progress |
 | T04 | 0 | Validate accuracy against Cloudflare / Ookla; tune stream count and test length | Improvement | High | To Do |
 | T14 | 1 | Show ping at 3 stages: idle / download / upload | Improvement | High | Done |

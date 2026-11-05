@@ -158,6 +158,17 @@ namespace TestNetSpeed.Helper
         //  DISPLAY HELPERS
         // ══════════════════════════════════════════════════════════════════════
 
+        /// <summary>
+        /// Short jitter note for the Dashboard's Jitter card, from the same
+        /// gaming / call jitter thresholds the verdicts use.
+        /// </summary>
+        public static (string Note, QualityLevel Level) JitterNote(double jitterMs)
+        {
+            if (jitterMs <= GameJitter.Good) return ("Good for gaming & calls", jitterMs <= GameJitter.Great ? QualityLevel.Great : QualityLevel.Good);
+            if (jitterMs <= CallJitter.Good) return ("OK for calls, high for gaming", QualityLevel.Fair);
+            return ("High for gaming & calls", QualityLevel.Poor);
+        }
+
         public static Color LevelColor(QualityLevel level) => level switch
         {
             QualityLevel.Great => Color.FromArgb(16, 185, 129),  // green

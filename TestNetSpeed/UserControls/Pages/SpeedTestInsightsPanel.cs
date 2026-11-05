@@ -70,9 +70,9 @@ namespace TestNetSpeed.UserControls.Pages
             _latencyRow.Controls.AddRange(new Control[] { idleBox, downBox, upBox, lossBox, bloatBox });
 
             _lblQualityTitle = SectionTitle("Connection quality");
-            _rowStreaming = new VerdictRow(this, "Streaming");
-            _rowGaming = new VerdictRow(this, "Gaming");
-            _rowCalls = new VerdictRow(this, "Video calls");
+            _rowStreaming = new VerdictRow("Streaming");
+            _rowGaming = new VerdictRow("Gaming");
+            _rowCalls = new VerdictRow("Video calls");
 
             _lblStreamingEstimate = InfoLabel();
             _lblIsp = InfoLabel();
@@ -336,70 +336,6 @@ namespace TestNetSpeed.UserControls.Pages
             btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(30, accent);
             btn.FlatAppearance.MouseDownBackColor = Color.FromArgb(55, accent);
             return btn;
-        }
-
-        /// <summary>"Streaming   GREAT   Plenty of headroom" — name, level, reason.</summary>
-        private sealed class VerdictRow : Panel
-        {
-            private readonly Label _name, _level, _reason;
-            private readonly SpeedTestInsightsPanel _owner;
-
-            public VerdictRow(SpeedTestInsightsPanel owner, string useCase)
-            {
-                _owner = owner;
-                BackColor = Color.Transparent;
-
-                var theme = owner.themeManager.CurrentTheme;
-                _name = new Label
-                {
-                    Text = useCase,
-                    Font = new Font("Segoe UI", 9f, FontStyle.Bold),
-                    ForeColor = theme.TextColor,
-                    BackColor = Color.Transparent,
-                    TextAlign = ContentAlignment.MiddleLeft,
-                };
-                _level = new Label
-                {
-                    Font = new Font("Segoe UI", 9f, FontStyle.Bold),
-                    BackColor = Color.Transparent,
-                    TextAlign = ContentAlignment.MiddleLeft,
-                };
-                _reason = new Label
-                {
-                    Font = new Font("Segoe UI", 8.5f),
-                    ForeColor = theme.SecondaryTextColor,
-                    BackColor = Color.Transparent,
-                    TextAlign = ContentAlignment.MiddleLeft,
-                    AutoEllipsis = true,
-                    UseMnemonic = false,
-                };
-
-                Controls.AddRange(new Control[] { _name, _level, _reason });
-                SizeChanged += (s, e) => LayoutRow();
-            }
-
-            public void Show(QualityVerdict v)
-            {
-                _level.Text = v.Level.ToString().ToUpperInvariant();
-                _level.ForeColor = QualityScorer.LevelColor(v.Level);
-                _reason.Text = v.Reason;
-            }
-
-            public void Clear()
-            {
-                _level.Text = "—";
-                _level.ForeColor = _owner.themeManager.CurrentTheme.SecondaryTextColor;
-                _reason.Text = "";
-            }
-
-            private void LayoutRow()
-            {
-                int nameW = DpiCommon.Helper.DpiAwareService.Scale(96);
-                int levelW = DpiCommon.Helper.DpiAwareService.Scale(64);
-                _name.SetBounds(0, 0, nameW, Height);
-                _level.SetBounds(nameW, 0, levelW, Height);
-                _reason.SetBounds(nameW + levelW, 0, Math.Max(0, Width - nameW - levelW), Height);
-            }
         }
     }
 }
