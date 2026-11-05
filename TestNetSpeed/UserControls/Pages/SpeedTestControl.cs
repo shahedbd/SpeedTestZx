@@ -41,6 +41,9 @@ namespace TestNetSpeed.UserControls.Pages
         private Label _lblDownVal, _lblUpVal, _lblPingVal, _lblJitterVal;
         private Button _btnStart, _btnCancel, _btnViewHistory;
 
+        // Right-hand column: live graph, latency, quality score, share card.
+        private SpeedTestInsightsPanel _insights;
+
         public SpeedTestControl()
         {
             this.BackColor = themeManager.CurrentTheme.ContentBackground;
@@ -193,10 +196,13 @@ namespace TestNetSpeed.UserControls.Pages
             _btnViewHistory.FlatAppearance.BorderSize = 0;
             _btnViewHistory.Click += (s, e) => NavigationManager.Instance.NavigateTo("Test History");
 
+            _insights = new SpeedTestInsightsPanel();
+
             panel.Controls.AddRange(new Control[]
             {
                 _gaugePanel, _lblBigValue, lblUnit, _lblPhase,
-                _progressTrack, _statRow, _btnStart, _btnCancel, _btnViewHistory
+                _progressTrack, _statRow, _btnStart, _btnCancel, _btnViewHistory,
+                _insights
             });
 
             panel.SizeChanged += (s, e) => LayoutTestPanel(panel, lblUnit);
@@ -215,11 +221,25 @@ namespace TestNetSpeed.UserControls.Pages
 
             _btnViewHistory.Location = new Point(w - _btnViewHistory.Width - Scale(4), Scale(4));
 
+            // Two columns: gauge block on the left, insights on the right.
+            // Below ~700px there isn't room for both, so the insights hide
+            // and the gauge block centres on its own as before.
+            bool twoColumns = w >= Scale(700);
+            int leftW = twoColumns ? Math.Clamp((int)(w * 0.45), Scale(300), Scale(480)) : w;
+
             // Capped so the block stays a well-proportioned centerpiece
-            // instead of stretching edge-to-edge on a wide window now that
-            // it no longer shares the row with a history panel.
-            int contentW = Math.Min(w - Scale(24), Scale(480));
-            int contentX = (w - contentW) / 2;
+            // instead of stretching edge-to-edge on a wide window.
+            int contentW = Math.Min(leftW - Scale(24), Scale(480));
+            int contentX = (leftW - contentW) / 2;
+
+            _insights.Visible = twoColumns;
+            if (twoColumns)
+            {
+                int insightsX = leftW + Scale(12);
+                int insightsY = _btnViewHistory.Bottom + Scale(4);
+                _insights.SetBounds(insightsX, insightsY,
+                    w - insightsX - Scale(8), h - insightsY - Scale(4));
+            }
 
             int gaugeSize = Math.Min(contentW - Scale(40), (int)(h * 0.44));
             gaugeSize = Math.Max(gaugeSize, Scale(160));
@@ -325,7 +345,19 @@ namespace TestNetSpeed.UserControls.Pages
             _lastResult = await _service.RunFullTestAsync(progress, _cts.Token);
 
             if (_lastResult.Success)
+            {
                 TestHistoryStore.Append(_lastResult);
+
+                // Set here rather than in OnProgress's Complete case:
+                // Progress<T> posts asynchronously, so the Complete report
+                // can arrive before _lastResult has been assigned.
+                _lblDownVal.Text = $"{_lastResult.DownloadMbps:F1}";
+                _lblUpVal.Text = $"{_lastResult.UploadMbps:F1}";
+                _lblPingVal.Text = $"{_lastResult.PingMs:F0}";
+                _lblJitterVal.Text = $"{_lastResult.JitterMs:F0}";
+            }
+
+            _insights.ShowResult(_lastResult);
 
             SetRunningState(false);
 
@@ -335,6 +367,14 @@ namespace TestNetSpeed.UserControls.Pages
 
         private void OnProgress(SpeedTestProgress p)
         {
+            if (IsDisposed) return;
+
+            _insights.OnProgress(p);
+
+            // Latency probe samples only feed the live graph — they carry
+            // no status text, percent or Mbps for the gauge.
+            if (p.IsLatencySample) return;
+
             _lblPhase.Text = p.StatusText;
 
             int trackW = _progressTrack.Width;
@@ -357,13 +397,9 @@ namespace TestNetSpeed.UserControls.Pages
                     break;
 
                 case SpeedTestPhase.Complete:
-                    if (_lastResult != null)
-                    {
-                        _lblDownVal.Text = $"{_lastResult.DownloadMbps:F1}";
-                        _lblUpVal.Text = $"{_lastResult.UploadMbps:F1}";
-                        _lblPingVal.Text = $"{_lastResult.PingMs:F0}";
-                        _lblJitterVal.Text = $"{_lastResult.JitterMs:F0}";
-                    }
+                    // Final stat values are set in StartTestAsync once the
+                    // result is in hand — _lastResult here may still be the
+                    // previous test's.
                     AnimateTo(0);
                     _gaugePeak = 0;
                     break;
@@ -414,6 +450,8 @@ namespace TestNetSpeed.UserControls.Pages
             _lblPingVal.Text = "—";
             _lblJitterVal.Text = "—";
             _progressFill.Width = 0;
+
+            _insights.Reset();
         }
 
         private void SetStatus(string msg)

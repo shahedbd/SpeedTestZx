@@ -1,0 +1,54 @@
+What we already have — solid base
+Download / Upload / Ping / Jitter, latest-result dashboard, connection status + public IP, auto local history, adapter info, Ping / DNS Lookup / IP Lookup / Traceroute, system tray, notifications, dark/light, collapsible sidebar, and that nice system bar (PC, Ryzen 7 5700G, RAM, Windows 11 Pro, uptime).
+
+3 gaps I can see in the screenshot
+No Jitter card — jitter is in your Store description, but the dashboard shows only Download, Upload, Ping, Internet Status, Last Tested. Add it, it's a free credibility fix.
+No server or ISP shown anywhere — Ookla's first screen tells you server + ISP. Yours doesn't, so users can't judge if a bad result is their ISP or a far server.
+Settings is 2nd in the sidebar — move it to the bottom, above About. Speed Test should be 2nd.
+Catalog check first: I did not suggest Who's On My Wi-Fi (that's WiFi Password Viewer's Pro headline), saved Wi-Fi passwords/QR (WiFi Password Viewer), a live taskbar meter or per-app bandwidth (Net Speed Meter / Net Monitor). Everything below is a genuine gap for this app.
+
+HIGH — Next release, keep all Free for growth
+1. Connection Quality Score — Streaming / Gaming / Calls verdicts
+Turn numbers into answers: "Great for 4K streaming, Poor for gaming, Good for Zoom." Cloudflare's AIM does exactly this — it assigns points from "Latency, Packet Loss, Download, Upload, Loaded Latency, Jitter" and translates them to streaming/gaming/RTC scores. Effort: S (rules on data you already collect, + packet loss from #2). This is your headline screenshot for the Store.
+
+2. Loaded Latency + Packet Loss + Bufferbloat Grade (A–F)
+Ping while downloading/uploading, not just idle. Cloudflare reports "download, upload, latency, jitter, packet loss, and loaded vs. unloaded latency" — that difference is bufferbloat, the #1 reason "100 Mbps but Zoom lags." Effort: M. Huge differentiator vs basic Ookla-style apps.
+
+3. Live Test Graph + Ping at 3 stages
+Real-time download/upload curve during the test, plus ping idle / download / upload — Ookla: "Measure ping at 3 stages: idle, download, and upload". Your big empty dashboard area is perfect for this. Effort: M.
+
+4. Server Selection + ISP Info
+Auto-nearest server, manual picker, favourite server, and on the dashboard/result: ISP name, server city + distance. Effort: M (depends on your test backend having >1 endpoint — if it doesn't, show ISP + single server location first).
+
+5. Video Streaming Test
+Separate test: max resolution (SD/HD/4K/8K), load time, buffering %. Ookla's version is to "Take a video test to measure your max resolution, load time, and buffering". Users understand this better than Mbps. Effort: M.
+
+6. Shareable Result Card
+One click → branded orange PNG card (Download/Upload/Ping, Quality Score, ISP, date) to copy/save/share. This is your free viral loop — every share is an ad for Test Net Speed. Effort: S.
+
+MEDIUM — Release after that, still Free
+7. History Charts & Insights — 7/30-day trend graph, avg / best / worst, stability %, compare 2 tests side-by-side, tag a test ("router rebooted", "new ISP"), export CSV. You have history data, you're just not visualising it. Effort: M.
+
+8. Scheduled Auto-Tests + Slow-Speed Alert — Auto-test daily in tray, notify if download drops below your threshold or internet goes down. Free: daily. This is the retention feature. Effort: M.
+
+9. Gaming & Meeting Ping Board — Ping/Discord/Zoom/Google/game-region servers in one list with jitter + loss each. Gamers will open your app instead of Ookla for this. Effort: S-M (reuses your Ping tool).
+
+10. Wi-Fi vs Ethernet Insight — current connection only — SSID, band (2.4/5 GHz), signal %, link speed, channel, plus a tip after a slow test: "You're on 2.4 GHz at 43% signal — that's your bottleneck, not your ISP." Tightly scoped to your connection, so it doesn't duplicate WiFi Password Viewer. Effort: M.
+
+11. Tray Quick Test — Right-click tray / keyboard shortcut → mini flyout, run test, see result, no full window. Effort: S.
+
+LOW NOW / PRO-READY — Build the hooks now, gate when Pro launches
+12. ISP Plan Checker + ISP Complaint Report — your future Pro headline
+User enters their plan (e.g. 100 Mbps). Every test is graded "% of what you pay for," and Pro exports a 30-day PDF report to send the ISP. Nobody in your category owns this, and people will pay for proof. Effort: M.
+
+13. Outage / Uptime Log (Pro) — Tray records every disconnect with start/end/duration: "Internet was down 3 times yesterday, total 47 min." Effort: M.
+
+14. Accurate Mode (Pro) — Single vs multi-connection test — Ookla lets you "Test with a single connection to simulate downloading a file or multiple connections to understand max speed" — plus Run-3x-and-take-median. Effort: S-M.
+
+15. DNS Race + Connectivity Bundle (Pro) — Race 1.1.1.1 vs 8.8.8.8 vs 9.9.9.9 vs ISP DNS and recommend the fastest, plus IPv6 test, NAT type, MTU check. Extends your existing DNS Lookup into something exciting. Effort: M.
+
+My suggested next-release scope, if you want it tight: #1, #2, #6, plus the jitter-card fix. Three features + one fix, all built on data you already collect except packet loss — and your Store screenshots completely change from "another speed test" to "understand your internet."
+
+Want me to turn #1 Quality Score into a full dev spec, like I did for Who's On My Wi-Fi?
+
+

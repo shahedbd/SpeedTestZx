@@ -155,7 +155,7 @@ namespace TestNetSpeed.UserControls.Pages
                 ("Upload",      Scale(262), Scale(90)),
                 ("Ping",        Scale(354), Scale(70)),
                 ("Jitter",      Scale(426), Scale(70)),
-                ("Server",      Scale(498), Scale(200)),
+                ("ISP / Server", Scale(498), Scale(200)),
             };
 
             foreach (var (text, x, w) in cols)
@@ -307,7 +307,7 @@ namespace TestNetSpeed.UserControls.Pages
                 ($"{r.UploadMbps:F1} Mbps",                   Scale(262), Scale(90),  Color.FromArgb(16, 185, 129)),
                 ($"{r.PingMs:F0} ms",                         Scale(354), Scale(70),  Color.FromArgb(245, 158, 11)),
                 ($"{r.JitterMs:F0} ms",                       Scale(426), Scale(70),  Color.FromArgb(168, 85, 247)),
-                (r.ServerUsed,                                Scale(498), Scale(200), themeManager.CurrentTheme.SecondaryTextColor),
+                (ServerText(r),                               Scale(498), Scale(200), themeManager.CurrentTheme.SecondaryTextColor),
             };
 
             foreach (var (text, x, w, color) in cells)
@@ -345,6 +345,21 @@ namespace TestNetSpeed.UserControls.Pages
                 this.Invoke(() => _lblStatus.Text = $"Status: {message}");
             else
                 _lblStatus.Text = $"Status: {message}";
+        }
+
+        /// <summary>
+        /// v2 results: "ISP · Cloudflare SIN". Older results only have the
+        /// ping endpoint URL, so show that as before.
+        /// </summary>
+        private static string ServerText(SpeedTestResult r)
+        {
+            if (r.Isp.Length == 0 && r.ServerColo.Length == 0)
+                return r.ServerUsed;
+
+            var parts = new List<string>();
+            if (r.Isp.Length > 0) parts.Add(r.Isp);
+            if (r.ServerColo.Length > 0) parts.Add($"Cloudflare {r.ServerColo}");
+            return string.Join(" · ", parts);
         }
     }
 }

@@ -13,10 +13,9 @@ namespace TestNetSpeed.UserControls.Pages
     /// straight to Speed Test. New page, not a WiFi port — this app's
     /// Dashboard didn't exist until Test History existed to feed it.
     ///
-    /// Deliberately omits an "ISP name" tile — that needs IP-geolocation
-    /// lookup logic ported from the old NetSpeedMeterPlus app
-    /// (test_code/NetSpeedMeterPlus/Data/Model/IPGeolocationViewModel.cs),
-    /// which the dev plan flagged as an open decision, not yet resolved.
+    /// The ISP name comes from the last test (SpeedTestService looks it up
+    /// from Cloudflare during every run) and shows on the Internet Status
+    /// tile; the welcome card adds the last test's Quality Score.
     /// </summary>
     public class DashboardControl : DpiAwareUserControl
     {
@@ -27,6 +26,7 @@ namespace TestNetSpeed.UserControls.Pages
         private StatTileControl _tilePing;
         private StatTileControl _tileInternet;
         private StatTileControl _tileLastTested;
+        private Label _lblLastQuality;
 
         private const int TILE_HEIGHT = 90;
 
@@ -147,6 +147,17 @@ namespace TestNetSpeed.UserControls.Pages
                 AutoSize = true
             };
 
+            // Last test's Quality Score — empty until a v2 test exists.
+            _lblLastQuality = new Label
+            {
+                Text = "",
+                Font = new Font("Segoe UI", 9.5f, FontStyle.Bold),
+                ForeColor = themeManager.CurrentTheme.TextColor,
+                BackColor = Color.Transparent,
+                AutoSize = true,
+                UseMnemonic = false
+            };
+
             var btnStart = new Button
             {
                 Text = "▶  Start Speed Test",
@@ -162,9 +173,10 @@ namespace TestNetSpeed.UserControls.Pages
 
             card.Controls.Add(lblTitle);
             card.Controls.Add(lblDesc);
+            card.Controls.Add(_lblLastQuality);
             card.Controls.Add(btnStart);
 
-            card.SizeChanged += (s, e) =>
+            void LayoutCard()
             {
                 if (card.Width <= 0 || card.Height <= 0) return;
 
@@ -175,10 +187,23 @@ namespace TestNetSpeed.UserControls.Pages
                 y += lblTitle.Height + Scale(12);
 
                 lblDesc.Location = new Point(cx - lblDesc.Width / 2, y);
-                y += lblDesc.Height + Scale(20);
+                y += lblDesc.Height + Scale(14);
+
+                if (_lblLastQuality.Text.Length > 0)
+                {
+                    _lblLastQuality.Location = new Point(cx - _lblLastQuality.Width / 2, y);
+                    y += _lblLastQuality.Height + Scale(14);
+                }
+                else
+                {
+                    y += Scale(6);
+                }
 
                 btnStart.Location = new Point(cx - btnStart.Width / 2, y);
-            };
+            }
+
+            card.SizeChanged += (s, e) => LayoutCard();
+            _lblLastQuality.TextChanged += (s, e) => LayoutCard();
 
             return card;
         }
@@ -200,6 +225,13 @@ namespace TestNetSpeed.UserControls.Pages
                 _tilePing.UpdateSubText($"ms  ·  Jitter {last.JitterMs:F0}ms");
                 _tileLastTested.UpdateValue(last.TestedAt.ToString("HH:mm:ss"));
                 _tileLastTested.UpdateSubText(last.TestedAt.ToString("dd MMM yyyy"));
+
+                if (last.SchemaVersion >= 2)
+                {
+                    var q = QualityScorer.Score(last);
+                    _lblLastQuality.Text =
+                        $"Last test:  Streaming {q.Streaming.Level}  ·  Gaming {q.Gaming.Level}  ·  Video calls {q.Calls.Level}";
+                }
             }
 
             try
@@ -207,7 +239,12 @@ namespace TestNetSpeed.UserControls.Pages
                 string pubIp = await _networkService.GetPublicIpAsync();
                 bool online = !string.IsNullOrEmpty(pubIp) && pubIp != "Unavailable";
                 _tileInternet.UpdateValue(online ? "Connected" : "Offline");
-                _tileInternet.UpdateSubText(online ? $"IP: {pubIp}" : "No internet");
+                // ISP from the last test when known — more useful at a
+                // glance than the raw IP, which Network Info already shows.
+                string isp = last?.Isp ?? "";
+                _tileInternet.UpdateSubText(!online ? "No internet"
+                    : isp.Length > 0 ? isp
+                    : $"IP: {pubIp}");
             }
             catch
             {

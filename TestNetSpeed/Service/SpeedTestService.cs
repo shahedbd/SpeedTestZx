@@ -32,6 +32,16 @@ namespace TestNetSpeed.Service
             Timeout = TimeSpan.FromSeconds(20)
         };
 
+        // ── Latency probe timing ─────────────────────────────────────────────
+        // Idle: 40 probes 50 ms apart ≈ 2 s (+ one timeout at worst) — enough
+        // for loss to resolve to 2.5% steps. Loaded: one probe every 250 ms
+        // for the 8 s transfer ≈ 30 samples per direction.
+        private const int IdleProbeCount = 40;
+        private const int IdleProbeIntervalMs = 50;
+        private const int LoadedProbeIntervalMs = 250;
+
+        private readonly ConnectionInfoService _connectionInfo = new();
+
         // ══════════════════════════════════════════════════════════════════════
         //  PUBLIC ENTRY POINT
         // ══════════════════════════════════════════════════════════════════════
@@ -39,7 +49,16 @@ namespace TestNetSpeed.Service
             IProgress<SpeedTestProgress>? progress = null,
             CancellationToken ct = default)
         {
-            var result = new SpeedTestResult { TestedAt = DateTime.Now };
+            var result = new SpeedTestResult
+            {
+                TestedAt = DateTime.Now,
+                SchemaVersion = SpeedTestResult.CurrentSchemaVersion,
+            };
+            var probe = new LatencyProbe();
+
+            // ISP / location lookup runs alongside the ping phase — it's one
+            // small request and shouldn't add to the test time.
+            var infoTask = _connectionInfo.GetAsync(ct);
 
             try
             {
@@ -49,20 +68,61 @@ namespace TestNetSpeed.Service
                 result.PingMs = ping;
                 result.JitterMs = jitter;
                 result.ServerUsed = server;
-                Report(progress, SpeedTestPhase.Ping, 100, 0,
+                Report(progress, SpeedTestPhase.Ping, 60, 0,
                     $"Ping: {ping:F0} ms  ·  Jitter: {jitter:F0} ms");
 
                 ct.ThrowIfCancellationRequested();
 
-                // ── Phase 2: Download ───────────────────────────────────────
-                Report(progress, SpeedTestPhase.Download, 0, 0, "Starting download test...");
-                result.DownloadMbps = await MeasureDownloadAsync(progress, ct);
+                // ── Phase 1b: Idle latency + packet loss ────────────────────
+                Report(progress, SpeedTestPhase.Ping, 70, 0, "Checking packet loss...");
+                var (idleMs, lossPct) = await probe.MeasureIdleAsync(
+                    IdleProbeCount, IdleProbeIntervalMs,
+                    LatencyReporter(progress, SpeedTestPhase.Ping), ct);
+                result.IdleLatencyMs = idleMs;
+                result.PacketLossPct = lossPct;
+                result.LatencyMethod = probe.Method;
+                Report(progress, SpeedTestPhase.Ping, 100, 0,
+                    $"Ping: {ping:F0} ms  ·  Packet loss: {lossPct:0.#}%");
 
                 ct.ThrowIfCancellationRequested();
 
-                // ── Phase 3: Upload ─────────────────────────────────────────
+                // ── Phase 2: Download (+ latency under load) ────────────────
+                Report(progress, SpeedTestPhase.Download, 0, 0, "Starting download test...");
+                using (var loadCts = CancellationTokenSource.CreateLinkedTokenSource(ct))
+                {
+                    var loaded = probe.MeasureLoadedAsync(LoadedProbeIntervalMs,
+                        LatencyReporter(progress, SpeedTestPhase.Download), loadCts.Token);
+                    try
+                    {
+                        (result.DownloadMbps, result.DownloadStabilityPct) = await MeasureDownloadAsync(progress, ct);
+                    }
+                    finally
+                    {
+                        loadCts.Cancel();
+                        result.LoadedLatencyDownMs = await loaded;
+                    }
+                }
+
+                ct.ThrowIfCancellationRequested();
+
+                // ── Phase 3: Upload (+ latency under load) ──────────────────
                 Report(progress, SpeedTestPhase.Upload, 0, 0, "Starting upload test...");
-                result.UploadMbps = await MeasureUploadAsync(progress, ct);
+                using (var loadCts = CancellationTokenSource.CreateLinkedTokenSource(ct))
+                {
+                    var loaded = probe.MeasureLoadedAsync(LoadedProbeIntervalMs,
+                        LatencyReporter(progress, SpeedTestPhase.Upload), loadCts.Token);
+                    try
+                    {
+                        result.UploadMbps = await MeasureUploadAsync(progress, ct);
+                    }
+                    finally
+                    {
+                        loadCts.Cancel();
+                        result.LoadedLatencyUpMs = await loaded;
+                    }
+                }
+
+                await ApplyConnectionInfoAsync(result, infoTask);
 
                 result.Success = true;
                 Report(progress, SpeedTestPhase.Complete, 100, result.DownloadMbps,
@@ -94,6 +154,42 @@ namespace TestNetSpeed.Service
             }
 
             return result;
+        }
+
+        // ── ISP / location — attach whatever the lookup found ───────────────
+        // By now the lookup has normally long finished; if it hasn't, give
+        // it a couple of seconds more rather than holding the result back.
+        private static async Task ApplyConnectionInfoAsync(SpeedTestResult result, Task<ConnectionInfo> infoTask)
+        {
+            try
+            {
+                var done = await Task.WhenAny(infoTask, Task.Delay(TimeSpan.FromSeconds(2)));
+                if (done != infoTask) return;
+
+                var info = await infoTask;
+                result.Isp = info.Isp;
+                result.ClientCity = info.City;
+                result.ClientCountry = info.Country;
+                result.ServerColo = info.Colo;
+            }
+            catch
+            {
+                // No ISP on this result — not a reason to fail the test.
+            }
+        }
+
+        // ── Latency samples → progress (live graph) ─────────────────────────
+        private static Action<double?>? LatencyReporter(
+            IProgress<SpeedTestProgress>? progress, SpeedTestPhase phase)
+        {
+            if (progress == null) return null;
+
+            return rtt => progress.Report(new SpeedTestProgress
+            {
+                Phase = phase,
+                IsLatencySample = true,
+                LatencyMs = rtt,
+            });
         }
 
         // ── Ping + jitter (fast — 6 samples) ────────────────────────────────
@@ -147,7 +243,7 @@ namespace TestNetSpeed.Service
         }
 
         // ── Download — live Mbps reported every ~200 ms ─────────────────────
-        private async Task<double> MeasureDownloadAsync(
+        private async Task<(double Mbps, double? StabilityPct)> MeasureDownloadAsync(
             IProgress<SpeedTestProgress>? progress,
             CancellationToken ct)
         {
@@ -213,7 +309,24 @@ namespace TestNetSpeed.Service
 
             Report(progress, SpeedTestPhase.Download, 100, result, $"Download: {result:F1} Mbps");
 
-            return Math.Round(result, 2);
+            return (Math.Round(result, 2), Stability(samples));
+        }
+
+        /// <summary>
+        /// 100 − coefficient of variation (%), over the samples after the
+        /// first 20% (TCP ramp-up is slow by design and isn't instability).
+        /// Null when there are too few samples to say.
+        /// </summary>
+        private static double? Stability(List<double> samples)
+        {
+            var steady = samples.Skip(samples.Count / 5).ToList();
+            if (steady.Count < 5) return null;
+
+            double mean = steady.Average();
+            if (mean <= 0) return null;
+
+            double stddev = Math.Sqrt(steady.Sum(s => Math.Pow(s - mean, 2)) / steady.Count);
+            return Math.Round(Math.Clamp(100 - stddev / mean * 100, 0, 100), 0);
         }
 
         // ── Upload — live Mbps reported every ~200 ms ───────────────────────

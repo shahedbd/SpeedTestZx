@@ -7,6 +7,50 @@
 - Preserve existing behavior unless the task requires otherwise.
 - Keep responses concise and report only important changes, affected files, and caveats.
 ********************************************************************************************************
+From doc: Task_tracker.md
+Start implemnting Speed Test tables all task except: T31
+
+I will build and review all once you complete it.
+
+
+
+
+
+
+Now Task_tracker.md group by sub tables.
+-Core features: side menu item
+-bug and improvement 
+-others
+
+
+
+
+
+Now write a simple app improvement task management plan table doc.
+-one single line
+-task status
+-prority
+-type: New feature, bug, improvement, other
+
+
+
+
+
+Write doc here:
+G:\src\MS_Store_App\TestNetSpeed\doc\App_improvement_plan
+
+
+
+Review this app improvement plan:
+G:\src\MS_Store_App\TestNetSpeed\doc\App_improvement_plan\Initial_draft.txt
+
+Now write a app improvement development plan phase by phase.
+
+
+
+
+
+
 Update UI and content in side menu: /Pages/OurAppsControl.cs
 
 Using updated project: Net Speed Meter
