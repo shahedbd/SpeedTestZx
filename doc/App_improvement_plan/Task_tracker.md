@@ -64,7 +64,7 @@ Plan: [Pro_plan.md](Pro_plan.md). Phases in these Pro tables are the Pro plan's 
 
 | ID | Phase | Task | Type | Priority | Status |
 |---|---|---|---|---|---|
-| T49 | P0 | JSON storage for Pro: lift 200-test cap, safe writes + backup, daily .jsonl probe logs, outages file | Other | High | To Do |
+| T49 | P0 | JSON storage for Pro: lift 200-test cap, daily .jsonl probe logs, outages file (safe writes done in T63) | Other | High | To Do |
 | T50 | P0 | Pro upsell card pattern: preview from the user's own data + Unlock button | New feature | High | To Do |
 | T61 | P3 | Store listing, Pro screenshots, privacy statement for background probes | Other | High | To Do |
 | T62 | P3 | Upsell touchpoints: header button, preview cards, one gentle prompt | Improvement | Medium | To Do |
@@ -118,6 +118,7 @@ _Also needed for Pro: T06 (background runner), T08 (entitlement stub), T10 (free
 |---|---|---|---|---|---|
 | T03 | 0 | Drop failed ping samples instead of recording 999 ms (inflates jitter) | Bug | High | To Do |
 | T39 | 0 | Download / upload averaged per-stream rates instead of summing them (≈ half real speed); fast lines ran out of data | Bug | High | In Progress |
+| T63 | 0 | History could be wiped: crash mid-save left a broken file, which loaded as empty and was overwritten | Bug | High | In Progress |
 | T01 | 0 | Move Settings to the bottom of the sidebar (above Our Apps / About) | Improvement | High | In Progress |
 | T02 | 0 | Add Jitter tile to the Dashboard (done by T44) | Improvement | High | In Progress |
 | T40 | 0 | Dashboard data cards and larger sidebar icons, following NetPulseApp | Improvement | Medium | In Progress |
