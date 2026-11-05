@@ -7,6 +7,16 @@
 - Preserve existing behavior unless the task requires otherwise.
 - Keep responses concise and report only important changes, affected files, and caveats.
 ********************************************************************************************************
+Update UI and content in side menu: /Pages/OurAppsControl.cs
+
+Using updated project: Net Speed Meter
+G:\src\MS_Store_App\NetSpeedMeterPlus\NetSpeedMeterPlus
+
+
+
+
+
+
 Copy our section same as this app:
 G:\src\MS_Store_App\NetSpeedMeterPlus\NetSpeedMeterPlus
 

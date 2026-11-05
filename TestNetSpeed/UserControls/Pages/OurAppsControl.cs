@@ -1,354 +1,249 @@
-using System.Diagnostics;
-using System.Drawing.Drawing2D;
-using DpiCommon.Helper;
 using FontAwesome.Sharp;
 using TestNetSpeed.Helper;
 
 namespace TestNetSpeed.UserControls.Pages
 {
     /// <summary>
-    /// "Our Apps" nav page — cross-promotes the developer's other Store
-    /// apps (AppConfig.OurApps). New page (not a WiFi port); no equivalent
-    /// visible gallery existed there — WiFiPasswordViewer's only cross-promo
-    /// mechanism is StartupService's silent background Store-page opens on
-    /// install/every-15-days, which is unrelated and untouched by this.
+    /// "Our Apps" nav page — cross-promotion for the rest of the portfolio
+    /// (ported from NetSpeedMeterPlus).
+    ///
+    /// The catalogue lives in <see cref="OurAppsCatalog"/>; this page lays it
+    /// out as a heading (title, portfolio stats, search) over one scrolling
+    /// card split into Featured (paid), Most Popular and More Apps sections,
+    /// each a header plus <see cref="OurAppRow"/>s.
     /// </summary>
     public class OurAppsControl : DpiAwareUserControl
     {
-        private Panel _listContainer;
+        private static readonly Color MoreColor = Color.FromArgb(99, 102, 241); // indigo
 
-        private const int ROW_HEIGHT = 80;
-        private const int HEADER_H = 50;
+        private readonly List<(Control Header, List<OurAppRow> Rows)> _sections = new();
+        private TextBox _search;
+        private Panel _list;
+        private Label _empty;
 
         public OurAppsControl()
         {
-            this.BackColor = themeManager.CurrentTheme.ContentBackground;
-            this.Padding = ScaledPadding(12);
+            // This page does its own DPI scaling through Scale()/ScaledPadding,
+            // so WinForms must not scale the finished layout a second time.
+            AutoScaleMode = AutoScaleMode.None;
 
-            BuildLayout();
+            BackColor = themeManager.CurrentTheme.ContentBackground;
+            Padding = ScaledPadding(16, 10, 16, 16);
+
+            Panel card = BuildCard();
+
+            AddSection(IconChar.Crown, "Featured", "Premium tools with advanced features",
+                OurAppRow.PremiumColor, OurAppsCatalog.Featured);
+            AddSection(IconChar.Star, "Most Popular", "Our most installed free apps",
+                OurAppRow.PopularColor, OurAppsCatalog.Popular);
+            AddSection(IconChar.List, "More Apps", "Handy free utilities for everyday tasks",
+                MoreColor, OurAppsCatalog.More);
+
+            // Docked controls stack in reverse add order, so the sections are
+            // added backwards to read top-down on screen.
+            _list.SuspendLayout();
+            foreach (var (header, rows) in Enumerable.Reverse(_sections))
+            {
+                foreach (var row in Enumerable.Reverse(rows))
+                    _list.Controls.Add(row);
+                _list.Controls.Add(header);
+            }
+            _list.ResumeLayout(true);
+
+            // Card (Fill) added first, heading (Top) last — the later addition
+            // claims the top strip and the card fills what's left.
+            Controls.Add(card);
+            Controls.Add(BuildHeading());
         }
 
-        // ══════════════════════════════════════════════════════════════════════
-        //  BUILD LAYOUT
-        // ══════════════════════════════════════════════════════════════════════
+        // ── Chrome ───────────────────────────────────────────────────────
 
-        private void BuildLayout()
+        /// <summary>Title and portfolio stats on the left, search box on the right.</summary>
+        private Control BuildHeading()
+        {
+            var panel = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = Scale(64),
+                BackColor = Color.Transparent,
+            };
+
+            panel.Controls.Add(new Label
+            {
+                Text = "Our Apps",
+                Font = new Font("Segoe UI", 18f, FontStyle.Bold),
+                ForeColor = themeManager.CurrentTheme.HeadingColor,
+                BackColor = Color.Transparent,
+                AutoSize = true,
+                Location = new Point(0, 0),
+            });
+
+            panel.Controls.Add(new Label
+            {
+                Text = BuildStats(),
+                UseMnemonic = false,
+                Font = new Font("Segoe UI", 9.5f),
+                ForeColor = themeManager.CurrentTheme.SecondaryTextColor,
+                BackColor = Color.Transparent,
+                AutoSize = true,
+                Location = new Point(Scale(2), Scale(34)),
+            });
+
+            _search = new TextBox
+            {
+                Font = new Font("Segoe UI", 10f),
+                PlaceholderText = "Search apps or categories…",
+                Width = Scale(240),
+                BorderStyle = BorderStyle.FixedSingle,
+                BackColor = themeManager.CurrentTheme.CardBackground,
+                ForeColor = themeManager.CurrentTheme.TextColor,
+            };
+            _search.TextChanged += (s, e) => ApplyFilter();
+            panel.Controls.Add(_search);
+
+            // Placed on every resize rather than anchored: anchoring computes
+            // its offset from the initial layout, which is wrong before the
+            // panel has its real width.
+            void PlaceSearch() =>
+                _search.Location = new Point(
+                    Math.Max(0, panel.ClientSize.Width - _search.Width), Scale(8));
+
+            panel.Resize += (s, e) => PlaceSearch();
+            PlaceSearch();
+
+            return panel;
+        }
+
+        /// <summary>"21 Microsoft Store apps by Zero Byte Software Solutions  ·  1.3M+ installs"</summary>
+        private static string BuildStats()
+        {
+            long total = OurAppsCatalog.All.Sum(a => (long)a.Acquisitions);
+            string installs = total >= 1_000_000
+                ? $"{total / 100_000 / 10.0:0.#}M+ installs"
+                : $"{total / 1_000}K+ installs";
+
+            return $"{OurAppsCatalog.All.Count} Microsoft Store apps by {OurAppsCatalog.DeveloperShortName}  ·  {installs}";
+        }
+
+        /// <summary>Bordered card holding the scrolling section list.</summary>
+        private Panel BuildCard()
         {
             var card = new Panel
             {
                 Dock = DockStyle.Fill,
                 BackColor = themeManager.CurrentTheme.CardBackground,
-                BorderStyle = BorderStyle.FixedSingle
-            };
-            this.Controls.Add(card);
-
-            BuildHeader(card);
-            BuildListContainer(card);
-            RenderRows();
-        }
-
-        // ── Header ────────────────────────────────────────────────────────────
-
-        private void BuildHeader(Panel card)
-        {
-            var header = new Panel
-            {
-                Location = new Point(0, 0),
-                Size = new Size(card.Width, Scale(HEADER_H)),
-                BackColor = themeManager.IsDarkTheme
-                    ? Color.FromArgb(40, 40, 40)
-                    : Color.FromArgb(241, 245, 249),
-                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right
-            };
-            card.Controls.Add(header);
-
-            header.Controls.Add(new Label
-            {
-                Text = "Our Apps",
-                Font = new Font("Segoe UI", 10.5f, FontStyle.Bold),
-                ForeColor = themeManager.CurrentTheme.HeadingColor,
-                BackColor = Color.Transparent,
-                Location = ScaledPoint(14, 7),
-                AutoSize = true
-            });
-
-            header.Controls.Add(new Label
-            {
-                Text = $"More tools from {AppConfig.DeveloperName}",
-                Font = new Font("Segoe UI", 8f),
-                ForeColor = themeManager.CurrentTheme.SecondaryTextColor,
-                BackColor = Color.Transparent,
-                Location = ScaledPoint(14, 28),
-                AutoSize = true
-            });
-        }
-
-        // ── Scrollable list container ─────────────────────────────────────────
-
-        private void BuildListContainer(Panel card)
-        {
-            _listContainer = new Panel
-            {
-                Location = new Point(0, Scale(HEADER_H)),
-                Size = new Size(card.Width, Math.Max(card.Height - Scale(HEADER_H), 0)),
-                AutoScroll = true,
-                BackColor = themeManager.CurrentTheme.CardBackground,
-                Anchor = AnchorStyles.Top | AnchorStyles.Bottom
-                           | AnchorStyles.Left | AnchorStyles.Right
-            };
-            card.Controls.Add(_listContainer);
-
-            card.SizeChanged += (s, e) =>
-            {
-                int t = Scale(HEADER_H);
-                _listContainer.Location = new Point(0, t);
-                _listContainer.Size = new Size(card.Width, Math.Max(card.Height - t, 0));
-            };
-        }
-
-        // ══════════════════════════════════════════════════════════════════════
-        //  ROWS
-        // ══════════════════════════════════════════════════════════════════════
-
-        private void RenderRows()
-        {
-            // TestHistoryControl's row loop wraps its Controls.Add calls in
-            // Suspend/ResumeLayout — this one didn't, and children added
-            // deep in a 17-iteration loop without it could pick up anchor
-            // margins mid-layout-thrash instead of against settled bounds.
-            _listContainer.SuspendLayout();
-
-            var apps = AppConfig.OurApps;
-            int y = 0;
-            for (int i = 0; i < apps.Count; i++)
-            {
-                var row = BuildRow(apps[i], i, y);
-                _listContainer.Controls.Add(row);
-                y += row.Height;
-            }
-
-            _listContainer.ResumeLayout();
-        }
-
-        private Panel BuildRow(OurApp app, int index, int y)
-        {
-            bool isEven = index % 2 == 0;
-            Color rowBg = isEven
-                ? themeManager.CurrentTheme.CardBackground
-                : (themeManager.IsDarkTheme
-                    ? Color.FromArgb(38, 38, 38)
-                    : Color.FromArgb(248, 250, 252));
-
-            var row = new Panel
-            {
-                Location = new Point(0, y),
-                Size = new Size(_listContainer.Width - Scale(2), Scale(ROW_HEIGHT)),
-                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
-                BackColor = rowBg
+                BorderStyle = BorderStyle.FixedSingle,
             };
 
-            // ── Icon "logo" — a colored circle with the app's category
-            // icon. No real per-app logo art is available locally, so this
-            // stands in for one, matching the colorful-icon language this
-            // app already uses (nav sidebar, StatTileControl).
-            int circleSize = Scale(44);
-            var iconCircle = new Panel
+            _list = new Panel
             {
-                Location = new Point(Scale(14), (Scale(ROW_HEIGHT) - circleSize) / 2),
-                Size = new Size(circleSize, circleSize),
-                BackColor = app.IconColor
-            };
-            MakeCircle(iconCircle);
-            iconCircle.Controls.Add(new IconPictureBox
-            {
-                IconChar = app.Icon,
-                IconColor = Color.White,
-                IconSize = (int)(circleSize * 0.5),
                 Dock = DockStyle.Fill,
+                AutoScroll = true,
                 BackColor = Color.Transparent,
-                Enabled = false
-            });
-            row.Controls.Add(iconCircle);
-
-            // ── Action column (badge + "Get from Microsoft Store" button) ──
-            // Was Anchor=Top|Right on the button directly — pure
-            // repositioning (no stretch), whose margin gets captured once
-            // against the row's tiny pre-dock width. Widening the button to
-            // fit "Get from Microsoft Store" made that captured X go
-            // negative and it never recovered correctly. Dock=Right instead
-            // — WinForms recomputes a Docked child's position fresh on
-            // every layout pass, not from a captured margin, the same fix
-            // class already used for SpeedTestControl's gauge panel and
-            // DashboardControl's welcome card.
-            int btnW = Scale(190);
-            var actionPanel = new Panel
-            {
-                Dock = DockStyle.Right,
-                Width = btnW,
-                BackColor = Color.Transparent
+                Padding = ScaledPadding(10, 4, 10, 10),
             };
-            row.Controls.Add(actionPanel);
 
-            int textX = Scale(14) + circleSize + Scale(12);
-            int textW = Math.Max(row.Width - textX - btnW - Scale(24), Scale(60));
-
-            var lblName = new Label
+            _empty = new Label
             {
-                Text = app.Name,
-                Font = new Font("Segoe UI", 9.5f, FontStyle.Bold),
-                ForeColor = themeManager.CurrentTheme.TextColor,
-                BackColor = Color.Transparent,
-                Location = new Point(textX, Scale(16)),
-                Size = new Size(textW, Scale(18)),
-                // Stretches with the row on resize (Left+Right anchor) —
-                // this one's proven to work correctly, unlike the pure
-                // repositioning case above.
-                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
-                AutoEllipsis = true
-            };
-            row.Controls.Add(lblName);
-
-            var lblDesc = new Label
-            {
-                Text = app.Description,
-                Font = new Font("Segoe UI", 8f),
+                Dock = DockStyle.Fill,
+                Text = "No app matches that search.",
+                Font = new Font("Segoe UI", 9.5f),
                 ForeColor = themeManager.CurrentTheme.SecondaryTextColor,
                 BackColor = Color.Transparent,
-                Location = new Point(textX, Scale(36)),
-                Size = new Size(textW, Scale(32)),
-                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
-                AutoEllipsis = true
-            };
-            row.Controls.Add(lblDesc);
-
-            // Install-count badge — social proof, using the real
-            // Acquisitions numbers behind the sort order. Omitted (not
-            // "0 installs") when there's no data; the button's own position
-            // stays fixed either way so rows line up consistently.
-            Label lblBadge = null;
-            if (app.Acquisitions > 0)
-            {
-                lblBadge = new Label
-                {
-                    Text = FormatInstallCount(app.Acquisitions),
-                    Font = new Font("Segoe UI", 7.5f),
-                    ForeColor = themeManager.CurrentTheme.SecondaryTextColor,
-                    BackColor = Color.Transparent,
-                    TextAlign = ContentAlignment.MiddleRight
-                };
-                actionPanel.Controls.Add(lblBadge);
-            }
-
-            var btnGet = new Button
-            {
-                Text = "Get from Microsoft Store",
-                Image = GetStoreIcon(),
-                ImageAlign = ContentAlignment.MiddleCenter,
                 TextAlign = ContentAlignment.MiddleCenter,
-                TextImageRelation = TextImageRelation.ImageBeforeText,
-                Font = new Font("Segoe UI", 8f, FontStyle.Bold),
-                FlatStyle = FlatStyle.Flat,
-                BackColor = AppConfig.PrimaryColor,
-                ForeColor = Color.White,
-                Cursor = Cursors.Hand,
-                TabStop = false,
-                UseVisualStyleBackColor = false
+                Visible = false,
             };
-            btnGet.FlatAppearance.BorderSize = 0;
-            btnGet.Click += (s, e) => OpenStoreLink(app.StoreLink);
-            actionPanel.Controls.Add(btnGet);
 
-            // actionPanel.Height tracks the row's real height (Dock=Right
-            // stretches it vertically to match), so this recomputes fresh
-            // every time instead of trusting a captured value.
-            void LayoutAction()
+            card.Controls.Add(_empty);
+            card.Controls.Add(_list);
+            return card;
+        }
+
+        // ── Sections ─────────────────────────────────────────────────────
+
+        private void AddSection(IconChar icon, string title, string subtitle, Color accent, IEnumerable<OurApp> apps)
+        {
+            var rows = apps.Select(a => new OurAppRow(a)).ToList();
+            if (rows.Count == 0) return; // no empty section headers
+
+            _sections.Add((BuildSectionHeader(icon, title, subtitle, accent), rows));
+        }
+
+        /// <summary>Accent glyph, uppercase title and a one-line subtitle.</summary>
+        private Control BuildSectionHeader(IconChar icon, string title, string subtitle, Color accent)
+        {
+            int height = Scale(46);
+            var header = new Panel { Dock = DockStyle.Top, Height = height, BackColor = Color.Transparent };
+
+            header.Controls.Add(new IconPictureBox
             {
-                int w = actionPanel.Width;
-                int h = actionPanel.Height;
-                if (w <= 0 || h <= 0) return;
+                Size = ScaledSize(16, 16),
+                IconChar = icon,
+                IconColor = accent,
+                IconSize = Scale(16),
+                Location = new Point(Scale(4), Scale(20)),
+                BackColor = Color.Transparent,
+                Enabled = false,
+            });
 
-                int btnH = Scale(30);
-                int badgeH = Scale(16);
-                int blockH = btnH + (lblBadge != null ? badgeH : 0);
-                int top = (h - blockH) / 2;
+            var lblTitle = new Label
+            {
+                Text = title.ToUpperInvariant(),
+                Font = new Font("Segoe UI", 9.5f, FontStyle.Bold),
+                ForeColor = accent,
+                BackColor = Color.Transparent,
+                AutoSize = true,
+                Location = new Point(Scale(26), Scale(18)),
+            };
+            header.Controls.Add(lblTitle);
 
-                if (lblBadge != null)
+            header.Controls.Add(new Label
+            {
+                Text = subtitle,
+                Font = new Font("Segoe UI", 8.5f),
+                ForeColor = themeManager.CurrentTheme.SecondaryTextColor,
+                BackColor = Color.Transparent,
+                AutoSize = true,
+                Location = new Point(lblTitle.Left + lblTitle.PreferredWidth + Scale(8), Scale(19)),
+            });
+
+            return header;
+        }
+
+        // ── Search ───────────────────────────────────────────────────────
+
+        /// <summary>
+        /// Hides the rows that don't match, and any section left empty. Rows
+        /// are Dock=Top, so the stack closes up on its own — no rebuild, and
+        /// scroll position survives.
+        /// </summary>
+        private void ApplyFilter()
+        {
+            string query = _search.Text?.Trim() ?? string.Empty;
+            int shown = 0;
+
+            _list.SuspendLayout();
+            foreach (var (header, rows) in _sections)
+            {
+                int inSection = 0;
+                foreach (var row in rows)
                 {
-                    lblBadge.SetBounds(0, top, w - Scale(4), badgeH);
-                    top += badgeH;
+                    bool match = query.Length == 0 || Matches(row.App, query);
+                    row.Visible = match;
+                    if (match) inSection++;
                 }
-                btnGet.SetBounds(0, top, w, btnH);
+                header.Visible = inSection > 0;
+                shown += inSection;
             }
+            _list.ResumeLayout(true);
 
-            actionPanel.SizeChanged += (s, e) => LayoutAction();
-            LayoutAction();
-
-            row.MouseEnter += (s, e) => row.BackColor = themeManager.IsDarkTheme
-                ? Color.FromArgb(50, 50, 60)
-                : Color.FromArgb(235, 242, 255);
-            row.MouseLeave += (s, e) => row.BackColor = rowBg;
-
-            return row;
+            _list.Visible = shown > 0;
+            _empty.Visible = shown == 0;
         }
 
-        // ══════════════════════════════════════════════════════════════════════
-        //  UTILITY
-        // ══════════════════════════════════════════════════════════════════════
-
-        // Loaded once and reused across all 17 button instances rather than
-        // re-reading the .ico file per row.
-        private static Image _storeIcon;
-
-        private static Image GetStoreIcon()
-        {
-            if (_storeIcon != null) return _storeIcon;
-
-            try
-            {
-                if (File.Exists(AppConfig.MsStoreIconPath))
-                {
-                    using var icon = new System.Drawing.Icon(AppConfig.MsStoreIconPath);
-                    _storeIcon = DpiAwareService.ScaleIcon(icon, 16);
-                }
-            }
-            catch
-            {
-                // Missing/corrupt icon file — button still works, just
-                // without the image.
-            }
-
-            return _storeIcon;
-        }
-
-        private static string FormatInstallCount(int n) => n switch
-        {
-            >= 1_000_000 => $"{n / 1_000_000}M+ installs",
-            >= 1_000 => $"{n / 1_000}K+ installs",
-            _ => $"{n} installs"
-        };
-
-        private static void MakeCircle(Panel p)
-        {
-            var path = new GraphicsPath();
-            path.AddEllipse(0, 0, p.Width, p.Height);
-            p.Region = new Region(path);
-        }
-
-        // Store protocol links (ms-windows-store://) resolve through the
-        // shell, same as AboutForm's website/email links — no UseShellExecute
-        // means Windows can't hand the URI to the Store app's protocol
-        // handler.
-        private static void OpenStoreLink(string url)
-        {
-            try
-            {
-                Process.Start(new ProcessStartInfo { FileName = url, UseShellExecute = true });
-            }
-            catch
-            {
-                // Store app unavailable or the link failed to resolve —
-                // non-fatal, nothing else on this page depends on it.
-            }
-        }
+        private static bool Matches(OurApp app, string query) =>
+            app.Name.Contains(query, StringComparison.OrdinalIgnoreCase)
+            || app.Description.Contains(query, StringComparison.OrdinalIgnoreCase)
+            || app.Category.Contains(query, StringComparison.OrdinalIgnoreCase);
     }
 }
