@@ -57,15 +57,49 @@ Plan: [Dashboard_plan.md](Dashboard_plan.md)
 | ID | Phase | Task | Type | Priority | Status |
 |---|---|---|---|---|---|
 | T27 | 3 | Gaming & Meeting Ping Board (ping, jitter, loss per target) | New feature | Medium | To Do |
-| T37 | 4 | DNS Race + IPv6, NAT type and MTU checks | New feature | Low | To Do |
 
-### ISP Plan (new menu item, Pro)
+### Pro foundations and launch
+
+Plan: [Pro_plan.md](Pro_plan.md). Phases in these Pro tables are the Pro plan's phases (P0–P3).
 
 | ID | Phase | Task | Type | Priority | Status |
 |---|---|---|---|---|---|
-| T33 | 4 | ISP Plan Checker: "% of your plan" grade on every test | New feature | Medium | To Do |
-| T34 | 4 | 30-day ISP complaint PDF report (Pro) | New feature | Medium | To Do |
-| T35 | 4 | Outage / uptime log (24 h free, full history Pro) | New feature | Medium | To Do |
+| T49 | P0 | JSON storage for Pro: lift 200-test cap, safe writes + backup, daily .jsonl probe logs, outages file | Other | High | To Do |
+| T50 | P0 | Pro upsell card pattern: preview from the user's own data + Unlock button | New feature | High | To Do |
+| T61 | P3 | Store listing, Pro screenshots, privacy statement for background probes | Other | High | To Do |
+| T62 | P3 | Upsell touchpoints: header button, preview cards, one gentle prompt | Improvement | Medium | To Do |
+
+_Also needed for Pro: T06 (background runner), T08 (entitlement stub), T10 (free vs Pro line), T32 (Store add-on)._
+
+### ISP Report Card (new menu item, Pro headline)
+
+| ID | Phase | Task | Type | Priority | Status |
+|---|---|---|---|---|---|
+| T33 | P1 | Plan checker: plan entry + "% of plan" on every test (free) | New feature | High | To Do |
+| T51 | P1 | Report Card page: summary cards, % of plan over time, by hour (7 days free, 30 / 90 / custom Pro) | New feature | High | To Do |
+| T52 | P1 | Cost view: "$ of undelivered speed" estimate (Pro) | New feature | Medium | To Do |
+| T34 | P1 | PDF complaint report with charts, outages and test table (Pro, PDFsharp) | New feature | High | To Do |
+
+### Connection Monitor (new menu item, Pro)
+
+| ID | Phase | Task | Type | Priority | Status |
+|---|---|---|---|---|---|
+| T53 | P2 | Monitor engine + scheduler: light test, daily free / 1-3-6 h Pro, skip on metered / battery / busy | New feature | High | To Do |
+| T54 | P2 | Latency and loss log: router + 1.1.1.1 every 10 s, per-minute rows, 90 days Pro | New feature | High | To Do |
+| T35 | P2 | Outage log with cause (router vs ISP); 24 h free, 90 days Pro | New feature | High | To Do |
+| T55 | P2 | Weekday × hour heatmap (Pro) | New feature | Medium | To Do |
+| T56 | P2 | Smart alerts: down (free); slow, high latency, back online (Pro) | New feature | Medium | To Do |
+| T57 | P2 | Connection Monitor page | New feature | High | To Do |
+| T58 | P2 | Close to tray + start with Windows (StartupTask, offered when scheduled tests are turned on) | New feature | Medium | To Do |
+
+### Advanced Test Lab (new menu item, Pro, later)
+
+| ID | Phase | Task | Type | Priority | Status |
+|---|---|---|---|---|---|
+| T36 | Later | Accurate Mode: single vs multi-connection, run 3× and take median | Improvement | Low | To Do |
+| T37 | Later | DNS Race + IPv6, NAT type and MTU checks | New feature | Low | To Do |
+| T59 | Later | Game & meeting readiness: latency / jitter / loss to Steam, Xbox, Teams, Zoom | New feature | Low | To Do |
+| T60 | Later | Advanced Test Lab page | New feature | Low | To Do |
 
 ### System tray and header (not a menu item)
 
@@ -74,7 +108,7 @@ Plan: [Dashboard_plan.md](Dashboard_plan.md)
 | T22 | 2 | Scheduled daily auto-test in the tray | New feature | High | To Do |
 | T23 | 2 | Slow-speed and internet-down alerts (once per incident) | New feature | High | To Do |
 | T24 | 2 | Tray quick test flyout + keyboard shortcut | New feature | Medium | To Do |
-| T32 | 4 | Store add-on / subscription and licensing; "Go Premium" header button | New feature | Medium | To Do |
+| T32 | 4 | Store add-on (one-time US$9.99) and licensing; "Go Premium" header button | New feature | Medium | To Do |
 
 ---
 
@@ -91,8 +125,7 @@ Plan: [Dashboard_plan.md](Dashboard_plan.md)
 | T14 | 1 | Show ping at 3 stages: idle / download / upload | Improvement | High | Done |
 | T17 | 1 | Keep full test under ~25 s; add Quick vs Full option if needed | Improvement | Medium | To Do |
 | T18 | 1 | Clear error states: offline, captive portal, VPN / proxy, blocked ICMP | Improvement | Medium | To Do |
-| T21 | 2 | Compare 2 tests side by side, tag a test, CSV export | Improvement | Medium | To Do |
-| T36 | 4 | Accurate Mode: single vs multi-connection, run 3× and take median | Improvement | Low | To Do |
+| T21 | 2 | Compare 2 tests side by side, tag a test, CSV export; paging for thousands of rows | Improvement | Medium | To Do |
 
 ---
 

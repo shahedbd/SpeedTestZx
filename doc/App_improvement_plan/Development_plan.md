@@ -152,6 +152,6 @@ Each phase ends with a Store release and new Store screenshots.
 ## 4. Open decisions
 
 1. **Second test backend?** Server selection (#4) and resilience against Cloudflare throttling both need one. Options: self-hosted LibreSpeed, M-Lab NDT7 (free, many servers, needs a WebSocket client), or stay on Cloudflare only. **Recommendation:** evaluate NDT7 during Phase 2. Until then, Cloudflare plus ISP/location display is enough.
-2. **Pro pricing model:** one-time unlock or subscription. This decides how 4.1 is set up in Partner Center.
-3. **Should history move to SQLite** before scheduled tests (Phase 2)? A daily schedule is fine with JSON for years. Hourly tests, or the Pro outage log, would push toward SQLite.
+2. **Pro pricing model:** ~~one-time unlock or subscription~~ **Decided: one-time unlock, US$9.99** (see [Pro_plan.md](Pro_plan.md)).
+3. **Should history move to SQLite?** **Decided: no, stay with JSON files.** Pro data uses daily JSON Lines files for the per-minute log; see the storage design in [Pro_plan.md](Pro_plan.md).
 4. **Privacy text.** Phase 0.3 and the outage log send requests to Cloudflare in the background. Update the Store privacy statement and the About page before Phase 2 ships.

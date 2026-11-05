@@ -7,6 +7,57 @@
 - Preserve existing behavior unless the task requires otherwise.
 - Keep responses concise and report only important changes, affected files, and caveats.
 ********************************************************************************************************
+Start development: Pro_plan.md
+Phase 0 to 2
+
+For pro payment, follow this recent implementaion project:
+G:\src\MS_Store_App\WiFiPasswordViewer\WiFiPasswordViewer
+
+
+
+
+
+
+
+
+Open decisions, with my suggestion for each
+Pricing: one-time unlock or subscription. I suggest one-time, since nothing runs on a server.
+-one time: 9.99 USD
+SQLite: I suggest moving history now, as the first Pro task.
+- json file
+Default Pro test interval: I suggest every 3 hours, about 400 MB a day. Hourly is about 1.2 GB a day.
+- ok
+Start with Windows: I suggest off by default, and offered when the user turns on scheduled tests.
+- offered when the user turns on scheduled tests.
+Pro history retention: I suggest keeping 90 days of per-minute data and every test result.
+- ok
+
+
+
+
+
+Now write development plan on:
+1. ISP Report Card (headline Pro) — the planned “ISP Plan” menu
+2. Connection Monitor (new Pro menu)
+3. Advanced Test Lab (new Pro menu) - will implement later.
+
+Write doc here:
+G:\src\MS_Store_App\TestNetSpeed\doc\App_improvement_plan
+
+
+
+
+
+Now analize app current featuers and doc:
+G:\src\MS_Store_App\TestNetSpeed\doc\App_improvement_plan
+
+And suggest me what exclusive 2-3 pro features we can add(menu item)?
+
+
+
+
+menu item, Pro
+
 Done: Phase-2
 Dashboard_plan.md
 
