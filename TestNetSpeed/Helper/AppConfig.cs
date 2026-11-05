@@ -1,6 +1,9 @@
 // Helper/AppConfig.cs
 using TestNetSpeed.Forms;
+using TestNetSpeed.Model;
 using TestNetSpeed.UserControls.Pages;
+using TestNetSpeed.UserControls.Pages.Monitor;
+using TestNetSpeed.UserControls.Pages.Report;
 using FontAwesome.Sharp;
 
 namespace TestNetSpeed.Helper
@@ -12,6 +15,19 @@ namespace TestNetSpeed.Helper
     /// </summary>
     public static class AppConfig
     {
+        // ── TEST-ONLY ACCESS OVERRIDE ────────────────────────────────────────
+        // The single switch for exercising both sides of the paywall before a
+        // release (same as WiFiPasswordViewer). It overrides the real tier
+        // outright — the Store license and its offline cache are ignored — so
+        // Gated really does gate even on a machine that already owns Pro.
+        // Unpackaged F5 runs have no package identity, so the Store always
+        // reports Free there; use FullAccess to test Pro. Debug builds can also
+        // flip it at runtime from Settings → Behavior → "Pro access (debug)".
+        //
+        // MUST be Off in every shipped build; FullAccess gives Pro away. A
+        // release build logs a warning at startup when it is not Off.
+        public static TestAccessMode TestAccess = TestAccessMode.FullAccess;
+
         // ── App identity ─────────────────────────────────────────────────────
         public static string AppName = "Test Net Speed";
         public static string AppSubtitle = "Test your internet speed, anytime";
@@ -33,6 +49,40 @@ namespace TestNetSpeed.Helper
         public static string NetSpeedPlusMsStoreLink = "ms-windows-store://pdp/?productid=9P00PF8JTJ1L";
         public static string CPUZxMsStoreLink = "ms-windows-store://pdp/?productid=9P5G6W4FPNS2";
         public static string CPUZxProMsStoreLink = "ms-windows-store://pdp/?productid=9N5RXJCZB734";
+
+        // ── Go Pro (one-time Store add-on, Pro_plan.md decision 1) ───────────
+        // Durable add-on — never expires, no renewal. TODO: replace the
+        // placeholder with the add-on's Store ID (9N…) from Partner Center
+        // before release. While it is a placeholder the Store finds no
+        // product: purchase reports an error and the prompt shows the
+        // fallback price below. A release build logs a warning.
+        public const string LifetimeProStoreId = "I_WILL_ADD_LIVE_ID_SOON";
+
+        // Fallback text only — the live, localized price comes from the Store.
+        public const string LifetimeProPrice = "$9.99";
+
+        /// <summary>True once LifetimeProStoreId looks like a real Store ID (12 chars, starts with 9).</summary>
+        public static bool HasRealProStoreId =>
+            LifetimeProStoreId.Length == 12 && LifetimeProStoreId[0] == '9'
+            && LifetimeProStoreId.All(char.IsLetterOrDigit);
+
+        // Microsoft Store badge on the upgrade prompt's trust line.
+        public static string MicrosoftStoreAppIconPath => MsStoreIconPath;
+
+        // Go Pro pill, upgrade-card gradient and the PRO badge.
+        public static Color ProAccentStart = Color.FromArgb(234, 88, 12);
+        public static Color ProAccentEnd = Color.FromArgb(219, 39, 119);
+
+        // What the upgrade prompt sells, in order (six fit without "+N more").
+        public static (IconChar Icon, string Text, Color Accent)[] ProBenefits =
+        [
+            (IconChar.FilePdf, "ISP Report Card: 30 / 90-day ranges and a PDF for your ISP", Color.FromArgb(239, 68, 68)),
+            (IconChar.DollarSign, "Cost view: what undelivered speed costs you each month", Color.FromArgb(34, 197, 94)),
+            (IconChar.Clock, "Automatic tests every 1, 3 or 6 hours", Color.FromArgb(59, 130, 246)),
+            (IconChar.WaveSquare, "90 days of latency, loss and outage history", Color.FromArgb(14, 165, 233)),
+            (IconChar.TableCells, "Weekday × hour heatmap of when your internet is bad", Color.FromArgb(245, 158, 11)),
+            (IconChar.Bell, "Smart alerts: slow speed, high latency, back online", Color.FromArgb(168, 85, 247)),
+        ];
 
         //API Constants
         public static string apiSecretKey = "c96524b3-dad4-4146-aa4a-7e6b99b92d8b";
@@ -67,6 +117,8 @@ namespace TestNetSpeed.Helper
             "Test history — every result saved locally, browsable anytime",
             "Detailed network adapter & connection info",
             "Built-in network tools — Ping, DNS Lookup, IP Lookup, Traceroute",
+            "ISP Report Card — % of your plan on every test, PDF report (Pro)",
+            "Connection Monitor — scheduled tests, outage log, heatmap, alerts",
             "System tray support with notifications",
             "Dark / Light theme, DPI-aware from 100% to 200%",
             "Collapsible sidebar navigation",
@@ -123,6 +175,11 @@ namespace TestNetSpeed.Helper
             new NavItem { Label = "Network Info", Icon = IconChar.NetworkWired, IconColor = Color.FromArgb(14, 165, 233), ControlType = typeof(NetworkInfoControl) },
             new NavItem { Label = "Network Tools", Icon = IconChar.Screwdriver, IconColor = Color.FromArgb(168, 85, 247), ControlType = typeof(NetworkToolsControl) },
 
+            // ── Pro ── pages open for everyone; Pro-only parts show an
+            // inline upsell. ProBadge draws the "PRO" pill until unlocked.
+            new NavItem { Label = "ISP Report Card", Icon = IconChar.FileContract, IconColor = Color.FromArgb(234, 88, 12), ControlType = typeof(IspReportCardControl), ProBadge = ProFeature.ReportLongRange },
+            new NavItem { Label = "Connection Monitor", Icon = IconChar.HeartPulse, IconColor = Color.FromArgb(239, 68, 68), ControlType = typeof(ConnectionMonitorControl), ProBadge = ProFeature.Heatmap },
+
             // ── App ── kept last so they sit at the bottom of the sidebar.
             // Settings leads this group, as in NetPulseApp (Settings just
             // above About); Our Apps sits between them, as in Net Speed
@@ -163,5 +220,9 @@ namespace TestNetSpeed.Helper
         /// About box). When set, ControlType is ignored and the sidebar's
         /// active-page highlight doesn't change.</summary>
         public Action ShowModal { get; set; }
+
+        /// <summary>When set, the nav item shows a "PRO" pill until the user
+        /// has this feature. The page itself still opens.</summary>
+        public ProFeature? ProBadge { get; set; }
     }
 }

@@ -8,9 +8,9 @@ namespace TestNetSpeed.Helper
     /// Local JSON log of completed speed tests. Same JSON-in-AppData shape
     /// as WiFiPasswordViewer's WifiProfileDataCache, but not a TTL cache —
     /// this is an append-only history, not something that expires. Newest
-    /// entry first; capped at MaxEntries so the file doesn't grow
-    /// unbounded (no pagination in the Test History table, so 200 is
-    /// plenty without needing one). The cap is lifted for Pro in T49.
+    /// entry first. Every result is kept (Pro_plan.md decision 5, T49): the
+    /// old 200-test cap was only 25 days at the 3 h Pro schedule, too short
+    /// for 30 / 90-day reports. Compact JSON keeps ~3,000 tests near 2 MB.
     ///
     /// History must never be lost to a crash, so:
     ///   • Saves go to a .tmp file first and are swapped in with
@@ -31,8 +31,6 @@ namespace TestNetSpeed.Helper
         private static readonly string BackupFile = Path.Combine(appDataDir, "TestHistory.bak.json");
         private static readonly string TempFile = HistoryFile + ".tmp";
 
-        private const int MaxEntries = 200;
-
         private static readonly object Gate = new();
 
         // Set when an unreadable main file couldn't be moved aside. The next
@@ -43,8 +41,14 @@ namespace TestNetSpeed.Helper
         private static readonly JsonSerializerOptions Options = new()
         {
             PropertyNameCaseInsensitive = true,
-            WriteIndented = true
+            WriteIndented = false
         };
+
+        /// <summary>
+        /// Raised after a result is saved — scheduled tests save from the
+        /// Monitor while a page may be open. May fire off the UI thread.
+        /// </summary>
+        public static event EventHandler<SpeedTestResult>? Appended;
 
         // ─────────────────────────────────────────────────────────────────────
         // LOAD  — newest first
@@ -123,23 +127,24 @@ namespace TestNetSpeed.Helper
 
         public static void Append(SpeedTestResult result)
         {
+            bool saved = false;
             lock (Gate)
             {
                 try
                 {
                     var history = LoadUnlocked();
                     history.Insert(0, result);
-
-                    if (history.Count > MaxEntries)
-                        history.RemoveRange(MaxEntries, history.Count - MaxEntries);
-
                     SaveUnlocked(history);
+                    saved = true;
                 }
                 catch (Exception ex)
                 {
                     Logger.Log($"Failed to save test history: {ex.Message}");
                 }
             }
+
+            if (saved)
+                Appended?.Invoke(null, result);
         }
 
         /// <summary>

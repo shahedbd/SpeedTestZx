@@ -53,7 +53,7 @@
         <uap5:Extension Category="windows.startupTask">
           <uap5:StartupTask
             TaskId="SpeedTestAppStartupTaskChecker"
-            Enabled="true"
+            Enabled="false"
             DisplayName="Internet Speed Checker Plus" />
         </uap5:Extension>
       </Extensions>

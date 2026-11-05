@@ -45,10 +45,19 @@ namespace TestNetSpeed.Service
         // ══════════════════════════════════════════════════════════════════════
         //  PUBLIC ENTRY POINT
         // ══════════════════════════════════════════════════════════════════════
+        /// <param name="light">
+        /// Scheduled-test mode (Pro_plan.md T53): same method, but each
+        /// direction stops after <see cref="LightWindow"/> or
+        /// <see cref="LightByteCap"/>, whichever comes first (~50 MB a test).
+        /// </param>
         public async Task<SpeedTestResult> RunFullTestAsync(
             IProgress<SpeedTestProgress>? progress = null,
-            CancellationToken ct = default)
+            CancellationToken ct = default,
+            bool light = false)
         {
+            var window = light ? LightWindow : TransferWindow;
+            long cap = light ? LightByteCap : 0;
+
             var result = new SpeedTestResult
             {
                 TestedAt = DateTime.Now,
@@ -94,7 +103,7 @@ namespace TestNetSpeed.Service
                         LatencyReporter(progress, SpeedTestPhase.Download), loadCts.Token);
                     try
                     {
-                        (result.DownloadMbps, result.DownloadStabilityPct) = await MeasureDownloadAsync(progress, ct);
+                        (result.DownloadMbps, result.DownloadStabilityPct) = await MeasureDownloadAsync(progress, window, cap, ct);
                     }
                     finally
                     {
@@ -113,7 +122,7 @@ namespace TestNetSpeed.Service
                         LatencyReporter(progress, SpeedTestPhase.Upload), loadCts.Token);
                     try
                     {
-                        result.UploadMbps = await MeasureUploadAsync(progress, ct);
+                        result.UploadMbps = await MeasureUploadAsync(progress, window, cap, ct);
                     }
                     finally
                     {
@@ -263,6 +272,10 @@ namespace TestNetSpeed.Service
         /// <summary>Parallel connections per direction (tune under T04).</summary>
         private const int TransferStreams = 2;
         private static readonly TimeSpan TransferWindow = TimeSpan.FromSeconds(8);
+
+        /// <summary>Light (scheduled) test: shorter window and a byte cap per direction.</summary>
+        private static readonly TimeSpan LightWindow = TimeSpan.FromSeconds(4);
+        private const long LightByteCap = 25L * 1024 * 1024;
         private const int SampleIntervalMs = 200;
 
         /// <summary>Leading share of the window treated as TCP ramp-up and left out of the result.</summary>
@@ -274,6 +287,7 @@ namespace TestNetSpeed.Service
         // ── Download ─────────────────────────────────────────────────────────
         private async Task<(double Mbps, double? StabilityPct)> MeasureDownloadAsync(
             IProgress<SpeedTestProgress>? progress,
+            TimeSpan transferWindow, long byteCap,
             CancellationToken ct)
         {
             Report(progress, SpeedTestPhase.Download, 5, 0, "Warming up...");
@@ -293,12 +307,13 @@ namespace TestNetSpeed.Service
             return await MeasureThroughputAsync(
                 SpeedTestPhase.Download, "Download",
                 (onBytes, token) => DownloadOnceAsync(url, onBytes, token),
-                progress, ct);
+                progress, transferWindow, byteCap, ct);
         }
 
         // ── Upload ───────────────────────────────────────────────────────────
         private async Task<double> MeasureUploadAsync(
             IProgress<SpeedTestProgress>? progress,
+            TimeSpan transferWindow, long byteCap,
             CancellationToken ct)
         {
             Report(progress, SpeedTestPhase.Upload, 5, 0, "Warming up upload...");
@@ -320,7 +335,7 @@ namespace TestNetSpeed.Service
             var (mbps, _) = await MeasureThroughputAsync(
                 SpeedTestPhase.Upload, "Upload",
                 (onBytes, token) => UploadOnceAsync(payload, onBytes, token),
-                progress, ct);
+                progress, transferWindow, byteCap, ct);
             return mbps;
         }
 
@@ -330,12 +345,13 @@ namespace TestNetSpeed.Service
             string label,
             Func<Action<long>, CancellationToken, Task> runOneRequest,
             IProgress<SpeedTestProgress>? progress,
+            TimeSpan transferWindow, long byteCap,
             CancellationToken ct)
         {
             var counter = new ByteCounter();
 
             using var window = CancellationTokenSource.CreateLinkedTokenSource(ct);
-            window.CancelAfter(TransferWindow);
+            window.CancelAfter(transferWindow);
 
             var workers = Enumerable.Range(0, TransferStreams)
                 .Select(_ => KeepTransferringAsync(runOneRequest, counter.Add, window.Token))
@@ -363,8 +379,12 @@ namespace TestNetSpeed.Service
                 samples.Add(mbps);
                 points.Add((sec, bytes));
 
-                int pct = Math.Min(95, 10 + (int)(sec / TransferWindow.TotalSeconds * 85));
+                int pct = Math.Min(95, 10 + (int)(sec / transferWindow.TotalSeconds * 85));
                 Report(progress, phase, pct, mbps, $"{label}: {mbps:F1} Mbps");
+
+                // Light test: enough data moved for this direction.
+                if (byteCap > 0 && bytes >= byteCap)
+                    break;
             }
 
             window.Cancel();

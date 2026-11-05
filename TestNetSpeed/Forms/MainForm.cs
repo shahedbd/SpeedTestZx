@@ -3,6 +3,7 @@ using DpiCommon.Helper;
 using TestNetSpeed.Helper;
 using TestNetSpeed.Managers;
 using TestNetSpeed.Service;
+using TestNetSpeed.Service.Monitor;
 using TestNetSpeed.UserControls.Layout;
 
 namespace TestNetSpeed.Forms
@@ -99,6 +100,7 @@ namespace TestNetSpeed.Forms
                 // outermost/topmost, Sidebar spans the full height below it,
                 // and mainAreaPanel fills whatever's left beside the sidebar.
                 InitializeMainArea();
+                InitializePro();        // MainForm.Pro.cs — needs Handle + content panel
                 InitializeSidebar();
                 InitializeTitleBar();
 
@@ -115,6 +117,9 @@ namespace TestNetSpeed.Forms
             // Icon + text segments (PC, CPU, RAM, OS, uptime) — loaded off the
             // UI thread by HeaderControl.SystemSummary.cs.
             _header?.LoadSystemSummary();
+
+            // Store licence check + Connection Monitor — MainForm.Pro.cs.
+            OnShownPro();
         }
 
         private void MainForm_DpiChanged(object sender, DpiChangedEventArgs e)
@@ -180,6 +185,8 @@ namespace TestNetSpeed.Forms
             if (contentPanel != null)
                 contentPanel.BackColor = themeManager.CurrentTheme.ContentBackground;
 
+            PromptManager.Current?.ApplyTheme();
+
             Invalidate(true);
         }
 
@@ -192,7 +199,10 @@ namespace TestNetSpeed.Forms
             Show();
             WindowState = FormWindowState.Normal;
             Activate();
-            _trayService?.Hide();
+
+            // The icon stays while the Monitor runs: alerts and status live there.
+            if (!MonitorService.Instance.IsActive)
+                _trayService?.Hide();
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
@@ -217,6 +227,7 @@ namespace TestNetSpeed.Forms
                 return;
             }
 
+            MonitorService.Instance.Stop();
             _trayService?.Dispose();
             base.OnFormClosing(e);
         }

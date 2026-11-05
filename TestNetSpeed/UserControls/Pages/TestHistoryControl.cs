@@ -9,7 +9,7 @@ namespace TestNetSpeed.UserControls.Pages
     /// — no equivalent existed before Speed Test's history was just an
     /// in-memory scrollback.
     /// </summary>
-    public class TestHistoryControl : DpiAwareUserControl
+    public partial class TestHistoryControl : DpiAwareUserControl
     {
         private List<SpeedTestResult> _results = new();
 
@@ -125,6 +125,9 @@ namespace TestNetSpeed.UserControls.Pages
             btnRefresh.Click += (s, e) => LoadHistory();
             header.Controls.Add(btnRefresh);
 
+            // ‹ 1–100 of N › — TestHistoryControl.Paging.cs.
+            BuildPager(header, btnRefresh);
+
             header.SizeChanged += (s, e) =>
             {
                 int margin = Scale(8);
@@ -155,7 +158,8 @@ namespace TestNetSpeed.UserControls.Pages
                 ("Upload",      Scale(262), Scale(90)),
                 ("Ping",        Scale(354), Scale(70)),
                 ("Jitter",      Scale(426), Scale(70)),
-                ("ISP / Server", Scale(498), Scale(200)),
+                ("% of plan",   Scale(498), Scale(70)),
+                ("ISP / Server", Scale(570), Scale(200)),
             };
 
             foreach (var (text, x, w) in cols)
@@ -253,6 +257,7 @@ namespace TestNetSpeed.UserControls.Pages
         private void LoadHistory()
         {
             _results = TestHistoryStore.Load();
+            _page = 0;
             RenderRows();
             SetStatus($"{_results.Count} result{(_results.Count == 1 ? "" : "s")} loaded.");
         }
@@ -260,13 +265,18 @@ namespace TestNetSpeed.UserControls.Pages
         private void RenderRows()
         {
             _listContainer.SuspendLayout();
-            _listContainer.Controls.Clear();
+
+            // Dispose, not Clear: Clear() leaks every row's window handles.
+            while (_listContainer.Controls.Count > 0)
+                _listContainer.Controls[0].Dispose();
 
             _lblCount.Text = $"Test History ({_results.Count})";
             _emptyState.Visible = _results.Count == 0;
 
+            // One page of rows at a time: history is no longer capped at 200,
+            // and a panel + 7 labels per row would run out of window handles.
             int y = 0;
-            for (int i = 0; i < _results.Count; i++)
+            for (int i = PageStart; i < PageEnd; i++)
             {
                 Panel row = BuildRow(_results[i], i, y);
                 _listContainer.Controls.Add(row);
@@ -274,6 +284,8 @@ namespace TestNetSpeed.UserControls.Pages
             }
 
             _listContainer.ResumeLayout();
+            _listContainer.AutoScrollPosition = Point.Empty;
+            UpdatePager();
         }
 
         private Panel BuildRow(SpeedTestResult r, int index, int y)
@@ -307,7 +319,8 @@ namespace TestNetSpeed.UserControls.Pages
                 ($"{r.UploadMbps:F1} Mbps",                   Scale(262), Scale(90),  Color.FromArgb(16, 185, 129)),
                 ($"{r.PingMs:F0} ms",                         Scale(354), Scale(70),  Color.FromArgb(245, 158, 11)),
                 ($"{r.JitterMs:F0} ms",                       Scale(426), Scale(70),  Color.FromArgb(168, 85, 247)),
-                (ServerText(r),                               Scale(498), Scale(200), themeManager.CurrentTheme.SecondaryTextColor),
+                (r.PctOfPlan is double p ? $"{p:0}%" : "—",   Scale(498), Scale(70),  PlanColor(r.PctOfPlan)),
+                (ServerText(r),                               Scale(570), Scale(200), themeManager.CurrentTheme.SecondaryTextColor),
             };
 
             foreach (var (text, x, w, color) in cells)

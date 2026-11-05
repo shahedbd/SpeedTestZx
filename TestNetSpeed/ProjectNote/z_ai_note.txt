@@ -10,8 +10,9 @@
 Start development: Pro_plan.md
 Phase 0 to 2
 
-For pro payment, follow this recent implementaion project:
+For pro payment module, follow this recent implementation project:
 G:\src\MS_Store_App\WiFiPasswordViewer\WiFiPasswordViewer
+
 
 
 

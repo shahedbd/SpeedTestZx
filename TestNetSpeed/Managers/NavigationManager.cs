@@ -1,5 +1,6 @@
 using TestNetSpeed.Helper;
 using TestNetSpeed.UserControls.Layout;
+using TestNetSpeed.UserControls.Prompts;
 
 namespace TestNetSpeed.Managers
 {
@@ -37,6 +38,11 @@ namespace TestNetSpeed.Managers
             foreach (var item in AppConfig.NavItems)
             {
                 var button = sidebar.AddNavButton(item);
+
+                // "PRO" pill until the user has the feature (ProNavBadge hides itself).
+                if (item.ProBadge is { } feature)
+                    ProNavBadge.Attach(button, feature);
+
                 button.Click += (s, e) =>
                 {
                     if (item.ShowModal != null)
@@ -112,6 +118,9 @@ namespace TestNetSpeed.Managers
         /// </summary>
         public void ShowPage(UserControl control, Panel containerPanel)
         {
+            // An open upgrade prompt belongs to the page being left.
+            PromptManager.Current?.CloseAll();
+
             if (_currentControl != null)
             {
                 containerPanel.Controls.Remove(_currentControl);

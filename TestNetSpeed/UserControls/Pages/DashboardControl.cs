@@ -562,6 +562,7 @@ namespace TestNetSpeed.UserControls.Pages
                 }
             }
 
+            if (r.PctOfPlan is double pct) info.Add($"{pct:0}% of plan");   // T33
             if (r.Isp.Length > 0) info.Add(r.Isp);
             if (r.ServerColo.Length > 0) info.Add($"Server {r.ServerColo}");
             _lblLastInfo.Text = string.Join("  ·  ", info);

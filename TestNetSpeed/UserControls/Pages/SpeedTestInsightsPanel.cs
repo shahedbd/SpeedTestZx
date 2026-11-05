@@ -230,6 +230,7 @@ namespace TestNetSpeed.UserControls.Pages
         private static string BuildIspText(SpeedTestResult r)
         {
             var parts = new List<string>();
+            if (r.PctOfPlan is double pct) parts.Add($"{pct:0}% of your plan");   // T33
             if (r.Isp.Length > 0) parts.Add($"ISP: {r.Isp}");
 
             string where = string.Join(", ", new[] { r.ClientCity, r.ClientCountry }.Where(s => s.Length > 0));

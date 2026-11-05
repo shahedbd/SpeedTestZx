@@ -16,7 +16,6 @@ namespace TestNetSpeed.UserControls.Pages
     /// </summary>
     public class SpeedTestControl : DpiAwareUserControl
     {
-        private readonly SpeedTestService _service = new();
 
         // ── State ─────────────────────────────────────────────────────────────
         private CancellationTokenSource _cts;
@@ -342,12 +341,18 @@ namespace TestNetSpeed.UserControls.Pages
 
             var progress = new Progress<SpeedTestProgress>(OnProgress);
 
-            _lastResult = await _service.RunFullTestAsync(progress, _cts.Token);
+            // SpeedTestRunner (T06) stamps % of plan and saves to history.
+            var result = await SpeedTestRunner.Instance.RunAsync(progress, scheduled: false, _cts.Token);
+            if (result == null)
+            {
+                SetRunningState(false);
+                SetStatus("A scheduled test is running. Try again in a moment.");
+                return;
+            }
+            _lastResult = result;
 
             if (_lastResult.Success)
             {
-                TestHistoryStore.Append(_lastResult);
-
                 // Set here rather than in OnProgress's Complete case:
                 // Progress<T> posts asynchronously, so the Complete report
                 // can arrive before _lastResult has been assigned.

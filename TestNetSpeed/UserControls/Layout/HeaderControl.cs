@@ -12,7 +12,8 @@ namespace TestNetSpeed.UserControls.Layout
     /// name, processor, RAM, OS and uptime as coloured icon + text segments
     /// (HeaderControl.Summary.cs; data loaded by <see cref="LoadSystemSummary"/>
     /// in HeaderControl.SystemSummary.cs). Right: Settings + About + Theme
-    /// icon-only action buttons (colours in HeaderControl.ActionStyle.cs).
+    /// icon-only action buttons (colours in HeaderControl.ActionStyle.cs),
+    /// plus the Go Pro pill (HeaderControl.Pro.cs).
     /// Only spans the region to the right of the sidebar — MainForm nests
     /// this inside the content-side panel, not directly under the title bar.
     /// </summary>
@@ -39,6 +40,8 @@ namespace TestNetSpeed.UserControls.Layout
 
             BuildLayout();
             ApplyTheme();
+
+            Disposed += (s, e) => DisposeProButton();
         }
 
         private void BuildLayout()
@@ -67,6 +70,10 @@ namespace TestNetSpeed.UserControls.Layout
             _buttonBar.Controls.Add(BtnSettings);
             _buttonBar.Controls.Add(BtnAbout);
             _buttonBar.Controls.Add(BtnTheme);
+
+            // Go Pro pill, left of Settings — HeaderControl.Pro.cs.
+            CreateProButton();
+            _buttonBar.Controls.Add(_btnGoPro);
             PositionButtons();
 
             _summaryStrip = BuildSummaryStrip();
@@ -88,7 +95,7 @@ namespace TestNetSpeed.UserControls.Layout
         private void PositionButtons()
         {
             // Right-to-left: the last entry ends up left-most.
-            var buttons = new[] { BtnTheme, BtnAbout, BtnSettings };
+            var buttons = BarButtons;
             int rightMargin = DpiAwareService.Scale(12);
 
             _buttonBar.Width = HeaderButtonService.GroupWidth(buttons, rightMargin) + DpiAwareService.Scale(8);
@@ -134,6 +141,7 @@ namespace TestNetSpeed.UserControls.Layout
 
             // Colourful icons on a neutral surface — HeaderControl.ActionStyle.cs.
             StyleActionButtons();
+            StyleProButton();
         }
 
         // ─────────────────────────────────────────────────────────────────────
@@ -151,6 +159,7 @@ namespace TestNetSpeed.UserControls.Layout
             BtnSettings.Size = new Size(HeaderButtonService.IconOnlyWidth, btnH);
             BtnAbout.Size = new Size(HeaderButtonService.IconOnlyWidth, btnH);
             BtnTheme.Size = new Size(HeaderButtonService.IconOnlyWidth, btnH);
+            RefreshProButtonForDpi();
 
             PositionButtons();
         }

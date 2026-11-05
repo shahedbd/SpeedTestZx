@@ -9,8 +9,9 @@ public class SpeedTestResult
     /// as 1; SpeedTestService stamps new results with CurrentSchemaVersion.
     /// 2 adds latency under load, packet loss, stability and ISP / server
     /// location — all nullable or empty, so v1 rows still display.
+    /// 3 adds % of plan, adapter type and scheduled (Pro_plan.md T33 / T53).
     /// </summary>
-    public const int CurrentSchemaVersion = 2;
+    public const int CurrentSchemaVersion = 3;
 
     public int SchemaVersion { get; set; } = 1;
 
@@ -62,7 +63,26 @@ public class SpeedTestResult
     /// <summary>Cloudflare data centre that served the test (IATA code, e.g. "SIN").</summary>
     public string ServerColo { get; set; } = string.Empty;
 
+    // ── v3: ISP plan grading (T33) ───────────────────────────────────────
+
+    /// <summary>Download ÷ the plan's download, in percent, when a plan was set at test time.</summary>
+    public double? PctOfPlan { get; set; }
+
+    /// <summary>Upload ÷ the plan's upload, in percent — graded separately.</summary>
+    public double? UpPctOfPlan { get; set; }
+
+    /// <summary>"Ethernet", "Wi-Fi", or empty when unknown (old rows). Wi-Fi slowness isn't the ISP's fault.</summary>
+    public string AdapterType { get; set; } = string.Empty;
+
+    // ── v3: Connection Monitor (T53) ─────────────────────────────────────
+
+    /// <summary>True for an automatic (light) test run by the Monitor.</summary>
+    public bool Scheduled { get; set; }
+
     // ── Derived ──────────────────────────────────────────────────────────
+
+    [JsonIgnore]
+    public bool IsWired => AdapterType == "Ethernet";
 
     /// <summary>Worst of the two loaded latencies, or null when neither was measured.</summary>
     [JsonIgnore]

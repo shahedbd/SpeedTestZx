@@ -72,6 +72,11 @@ namespace TestNetSpeed.Service
         /// <summary>Hides the tray icon (call once the window is restored).</summary>
         public void Hide() => _notifyIcon.Visible = false;
 
+        public bool IsVisible => _notifyIcon.Visible;
+
+        /// <summary>Tooltip text — the Connection Monitor's status (T58).</summary>
+        public void SetTooltip(string text) => _notifyIcon.Text = Truncate(text, 63);
+
         /// <summary>
         /// Shows a Windows notification balloon from the tray icon. Only
         /// visible if the icon itself is currently shown (call after Show()).
