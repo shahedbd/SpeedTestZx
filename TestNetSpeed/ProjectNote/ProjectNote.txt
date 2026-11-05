@@ -1,10 +1,33 @@
+Internet Speed Test ZX or Speed Test 
+
+1. New App Name: Speed Test ZX - Internet Speed Checker
+
+2. Brand color: 
+Turbo Sunset — RECOMMENDED
+Orange = speed / throttle. Instantly different from your 22 blue apps and green Net Speed Meter.
+Primary #C2410C
+Bright #EA580C
+Accent #F59E0B
+Upload #BE185D
+Dark BG #1C1917
+
+
+
+
+
+
+
+
+
+
+
 
 *********************************************
 Now create a new tab in side menu bottom: Our Apps Or Other Apps Or Try Our Apps (Set best name)
 Create each app card with app logo, app name, app description and a button to open app in Microsoft Store. Or suggest better way to show other apps.
 
 
-Internet Speed Test ZX or Speed Test ZX
+
 
 
 

@@ -7,6 +7,10 @@
 - Preserve existing behavior unless the task requires otherwise.
 - Keep responses concise and report only important changes, affected files, and caveats.
 ********************************************************************************************************
+Copy our section same as this app:
+G:\src\MS_Store_App\NetSpeedMeterPlus\NetSpeedMeterPlus
+
+
 App full docs:
 G:\src\MS_Store_App\TestNetSpeed\doc\Requirements
 

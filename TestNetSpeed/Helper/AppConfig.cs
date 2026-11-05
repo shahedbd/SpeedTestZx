@@ -120,6 +120,7 @@ namespace TestNetSpeed.Helper
         public static List<NavItem> NavItems = new()
         {
             new NavItem { Label = "Dashboard", Icon = IconChar.ChartLine, IconColor = Color.FromArgb(14, 165, 233), ControlType = typeof(DashboardControl) },
+            new NavItem { Label = "Settings", Icon = IconChar.Gear, IconColor = Color.FromArgb(0, 120, 212), ControlType = typeof(SettingsPageControl) },
             new NavItem { Label = "Speed Test", Icon = IconChar.GaugeHigh, IconColor = Color.FromArgb(59, 130, 246), ControlType = typeof(SpeedTestControl) },
             new NavItem { Label = "Test History", Icon = IconChar.ClockRotateLeft, IconColor = Color.FromArgb(16, 185, 129), ControlType = typeof(TestHistoryControl) },
             new NavItem { Label = "Network Info", Icon = IconChar.NetworkWired, IconColor = Color.FromArgb(14, 165, 233), ControlType = typeof(NetworkInfoControl) },

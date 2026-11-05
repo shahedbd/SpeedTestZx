@@ -113,8 +113,9 @@ namespace TestNetSpeed.UserControls.Layout
 
         private void BtnSettings_Click(object sender, EventArgs e)
         {
-            using var dlg = new SettingsDialog();
-            dlg.ShowDialog(FindForm());
+            // Settings is a sidebar page (not a separate dialog) — jump to it
+            // the same way clicking the sidebar's "Settings" entry would.
+            NavigationManager.Instance.NavigateTo("Settings");
         }
 
         // ─────────────────────────────────────────────────────────────────────
