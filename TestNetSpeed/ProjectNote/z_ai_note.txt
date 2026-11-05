@@ -7,6 +7,26 @@
 - Preserve existing behavior unless the task requires otherwise.
 - Keep responses concise and report only important changes, affected files, and caveats.
 ********************************************************************************************************
+Now how we can improve dashboard current layout UI?
+Can we add same graph in dashboad that is used in live test? Using live download and upload speed data.
+(T25	2	Live download / upload graph during the test)
+
+Or whate else we can add?
+
+let me your feedback and opnion first.
+
+
+
+
+1. Improve dashboard data card box by following this project pattern:
+G:\src\MS_Store_App\NetPulseApp\NetPulseApp
+2. Increase side menu iocn size same as:NetPulseApp
+3. Set Settings side menu position same as: NetPulseApp 
+
+
+
+
+
 From doc: Task_tracker.md
 Start implemnting Speed Test tables all task except: T31
 

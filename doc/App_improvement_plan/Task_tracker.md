@@ -69,8 +69,9 @@ _In Progress = code written, waiting for build and review._
 |---|---|---|---|---|---|
 | T03 | 0 | Drop failed ping samples instead of recording 999 ms (inflates jitter) | Bug | High | To Do |
 | T39 | 0 | Download / upload averaged per-stream rates instead of summing them (≈ half real speed); fast lines ran out of data | Bug | High | In Progress |
-| T01 | 0 | Move Settings to the bottom of the sidebar (above Our Apps / About) | Improvement | High | To Do |
+| T01 | 0 | Move Settings to the bottom of the sidebar (above Our Apps / About) | Improvement | High | In Progress |
 | T02 | 0 | Add Jitter tile to the Dashboard | Improvement | High | To Do |
+| T40 | 0 | Dashboard data cards and larger sidebar icons, following NetPulseApp | Improvement | Medium | In Progress |
 | T04 | 0 | Validate accuracy against Cloudflare / Ookla; tune stream count and test length | Improvement | High | To Do |
 | T14 | 1 | Show ping at 3 stages: idle / download / upload | Improvement | High | Done |
 | T17 | 1 | Keep full test under ~25 s; add Quick vs Full option if needed | Improvement | Medium | To Do |

@@ -1,13 +1,15 @@
-using TestNetSpeed.Helper;
 using TestNetSpeed.Managers;
 using TestNetSpeed.Model;
 using TestNetSpeed.Service;
+using FontAwesome.Sharp;
+using TestNetSpeed.Helper;
 using TestNetSpeed.UserControls.Lib;
+using TestNetSpeed.UserControls.Lib.DataCard;
 
 namespace TestNetSpeed.UserControls.Pages
 {
     /// <summary>
-    /// "Dashboard" nav page — the landing page. A stat-tile row (mirroring
+    /// "Dashboard" nav page — the landing page. A data-card row (DataCard library ported from NetPulseApp; originally mirroring
     /// WifiHeaderControl's layout pattern from WiFiPasswordViewer) fed from
     /// the most recent Test History entry, plus a welcome card that jumps
     /// straight to Speed Test. New page, not a WiFi port — this app's
@@ -21,11 +23,12 @@ namespace TestNetSpeed.UserControls.Pages
     {
         private readonly NetworkDetailsService _networkService = new();
 
-        private StatTileControl _tileDownload;
-        private StatTileControl _tileUpload;
-        private StatTileControl _tilePing;
-        private StatTileControl _tileInternet;
-        private StatTileControl _tileLastTested;
+        private DataCardGrid _statRow = null!;
+        private DataCardControl _tileDownload = null!;
+        private DataCardControl _tileUpload = null!;
+        private DataCardControl _tilePing = null!;
+        private DataCardControl _tileInternet = null!;
+        private DataCardControl _tileLastTested = null!;
         private Label _lblLastQuality;
 
         private const int TILE_HEIGHT = 90;
@@ -36,6 +39,7 @@ namespace TestNetSpeed.UserControls.Pages
             this.Padding = ScaledPadding(12);
 
             BuildLayout();
+            themeManager.ThemeChanged += OnThemeChanged;
             _ = LoadAsync();
         }
 
@@ -64,58 +68,58 @@ namespace TestNetSpeed.UserControls.Pages
             outer.Controls.Add(BuildWelcomeCard(), 0, 1);
         }
 
-        // ── Stat tile row ─────────────────────────────────────────────────────
+        // ── Stat card row ─────────────────────────────────────────────────────
+        // Same DataCard pattern as NetPulseApp's dashboard: owner-drawn cards
+        // with an accent strip, gradient icon badge and hover lift, laid out
+        // equal-width by DataCardGrid.
 
-        private TableLayoutPanel BuildTileRow()
+        private DataCardGrid BuildTileRow()
         {
-            var table = new TableLayoutPanel
+            _statRow = new DataCardGrid
             {
                 Dock = DockStyle.Fill,
-                ColumnCount = 5,
-                RowCount = 1,
-                BackColor = Color.Transparent,
+                Gap = 12,
                 Margin = new Padding(0, 0, 0, Scale(10))
             };
 
-            for (int i = 0; i < 5; i++)
-                table.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20f));
-            table.RowStyles.Add(new RowStyle(SizeType.Percent, 100f));
+            _tileDownload = AddCard(IconChar.Download, "LAST DOWNLOAD", DataCardAccents.Blue, "No tests yet");
+            _tileUpload = AddCard(IconChar.Upload, "LAST UPLOAD", DataCardAccents.Green, "No tests yet");
+            _tilePing = AddCard(IconChar.Gauge, "LAST PING", DataCardAccents.Purple, "No tests yet");
+            _tileInternet = AddCard(IconChar.Globe, "INTERNET STATUS", DataCardAccents.Sky, "Checking...");
+            _tileLastTested = AddCard(IconChar.Clock, "LAST TESTED", DataCardAccents.Amber, "No tests yet");
 
-            _tileDownload = CreateTile("⬇", Color.FromArgb(37, 99, 235), "Last Download", "—", "Mbps", Color.FromArgb(59, 130, 246));
-            _tileUpload = CreateTile("⬆", Color.FromArgb(5, 150, 105), "Last Upload", "—", "Mbps", Color.FromArgb(16, 185, 129));
-            _tilePing = CreateTile("⚡", Color.FromArgb(126, 34, 206), "Last Ping", "—", "ms", Color.FromArgb(168, 85, 247));
-            _tileInternet = CreateTile("🌐", Color.FromArgb(2, 132, 199), "Internet Status", "Checking...", "Please wait", Color.FromArgb(14, 165, 233));
-            _tileLastTested = CreateTile("🕐", Color.FromArgb(180, 83, 9), "Last Tested", "—", "No tests yet", Color.FromArgb(245, 158, 11));
+            // Internet status needs a network call — skeleton until it lands.
+            _tileInternet.IsLoading = true;
 
-            AddTileToTable(table, _tileDownload, 0, leftMargin: 0);
-            AddTileToTable(table, _tileUpload, 1);
-            AddTileToTable(table, _tilePing, 2);
-            AddTileToTable(table, _tileInternet, 3);
-            AddTileToTable(table, _tileLastTested, 4, rightMargin: 0);
-
-            return table;
+            _statRow.ApplyPalette(CurrentPalette());
+            return _statRow;
         }
 
-        private StatTileControl CreateTile(
-            string icon, Color iconBg, string caption, string value, string sub, Color accent)
+        private DataCardControl AddCard(IconChar icon, string caption, Color accent, string subText)
         {
-            return new StatTileControl(new StatTileControl.TileConfig(
-                Icon: icon,
-                IconBackground: iconBg,
-                Caption: caption,
-                Value: value,
-                SubText: sub,
-                AccentColor: accent
-            ));
+            var card = _statRow.AddCard(new DataCardControl(icon, caption, accent));
+            card.Value = "—";
+            card.SubText = subText;
+            return card;
         }
 
-        private void AddTileToTable(
-            TableLayoutPanel table, StatTileControl tile, int col,
-            int leftMargin = 4, int rightMargin = 4)
+        /// <summary>Data cards are theme-agnostic — map this app's theme onto their palette.</summary>
+        private DataCardPalette CurrentPalette()
         {
-            tile.Dock = DockStyle.Fill;
-            tile.Margin = new Padding(leftMargin, 0, rightMargin, 0);
-            table.Controls.Add(tile, col, 0);
+            var t = themeManager.CurrentTheme;
+            return DataCardPalette.From(
+                t.CardBackground, t.BorderColor, t.TextColor,
+                t.SecondaryTextColor, themeManager.IsDarkTheme);
+        }
+
+        private void OnThemeChanged(object? sender, ThemeChangedEventArgs e) =>
+            _statRow.ApplyPalette(CurrentPalette());
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+                themeManager.ThemeChanged -= OnThemeChanged;
+            base.Dispose(disposing);
         }
 
         // ── Welcome card ──────────────────────────────────────────────────────
@@ -219,18 +223,23 @@ namespace TestNetSpeed.UserControls.Pages
 
             if (last != null)
             {
-                _tileDownload.UpdateValue($"{last.DownloadMbps:F1}");
-                _tileUpload.UpdateValue($"{last.UploadMbps:F1}");
-                _tilePing.UpdateValue($"{last.PingMs:F0}");
-                _tilePing.UpdateSubText($"ms  ·  Jitter {last.JitterMs:F0}ms");
-                _tileLastTested.UpdateValue(last.TestedAt.ToString("HH:mm:ss"));
-                _tileLastTested.UpdateSubText(last.TestedAt.ToString("dd MMM yyyy"));
+                _tileDownload.SetData($"{last.DownloadMbps:F1} Mbps", "Download speed");
+                _tileUpload.SetData($"{last.UploadMbps:F1} Mbps", "Upload speed");
+                _tilePing.SetData($"{last.PingMs:F0} ms", $"Jitter {last.JitterMs:F0} ms");
+                _tileLastTested.SetData(last.TestedAt.ToString("HH:mm"), last.TestedAt.ToString("dd MMM yyyy"));
 
                 if (last.SchemaVersion >= 2)
                 {
                     var q = QualityScorer.Score(last);
                     _lblLastQuality.Text =
                         $"Last test:  Streaming {q.Streaming.Level}  ·  Gaming {q.Gaming.Level}  ·  Video calls {q.Calls.Level}";
+
+                    // Bufferbloat grade as a corner pill, like NetPulseApp's latency card.
+                    if (last.BufferbloatMs is not null)
+                    {
+                        _tilePing.Badge = $"Grade {q.BufferbloatGrade}";
+                        _tilePing.BadgeColor = QualityScorer.GradeColor(q.BufferbloatGrade);
+                    }
                 }
             }
 
@@ -238,18 +247,19 @@ namespace TestNetSpeed.UserControls.Pages
             {
                 string pubIp = await _networkService.GetPublicIpAsync();
                 bool online = !string.IsNullOrEmpty(pubIp) && pubIp != "Unavailable";
-                _tileInternet.UpdateValue(online ? "Connected" : "Offline");
+                string status = online ? "Connected" : "Offline";
                 // ISP from the last test when known — more useful at a
                 // glance than the raw IP, which Network Info already shows.
                 string isp = last?.Isp ?? "";
-                _tileInternet.UpdateSubText(!online ? "No internet"
+                _tileInternet.SetData(status,
+                    !online ? "No internet"
                     : isp.Length > 0 ? isp
-                    : $"IP: {pubIp}");
+                    : $"IP: {pubIp}",
+                    online ? DataCardAccents.Green : DataCardAccents.Red);
             }
             catch
             {
-                _tileInternet.UpdateValue("Unknown");
-                _tileInternet.UpdateSubText("Could not check");
+                _tileInternet.SetData("Unknown", "Could not check");
             }
         }
     }

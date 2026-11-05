@@ -118,14 +118,16 @@ namespace TestNetSpeed.Helper
         public static List<NavItem> NavItems = new()
         {
             new NavItem { Label = "Dashboard", Icon = IconChar.ChartLine, IconColor = Color.FromArgb(14, 165, 233), ControlType = typeof(DashboardControl) },
-            new NavItem { Label = "Settings", Icon = IconChar.Gear, IconColor = Color.FromArgb(0, 120, 212), ControlType = typeof(SettingsPageControl) },
             new NavItem { Label = "Speed Test", Icon = IconChar.GaugeHigh, IconColor = Color.FromArgb(59, 130, 246), ControlType = typeof(SpeedTestControl) },
             new NavItem { Label = "Test History", Icon = IconChar.ClockRotateLeft, IconColor = Color.FromArgb(16, 185, 129), ControlType = typeof(TestHistoryControl) },
             new NavItem { Label = "Network Info", Icon = IconChar.NetworkWired, IconColor = Color.FromArgb(14, 165, 233), ControlType = typeof(NetworkInfoControl) },
             new NavItem { Label = "Network Tools", Icon = IconChar.Screwdriver, IconColor = Color.FromArgb(168, 85, 247), ControlType = typeof(NetworkToolsControl) },
 
-            // ── App ── kept last so they sit at the bottom of the sidebar
-            // (same order as Net Speed Meter Plus: Our Apps, then About).
+            // ── App ── kept last so they sit at the bottom of the sidebar.
+            // Settings leads this group, as in NetPulseApp (Settings just
+            // above About); Our Apps sits between them, as in Net Speed
+            // Meter Plus.
+            new NavItem { Label = "Settings", Icon = IconChar.Gear, IconColor = Color.FromArgb(0, 120, 212), ControlType = typeof(SettingsPageControl) },
             new NavItem { Label = "Our Apps", Icon = IconChar.Store, IconColor = Color.FromArgb(99, 102, 241), ControlType = typeof(OurAppsControl) },
             // ShowModal instead of ControlType — About is a dialog, not a
             // content page, so there's nothing to dock into the content panel.

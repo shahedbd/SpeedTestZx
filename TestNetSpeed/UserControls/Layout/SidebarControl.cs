@@ -141,6 +141,13 @@ namespace TestNetSpeed.UserControls.Layout
         // NAV BUTTONS (driven by AppConfig.NavItems via NavigationManager)
         // ─────────────────────────────────────────────────────────────────────
 
+        // Nav icon box at 96 DPI. FontAwesome.Sharp shrinks the glyph to ~77%
+        // of the box, so 29 here draws the same ~22 px glyph NetPulseApp gets
+        // from its 22 px box (its own renderer fills the full box). X keeps
+        // the glyph centred where NetPulseApp's sits (12 + 22/2 ≈ 8 + 29/2).
+        private const int NavIconSize = 29;
+        private const int NavIconX = 8;
+
         public Button AddNavButton(NavItem item)
         {
             int buttonWidth = Width - DpiAwareService.Scale(16);
@@ -161,7 +168,7 @@ namespace TestNetSpeed.UserControls.Layout
             btn.FlatAppearance.BorderSize = 0;
             btn.FlatAppearance.MouseOverBackColor = GetHoverColor();
 
-            int iconSize = DpiAwareService.Scale(22);
+            int iconSize = DpiAwareService.Scale(NavIconSize);
             var iconBox = new IconPictureBox
             {
                 Name = "icon",
@@ -172,7 +179,7 @@ namespace TestNetSpeed.UserControls.Layout
                 // / ApplyTheme).
                 IconColor = item.IconColor,
                 IconSize = iconSize,
-                Location = new Point(DpiAwareService.Scale(12), (buttonHeight - iconSize) / 2),
+                Location = new Point(DpiAwareService.Scale(NavIconX), (buttonHeight - iconSize) / 2),
                 Size = new Size(iconSize, iconSize),
                 BackColor = Color.Transparent,
                 // Disabled so it never captures the click itself — same as
@@ -352,8 +359,8 @@ namespace TestNetSpeed.UserControls.Layout
         {
             int buttonWidth = Width - DpiAwareService.Scale(16);
             int buttonHeight = DpiAwareService.Scale(44);
-            int iconSize = DpiAwareService.Scale(22);
-            int iconX = DpiAwareService.Scale(12);
+            int iconSize = DpiAwareService.Scale(NavIconSize);
+            int iconX = DpiAwareService.Scale(NavIconX);
             int textX = DpiAwareService.Scale(44);
 
             foreach (Control ctrl in NavigationPanel.Controls)
