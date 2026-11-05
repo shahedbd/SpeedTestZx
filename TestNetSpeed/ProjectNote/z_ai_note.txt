@@ -7,13 +7,27 @@
 - Preserve existing behavior unless the task requires otherwise.
 - Keep responses concise and report only important changes, affected files, and caveats.
 ********************************************************************************************************
+Now write a dashbaod impoevement development plan.
+- Option A
+- Layout I’d suggest
+
+Ask me question if any things decision related or missing.
+Write doc here:
+G:\src\MS_Store_App\TestNetSpeed\doc\App_improvement_plan\
+
+
+
+
+
+
 Now how we can improve dashboard current layout UI?
-Can we add same graph in dashboad that is used in live test? Using live download and upload speed data.
+Can we add same graph in dashboard that is used in live test? Using live download and upload speed data.
 (T25	2	Live download / upload graph during the test)
 
-Or whate else we can add?
+Or what else we can add?
 
-let me your feedback and opnion first.
+let me your feedback and onion first.
+
 
 
 
