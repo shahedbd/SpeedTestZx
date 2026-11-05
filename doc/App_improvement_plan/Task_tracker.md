@@ -15,14 +15,14 @@ _In Progress = code written, waiting for build and review._
 
 | ID | Phase | Task | Type | Priority | Status |
 |---|---|---|---|---|---|
-| T05 | 0 | Show ISP name and test location (Cloudflare `/meta`), also on Dashboard | New feature | High | In Progress |
-| T11 | 1 | Measure latency under load during download and upload (bufferbloat) | New feature | High | In Progress |
-| T12 | 1 | Measure packet loss with ICMP, TCP fallback when blocked | New feature | High | In Progress |
-| T13 | 1 | Bufferbloat grade A–F on every result | New feature | High | In Progress |
+| T05 | 0 | Show ISP name and test location (Cloudflare `/meta`), also on Dashboard | New feature | High | Done |
+| T11 | 1 | Measure latency under load during download and upload (bufferbloat) | New feature | High | Done |
+| T12 | 1 | Measure packet loss with ICMP, TCP fallback when blocked | New feature | High | Done |
+| T13 | 1 | Bufferbloat grade A–F on every result | New feature | High | Done |
 | T15 | 1 | Quality Score: Streaming / Gaming / Video calls verdicts, with unit tests | New feature | High | In Progress |
 | T16 | 1 | Shareable result card: copy / save PNG / Windows Share | New feature | High | In Progress |
-| T25 | 2 | Live download / upload graph during the test | New feature | Medium | In Progress |
-| T29 | 3 | Streaming resolution estimate (labelled as an estimate) | New feature | Low | In Progress |
+| T25 | 2 | Live download / upload graph during the test | New feature | Medium | Done |
+| T29 | 3 | Streaming resolution estimate (labelled as an estimate) | New feature | Low | Done |
 | T31 | 3 | Manual server picker (only if a second backend is added) | New feature | Low | Blocked |
 
 ### Test History
@@ -68,10 +68,11 @@ _In Progress = code written, waiting for build and review._
 | ID | Phase | Task | Type | Priority | Status |
 |---|---|---|---|---|---|
 | T03 | 0 | Drop failed ping samples instead of recording 999 ms (inflates jitter) | Bug | High | To Do |
+| T39 | 0 | Download / upload averaged per-stream rates instead of summing them (≈ half real speed); fast lines ran out of data | Bug | High | In Progress |
 | T01 | 0 | Move Settings to the bottom of the sidebar (above Our Apps / About) | Improvement | High | To Do |
 | T02 | 0 | Add Jitter tile to the Dashboard | Improvement | High | To Do |
 | T04 | 0 | Validate accuracy against Cloudflare / Ookla; tune stream count and test length | Improvement | High | To Do |
-| T14 | 1 | Show ping at 3 stages: idle / download / upload | Improvement | High | In Progress |
+| T14 | 1 | Show ping at 3 stages: idle / download / upload | Improvement | High | Done |
 | T17 | 1 | Keep full test under ~25 s; add Quick vs Full option if needed | Improvement | Medium | To Do |
 | T18 | 1 | Clear error states: offline, captive portal, VPN / proxy, blocked ICMP | Improvement | Medium | To Do |
 | T21 | 2 | Compare 2 tests side by side, tag a test, CSV export | Improvement | Medium | To Do |

@@ -242,75 +242,196 @@ namespace TestNetSpeed.Service
             return (Math.Round(avg, 1), Math.Round(jitter, 1), bestServer);
         }
 
-        // ── Download — live Mbps reported every ~200 ms ─────────────────────
+        // ══════════════════════════════════════════════════════════════════════
+        //  THROUGHPUT (download / upload)
+        //
+        //  Several streams run in parallel and every byte they move goes into
+        //  one shared counter. A single sampler reads that counter every
+        //  SampleIntervalMs, so each sample — and the gauge, live graph and
+        //  stability figure built on them — is the COMBINED rate of all
+        //  streams. (The old code averaged per-stream rates, which reported
+        //  roughly 1 / TransferStreams of the real speed on a saturated line.)
+        //
+        //  Streams restart as soon as a request finishes, so fast lines keep
+        //  the pipe full for the whole window. The final figure is bytes ÷
+        //  time over the steady part of the window (TCP ramp-up excluded).
+        // ══════════════════════════════════════════════════════════════════════
+
+        private const string DownloadBaseUrl = "https://speed.cloudflare.com/__down?bytes=";
+        private const string UploadUrl = "https://speed.cloudflare.com/__up";
+
+        /// <summary>Parallel connections per direction (tune under T04).</summary>
+        private const int TransferStreams = 2;
+        private static readonly TimeSpan TransferWindow = TimeSpan.FromSeconds(8);
+        private const int SampleIntervalMs = 200;
+
+        /// <summary>Leading share of the window treated as TCP ramp-up and left out of the result.</summary>
+        private const double RampUpShare = 0.2;
+
+        private const int DownloadRequestBytes = 50 * 1024 * 1024;
+        private const int UploadRequestBytes = 4 * 1024 * 1024;
+
+        // ── Download ─────────────────────────────────────────────────────────
         private async Task<(double Mbps, double? StabilityPct)> MeasureDownloadAsync(
             IProgress<SpeedTestProgress>? progress,
             CancellationToken ct)
         {
-            const int totalBytes = 50 * 1024 * 1024;
-            var url = $"https://speed.cloudflare.com/__down?bytes={totalBytes}";
-
             Report(progress, SpeedTestPhase.Download, 5, 0, "Warming up...");
-
             try
             {
-                await DownloadStreamAsync(
-                    $"https://speed.cloudflare.com/__down?bytes={512 * 1024}", null, ct);
+                await DownloadOnceAsync(DownloadBaseUrl + (512 * 1024), _ => { }, ct);
             }
             catch (Exception) when (!ct.IsCancellationRequested)
             {
-                // Warm-up failure (e.g. a transient rate limit) is non-fatal
-                // — same tolerance the upload warm-up below already has via
-                // UploadChunkAsync's own try/catch. The real measurement
-                // loop still runs and produces its own samples.
+                // Warm-up failure (e.g. a transient rate limit) is non-fatal —
+                // the measurement below still runs and reports its own errors.
             }
 
             Report(progress, SpeedTestPhase.Download, 10, 0, "Measuring download...");
 
-            var samples = new List<double>();
-            double peak = 0;
+            string url = DownloadBaseUrl + DownloadRequestBytes;
+            return await MeasureThroughputAsync(
+                SpeedTestPhase.Download, "Download",
+                (onBytes, token) => DownloadOnceAsync(url, onBytes, token),
+                progress, ct);
+        }
 
-            var cts2 = CancellationTokenSource.CreateLinkedTokenSource(ct);
-            cts2.CancelAfter(TimeSpan.FromSeconds(8));
-
-            var liveProgress = new Progress<double>(mbps =>
-            {
-                samples.Add(mbps);
-                peak = Math.Max(peak, mbps);
-
-                int pct = Math.Clamp(10 + samples.Count * 3, 10, 95);
-                Report(progress, SpeedTestPhase.Download, pct, mbps, $"Download: {mbps:F1} Mbps");
-            });
-
+        // ── Upload ───────────────────────────────────────────────────────────
+        private async Task<double> MeasureUploadAsync(
+            IProgress<SpeedTestProgress>? progress,
+            CancellationToken ct)
+        {
+            Report(progress, SpeedTestPhase.Upload, 5, 0, "Warming up upload...");
             try
             {
-                var t1 = DownloadStreamAsync(url, liveProgress, cts2.Token);
-                var t2 = DownloadStreamAsync(url, liveProgress, cts2.Token);
-                await Task.WhenAll(t1, t2);
+                await UploadOnceAsync(new byte[256 * 1024], _ => { }, ct);
             }
-            catch (OperationCanceledException) when (!ct.IsCancellationRequested)
+            catch (Exception) when (!ct.IsCancellationRequested)
             {
-                // Time limit hit — not a user cancel
+                // Warm-up failure is non-fatal.
             }
-            catch (HttpRequestException) when (!ct.IsCancellationRequested)
+
+            Report(progress, SpeedTestPhase.Upload, 10, 0, "Measuring upload...");
+
+            // One random payload shared (read-only) by every stream.
+            var payload = new byte[UploadRequestBytes];
+            Random.Shared.NextBytes(payload);
+
+            var (mbps, _) = await MeasureThroughputAsync(
+                SpeedTestPhase.Upload, "Upload",
+                (onBytes, token) => UploadOnceAsync(payload, onBytes, token),
+                progress, ct);
+            return mbps;
+        }
+
+        // ── Shared measurement loop ──────────────────────────────────────────
+        private static async Task<(double Mbps, double? StabilityPct)> MeasureThroughputAsync(
+            SpeedTestPhase phase,
+            string label,
+            Func<Action<long>, CancellationToken, Task> runOneRequest,
+            IProgress<SpeedTestProgress>? progress,
+            CancellationToken ct)
+        {
+            var counter = new ByteCounter();
+
+            using var window = CancellationTokenSource.CreateLinkedTokenSource(ct);
+            window.CancelAfter(TransferWindow);
+
+            var workers = Enumerable.Range(0, TransferStreams)
+                .Select(_ => KeepTransferringAsync(runOneRequest, counter.Add, window.Token))
+                .ToArray();
+            var allWorkers = Task.WhenAll(workers);
+
+            var samples = new List<double>();                         // combined Mbps per interval
+            var points = new List<(double Sec, long Bytes)> { (0, 0) }; // cumulative, for the result
+            var clock = Stopwatch.StartNew();
+
+            while (true)
             {
-                // One stream hit a hard HTTP failure that outlasted
-                // SendWithRetryAsync's retries (e.g. sustained rate
-                // limiting) — fall back to whatever samples the other
-                // stream already collected instead of failing the test.
+                await Task.WhenAny(Task.Delay(SampleIntervalMs, window.Token), allWorkers);
+
+                // Window over, or every stream gave up: stop sampling. The
+                // last partial interval is dropped — it would just be noise.
+                if (window.IsCancellationRequested || allWorkers.IsCompleted)
+                    break;
+
+                double sec = clock.Elapsed.TotalSeconds;
+                long bytes = counter.Total;
+                var (lastSec, lastBytes) = points[^1];
+
+                double mbps = ToMbps(bytes - lastBytes, sec - lastSec);
+                samples.Add(mbps);
+                points.Add((sec, bytes));
+
+                int pct = Math.Min(95, 10 + (int)(sec / TransferWindow.TotalSeconds * 85));
+                Report(progress, phase, pct, mbps, $"{label}: {mbps:F1} Mbps");
             }
 
-            if (ct.IsCancellationRequested)
-                ct.ThrowIfCancellationRequested();
+            window.Cancel();
+            Exception?[] errors = await allWorkers;
 
-            double result = samples.Count > 4
-                ? samples.OrderDescending().Take((int)(samples.Count * 0.8)).Average()
-                : samples.DefaultIfEmpty(0).Average();
+            ct.ThrowIfCancellationRequested();
 
-            Report(progress, SpeedTestPhase.Download, 100, result, $"Download: {result:F1} Mbps");
+            // Nothing got through at all and a stream hit a real error: fail
+            // the test with that error instead of reporting 0 Mbps as success.
+            if (counter.Total == 0 && errors.FirstOrDefault(e => e != null) is Exception first)
+                throw first;
+
+            double result = SteadyMbps(points);
+            Report(progress, phase, 100, result, $"{label}: {result:F1} Mbps");
 
             return (Math.Round(result, 2), Stability(samples));
         }
+
+        /// <summary>
+        /// Runs requests back to back on one stream until the window closes.
+        /// Returns the error that stopped it early, or null.
+        /// </summary>
+        private static async Task<Exception?> KeepTransferringAsync(
+            Func<Action<long>, CancellationToken, Task> runOneRequest,
+            Action<long> onBytes,
+            CancellationToken window)
+        {
+            while (!window.IsCancellationRequested)
+            {
+                try
+                {
+                    await runOneRequest(onBytes, window);
+                }
+                catch (OperationCanceledException) when (window.IsCancellationRequested)
+                {
+                    return null;
+                }
+                catch (Exception ex)
+                {
+                    // A hard failure that outlasted SendWithRetryAsync (e.g.
+                    // sustained rate limiting). This stream stops; the others
+                    // keep going and the result uses whatever got through.
+                    return ex;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Bytes ÷ time over the window after the ramp-up share. Falls back to
+        /// the whole window when the steady part is too short to trust.
+        /// </summary>
+        private static double SteadyMbps(List<(double Sec, long Bytes)> points)
+        {
+            if (points.Count < 2) return 0;
+
+            var end = points[^1];
+            var start = points[(int)((points.Count - 1) * RampUpShare)];
+
+            if (end.Sec - start.Sec < 1.0)
+                start = points[0];
+
+            return ToMbps(end.Bytes - start.Bytes, end.Sec - start.Sec);
+        }
+
+        private static double ToMbps(long bytes, double seconds) =>
+            seconds > 0 ? bytes * 8.0 / seconds / 1_000_000 : 0;
 
         /// <summary>
         /// 100 − coefficient of variation (%), over the samples after the
@@ -329,69 +450,10 @@ namespace TestNetSpeed.Service
             return Math.Round(Math.Clamp(100 - stddev / mean * 100, 0, 100), 0);
         }
 
-        // ── Upload — live Mbps reported every ~200 ms ───────────────────────
-        private async Task<double> MeasureUploadAsync(
-            IProgress<SpeedTestProgress>? progress,
-            CancellationToken ct)
-        {
-            const string uploadUrl = "https://speed.cloudflare.com/__up";
-
-            Report(progress, SpeedTestPhase.Upload, 5, 0, "Warming up upload...");
-            await UploadChunkAsync(uploadUrl, 256 * 1024, ct);
-
-            Report(progress, SpeedTestPhase.Upload, 10, 0, "Measuring upload...");
-
-            var samples = new List<double>();
-            double peak = 0;
-
-            var cts2 = CancellationTokenSource.CreateLinkedTokenSource(ct);
-            cts2.CancelAfter(TimeSpan.FromSeconds(8));
-
-            try
-            {
-                var t1 = UploadStreamAsync(uploadUrl, samples, ct: cts2.Token,
-                    onSample: mbps =>
-                    {
-                        peak = Math.Max(peak, mbps);
-                        int pct = Math.Clamp(10 + samples.Count * 3, 10, 95);
-                        Report(progress, SpeedTestPhase.Upload, pct, mbps, $"Upload: {mbps:F1} Mbps");
-                    });
-
-                var t2 = UploadStreamAsync(uploadUrl, samples, ct: cts2.Token,
-                    onSample: mbps =>
-                    {
-                        peak = Math.Max(peak, mbps);
-                        int pct = Math.Clamp(10 + samples.Count * 3, 10, 95);
-                        Report(progress, SpeedTestPhase.Upload, pct, mbps, $"Upload: {mbps:F1} Mbps");
-                    });
-
-                await Task.WhenAll(t1, t2);
-            }
-            catch (OperationCanceledException) when (!ct.IsCancellationRequested)
-            {
-                // Time limit hit
-            }
-            catch (HttpRequestException) when (!ct.IsCancellationRequested)
-            {
-                // Same tolerance as the download side above.
-            }
-
-            if (ct.IsCancellationRequested)
-                ct.ThrowIfCancellationRequested();
-
-            double result = samples.Count > 4
-                ? samples.OrderDescending().Take((int)(samples.Count * 0.8)).Average()
-                : samples.DefaultIfEmpty(0).Average();
-
-            Report(progress, SpeedTestPhase.Upload, 100, result, $"Upload: {result:F1} Mbps");
-
-            return Math.Round(result, 2);
-        }
-
-        // ── Low-level: streaming download with live sampling ───────────────
-        private async Task DownloadStreamAsync(
+        // ── Low-level: one download request, counting bytes as they arrive ──
+        private static async Task DownloadOnceAsync(
             string url,
-            IProgress<double>? liveProgress,
+            Action<long> onBytes,
             CancellationToken ct)
         {
             using var res = await SendWithRetryAsync(
@@ -401,74 +463,70 @@ namespace TestNetSpeed.Service
             var buffer = new byte[65536];
             await using var stream = await res.Content.ReadAsStreamAsync(ct);
 
-            long totalRead = 0;
-            var sw = Stopwatch.StartNew();
-            var sampleSw = Stopwatch.StartNew();
-            long sampleRead = 0;
-
             int bytesRead;
             while ((bytesRead = await stream.ReadAsync(buffer, ct)) > 0)
-            {
-                totalRead += bytesRead;
-                sampleRead += bytesRead;
-
-                if (liveProgress != null && sampleSw.Elapsed.TotalMilliseconds >= 200)
-                {
-                    double mbps = sampleRead * 8.0 / sampleSw.Elapsed.TotalSeconds / 1_000_000;
-
-                    liveProgress.Report(mbps);
-                    sampleRead = 0;
-                    sampleSw.Restart();
-                }
-            }
+                onBytes(bytesRead);
         }
 
-        // ── Low-level: upload stream — sends 4 MB chunks in a loop ─────────
-        private async Task UploadStreamAsync(
-            string url,
-            List<double> sharedSamples,
-            CancellationToken ct,
-            Action<double>? onSample = null)
+        // ── Low-level: one upload request, counting bytes as they're sent ───
+        private static async Task UploadOnceAsync(
+            byte[] payload,
+            Action<long> onBytes,
+            CancellationToken ct)
         {
-            const int chunkSize = 4 * 1024 * 1024; // 4 MB
-            var payload = new byte[chunkSize];
-            Random.Shared.NextBytes(payload);
+            // Fresh content per attempt — SendWithRetryAsync may resend.
+            using var res = await SendWithRetryAsync(
+                c => _http.PostAsync(UploadUrl, new CountingContent(payload, onBytes), c), ct);
+            res.EnsureSuccessStatusCode();
+        }
 
-            while (!ct.IsCancellationRequested)
+        /// <summary>Thread-safe running byte total shared by all streams.</summary>
+        private sealed class ByteCounter
+        {
+            private long _total;
+            public long Total => Interlocked.Read(ref _total);
+            public void Add(long bytes) => Interlocked.Add(ref _total, bytes);
+        }
+
+        /// <summary>
+        /// Request body that writes the payload in 64 KB pieces and reports
+        /// each piece as it's handed to the connection, so upload is measured
+        /// while it happens rather than per whole request (which also timed
+        /// the server's reply and the round trip).
+        /// </summary>
+        private sealed class CountingContent : HttpContent
+        {
+            private const int PieceSize = 64 * 1024;
+            private readonly byte[] _payload;
+            private readonly Action<long> _onBytes;
+
+            public CountingContent(byte[] payload, Action<long> onBytes)
             {
-                var sw = Stopwatch.StartNew();
-
-                using var content = new ByteArrayContent(payload);
-                content.Headers.ContentType =
+                _payload = payload;
+                _onBytes = onBytes;
+                Headers.ContentType =
                     new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
-
-                try
-                {
-                    using var res = await SendWithRetryAsync(c => _http.PostAsync(url, content, c), ct);
-                    sw.Stop();
-
-                    double mbps = chunkSize * 8.0 / sw.Elapsed.TotalSeconds / 1_000_000;
-
-                    lock (sharedSamples)
-                        sharedSamples.Add(mbps);
-
-                    onSample?.Invoke(mbps);
-                }
-                catch (OperationCanceledException) { break; }
-                catch { break; }
             }
-        }
 
-        // ── Upload chunk (warm-up only) ─────────────────────────────────────
-        private async Task UploadChunkAsync(string url, int bytes, CancellationToken ct)
-        {
-            var payload = new byte[bytes];
-            Random.Shared.NextBytes(payload);
-            using var content = new ByteArrayContent(payload);
-            content.Headers.ContentType =
-                new System.Net.Http.Headers.MediaTypeHeaderValue("application/octet-stream");
-            try { using var res = await SendWithRetryAsync(c => _http.PostAsync(url, content, c), ct); }
-            catch { /* warm-up failure is non-fatal */ }
+            protected override Task SerializeToStreamAsync(Stream stream, TransportContext? context) =>
+                SerializeToStreamAsync(stream, context, CancellationToken.None);
+
+            protected override async Task SerializeToStreamAsync(
+                Stream stream, TransportContext? context, CancellationToken cancellationToken)
+            {
+                for (int offset = 0; offset < _payload.Length; offset += PieceSize)
+                {
+                    int count = Math.Min(PieceSize, _payload.Length - offset);
+                    await stream.WriteAsync(_payload.AsMemory(offset, count), cancellationToken);
+                    _onBytes(count);
+                }
+            }
+
+            protected override bool TryComputeLength(out long length)
+            {
+                length = _payload.Length;
+                return true;
+            }
         }
 
         // ── Retry wrapper — absorbs 429s with a short backoff before they
