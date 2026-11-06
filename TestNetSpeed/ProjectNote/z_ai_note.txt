@@ -7,6 +7,11 @@
 - Preserve existing behavior unless the task requires otherwise.
 - Keep responses concise and report only important changes, affected files, and caveats.
 ********************************************************************************************************
+Improve About UI by following CpuZXPro Project:
+G:\src\MS_Store_App\CpuZxPro\CpuZXPro\Forms\AboutForm.cs
+
+
+
 From my side build, basic user test and commit done
 Now perfomr full testing on two pro features, before final production release.
 

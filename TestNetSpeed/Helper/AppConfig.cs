@@ -53,7 +53,7 @@ namespace TestNetSpeed.Helper
         // before release. While it is a placeholder the Store finds no
         // product: purchase reports an error and the prompt shows the
         // fallback price below. A release build logs a warning.
-        public const string LifetimeProStoreId = "I_WILL_ADD_LIVE_ID_SOON";
+        public const string LifetimeProStoreId = "9P4FH87ZZ9MX";
 
         // Fallback text only — the live, localized price comes from the Store.
         public const string LifetimeProPrice = "$9.99";
