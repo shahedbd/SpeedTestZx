@@ -7,7 +7,14 @@ namespace TestNetSpeed.Helper
     /// <summary>A 7 × 24 grid (Monday first) of medians and their sample counts.</summary>
     public sealed class HeatmapGrid
     {
-        public const int MinSamples = 2;
+        /// <summary>
+        /// Samples a cell needs before it's coloured. Speed: 2 tests (Pro_plan
+        /// T55). Ping: each sample is already a full hour of per-minute data,
+        /// so 1 is enough — otherwise the ping map stayed empty for 2 weeks.
+        /// </summary>
+        public static int MinSamplesFor(HeatmapMode mode) => mode == HeatmapMode.Ping ? 1 : 2;
+
+        public int MinSamples => MinSamplesFor(Mode);
 
         public double?[,] Values { get; } = new double?[7, 24];
         public int[,] Counts { get; } = new int[7, 24];
@@ -21,7 +28,8 @@ namespace TestNetSpeed.Helper
             get
             {
                 int n = 0;
-                foreach (var c in Counts) if (c >= MinSamples) n++;
+                int min = MinSamples;
+                foreach (var c in Counts) if (c >= min) n++;
                 return n;
             }
         }

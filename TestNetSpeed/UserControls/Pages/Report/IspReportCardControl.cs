@@ -59,6 +59,10 @@ namespace TestNetSpeed.UserControls.Pages.Report
 
         private bool _inLayout;
 
+        // Layout reads these, not Control.Visible: Visible reads false until
+        // the page is on screen, which left the pickers unplaced.
+        private bool _showCustom, _showWired;
+
         public IspReportCardControl()
         {
             BackColor = themeManager.CurrentTheme.ContentBackground;
@@ -152,12 +156,12 @@ namespace TestNetSpeed.UserControls.Pages.Report
             foreach (var picker in new[] { _dtTo, _dtFrom })
             {
                 picker.Width = Scale(110);
-                if (!picker.Visible) continue;
+                if (!_showCustom) continue;
                 x -= picker.Width + Scale(6);
                 picker.Location = new Point(x, pad);
             }
 
-            if (_chkWired.Visible)
+            if (_showWired)
             {
                 x -= _chkWired.Width + Scale(12);
                 _chkWired.Location = new Point(x, pad + (rowH - _chkWired.Height) / 2);
@@ -271,6 +275,11 @@ namespace TestNetSpeed.UserControls.Pages.Report
                 int needed = y - top + pad.Vertical;
                 var min = needed > ClientSize.Height ? new Size(0, needed) : Size.Empty;
                 if (AutoScrollMinSize != min) AutoScrollMinSize = min;
+
+                // Recompute the scroll extent: the first layout runs at the page's
+                // tiny pre-dock size (cards stacked, ~1400 px tall), and AutoScroll
+                // kept that stale extent, leaving a scrollbar with nothing below.
+                AdjustFormScrollbars(AutoScroll);
             }
             finally
             {

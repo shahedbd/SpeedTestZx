@@ -61,11 +61,19 @@ namespace TestNetSpeed.UserControls.Lib.Charts
 
             // X labels: first, middle and last day.
             double days = Math.Max(1, (_to - _from).TotalDays);
-            foreach (var day in new[] { _from, _from.AddDays(Math.Round(days / 2)), _to })
+            // First label left-aligned, last right-aligned, so neither is clipped at the edge.
+            int labelW = Px(g, 60);
+            var labels = new[] { (_from, StringAlignment.Near), (_from.AddDays(Math.Round(days / 2)), StringAlignment.Center), (_to, StringAlignment.Far) };
+            foreach (var (day, align) in labels)
             {
                 int x = XFor(day, days, plot);
-                DrawText(g, day.ToString("MMM d"), font, new Rectangle(x - Px(g, 30), plot.Bottom + 4, Px(g, 60), lh),
-                    StringAlignment.Center, StringAlignment.Near);
+                int labelX = align switch
+                {
+                    StringAlignment.Near => x - Px(g, 4),
+                    StringAlignment.Far => x - labelW + Px(g, 4),
+                    _ => x - labelW / 2,
+                };
+                DrawText(g, day.ToString("MMM d"), font, new Rectangle(labelX, plot.Bottom + 4, labelW, lh), align, StringAlignment.Near);
             }
 
             var pts = values.Select(p => new PointF(XFor(p.Day, days, plot), YFor(p.Value!.Value, max, plot))).ToArray();

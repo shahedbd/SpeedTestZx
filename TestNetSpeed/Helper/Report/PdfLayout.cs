@@ -73,9 +73,13 @@ namespace TestNetSpeed.Helper.Report
             _y += after;
         }
 
-        public void SectionHeading(string text)
+        /// <param name="keepWith">
+        /// Height of what follows that must start on the same page — a chart,
+        /// or a few table rows — so a heading is never stranded at the bottom.
+        /// </param>
+        public void SectionHeading(string text, double keepWith = 70)
         {
-            EnsureSpace(Heading.GetHeight() + 40);   // never strand a heading at the bottom
+            EnsureSpace(Heading.GetHeight() + 18 + keepWith);
             _y += 8;
             Text(text, Heading, Ink, 2);
             _g.DrawLine(Rule, Margin, _y, Margin + Width, _y);

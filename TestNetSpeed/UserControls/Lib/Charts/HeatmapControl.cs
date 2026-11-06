@@ -7,7 +7,7 @@ namespace TestNetSpeed.UserControls.Lib.Charts
     ///   • speed, % of plan — red ≤ 50%, amber 75%, green ≥ 100%;
     ///   • speed, Mbps (no plan) — relative to the fastest cell;
     ///   • ping — green ≤ 30 ms to red ≥ 150 ms.
-    /// Cells with fewer than 2 samples are drawn empty ("not enough data").
+    /// Cells with too few samples (2 tests; 1 hour for ping) are drawn empty.
     /// Hovering a cell shows its value in a tooltip.
     /// </summary>
     public sealed class HeatmapControl : ChartControl
@@ -47,7 +47,7 @@ namespace TestNetSpeed.UserControls.Lib.Charts
 
                 for (int h = 0; h < 24; h++)
                 {
-                    var color = _grid.Counts[d, h] >= HeatmapGrid.MinSamples && _grid.Values[d, h] is double v
+                    var color = _grid.Counts[d, h] >= _grid.MinSamples && _grid.Values[d, h] is double v
                         ? ColorFor(v)
                         : Palette.Empty;
                     using var brush = new SolidBrush(color);
@@ -89,7 +89,7 @@ namespace TestNetSpeed.UserControls.Lib.Charts
             _hover = (d, h);
 
             int n = _grid.Counts[d, h];
-            string value = n < HeatmapGrid.MinSamples || _grid.Values[d, h] is not double v
+            string value = n < _grid.MinSamples || _grid.Values[d, h] is not double v
                 ? "Not enough data"
                 : _grid.Mode == HeatmapMode.Ping ? $"{v:0} ms median ping"
                 : _grid.IsPct ? $"{v:0}% of plan (median)" : $"{v:0.#} Mbps (median)";

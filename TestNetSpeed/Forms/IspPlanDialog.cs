@@ -95,7 +95,7 @@ namespace TestNetSpeed.Forms
             });
 
             var box = new TextBox { Text = value, Dock = DockStyle.Fill, Margin = new Padding(0, S(4), 0, S(4)) };
-            SettingsStyle.ThemeInput(box);
+            PageCards.ThemeInput(box);
             grid.Controls.Add(box);
             return box;
         }

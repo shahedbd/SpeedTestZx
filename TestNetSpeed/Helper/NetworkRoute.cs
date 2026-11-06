@@ -16,30 +16,59 @@ namespace TestNetSpeed.Helper
 
         public static readonly Route None = new(string.Empty, null);
 
-        /// <summary>The first up, non-virtual adapter with an IPv4 gateway. Never throws.</summary>
+        /// <summary>
+        /// The adapter Windows actually routes 1.1.1.1 through (GetBestInterface),
+        /// so a Hyper-V / VMware / VPN adapter that also has a gateway is never
+        /// mistaken for the internet connection. Falls back to the first up
+        /// adapter with an IPv4 gateway. Never throws.
+        /// </summary>
         public static Route Current()
         {
             try
             {
-                foreach (var nic in NetworkInterface.GetAllNetworkInterfaces())
+                var candidates = NetworkInterface.GetAllNetworkInterfaces()
+                    .Where(n => n.OperationalStatus == OperationalStatus.Up
+                                && n.NetworkInterfaceType is not (NetworkInterfaceType.Loopback or NetworkInterfaceType.Tunnel))
+                    .Select(n => (Nic: n, Gateway: GatewayOf(n)))
+                    .Where(c => c.Gateway != null)
+                    .ToList();
+
+                if (BestInterfaceIndex() is int best)
                 {
-                    if (nic.OperationalStatus != OperationalStatus.Up) continue;
-                    if (nic.NetworkInterfaceType is NetworkInterfaceType.Loopback or NetworkInterfaceType.Tunnel) continue;
-
-                    var gateway = nic.GetIPProperties().GatewayAddresses
-                        .Select(g => g.Address)
-                        .FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork
-                                             && !a.Equals(IPAddress.Any));
-                    if (gateway == null) continue;
-
-                    return new Route(TypeName(nic.NetworkInterfaceType), gateway);
+                    foreach (var c in candidates)
+                        if (IndexOf(c.Nic) == best)
+                            return new Route(TypeName(c.Nic.NetworkInterfaceType), c.Gateway);
                 }
+
+                if (candidates.Count > 0)
+                    return new Route(TypeName(candidates[0].Nic.NetworkInterfaceType), candidates[0].Gateway);
             }
             catch (Exception ex)
             {
                 Logger.Log($"Route lookup failed: {ex.Message}");
             }
             return None;
+        }
+
+        private static IPAddress? GatewayOf(NetworkInterface nic) =>
+            nic.GetIPProperties().GatewayAddresses
+                .Select(g => g.Address)
+                .FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork && !a.Equals(IPAddress.Any));
+
+        private static int? IndexOf(NetworkInterface nic)
+        {
+            try { return nic.GetIPProperties().GetIPv4Properties()?.Index; }
+            catch { return null; }
+        }
+
+        [System.Runtime.InteropServices.DllImport("iphlpapi.dll")]
+        private static extern int GetBestInterface(uint destAddr, out uint bestIfIndex);
+
+        /// <summary>Interface index of the route to 1.1.1.1, or null.</summary>
+        private static int? BestInterfaceIndex()
+        {
+            uint dest = BitConverter.ToUInt32(IPAddress.Parse("1.1.1.1").GetAddressBytes(), 0);
+            return GetBestInterface(dest, out uint index) == 0 ? (int)index : null;
         }
 
         private static string TypeName(NetworkInterfaceType type) => type switch

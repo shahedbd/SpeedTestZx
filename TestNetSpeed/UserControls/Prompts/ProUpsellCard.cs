@@ -118,9 +118,10 @@ namespace TestNetSpeed.UserControls.Prompts
             label.SetBounds((ClientSize.Width - width) / 2, y, width, height);
         }
 
+        /// <summary>Wrapped height, measured a little narrower than the label so the last line is never cut.</summary>
         private static int MeasureHeight(Label label, int width) =>
-            TextRenderer.MeasureText(label.Text, label.Font, new Size(Math.Max(1, width), 0),
-                TextFormatFlags.WordBreak).Height + DpiAwareService.Scale(2);
+            TextRenderer.MeasureText(label.Text, label.Font, new Size(Math.Max(1, width - DpiAwareService.Scale(12)), int.MaxValue),
+                TextFormatFlags.WordBreak | TextFormatFlags.TextBoxControl).Height + DpiAwareService.Scale(4);
 
         /// <summary>Thin border plus the Pro gradient bar along the top.</summary>
         private void OnPaintCard(object? sender, PaintEventArgs e)

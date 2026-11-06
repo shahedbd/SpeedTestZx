@@ -20,7 +20,7 @@ namespace TestNetSpeed.UserControls.Pages.Monitor
 
         private sealed record MonitorView(
             List<ProbeMinute> Minutes, List<Outage> Outages24h, List<Outage> OutagesShown, int OlderHidden,
-            int CardOutageCount, TimeSpan CardOutageTime, double? Uptime24h, HeatmapGrid? Heat);
+            int CardOutageCount, TimeSpan CardOutageTime, double? Uptime24h, HeatmapGrid? Heat, int TestsFor90Days);
 
         private void HookData()
         {
@@ -83,17 +83,22 @@ namespace TestNetSpeed.UserControls.Pages.Monitor
             var cardOutages = allOutages.Where(o => (o.End ?? now) > cardFrom).ToList();
 
             HeatmapGrid? heat = null;
+            int tests90 = 0;
+            var from = now.AddDays(-MonitorStore.ProRetentionDays);
             if (heatAllowed)
             {
-                var from = now.AddDays(-MonitorStore.ProRetentionDays);
                 heat = mode == HeatmapMode.Ping
                     ? HeatmapData.Ping(MonitorStore.LoadHourly(), from)
                     : HeatmapData.Speed(TestHistoryStore.Load(), from, IspPlanStore.Current);
             }
+            else
+            {
+                tests90 = TestHistoryStore.Load().Count(r => r.Success && r.TestedAt >= from);   // upsell preview
+            }
 
             return new MonitorView(minutes, outages24h, shown, hidden,
                 cardOutages.Count, MonitorStats.OutageTime(cardOutages, cardFrom, now),
-                MonitorStats.UptimePct(dayAgo, now, outages24h), heat);
+                MonitorStats.UptimePct(dayAgo, now, outages24h), heat, tests90);
         }
 
         // ══════════════════════════════════════════════════════════════════════
@@ -133,8 +138,7 @@ namespace TestNetSpeed.UserControls.Pages.Monitor
             }
             else if (_heatUpsell != null)
             {
-                int tests = TestHistoryStore.Load().Count(r => r.Success && r.TestedAt >= now.AddDays(-90));
-                _heatUpsell.Preview = tests > 0 ? $"{tests} tests from the last 90 days are ready to map." : "";
+                _heatUpsell.Preview = v.TestsFor90Days > 0 ? $"{v.TestsFor90Days} tests from the last 90 days are ready to map." : "";
             }
 
             RenderOutages(v);

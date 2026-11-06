@@ -74,7 +74,9 @@ namespace TestNetSpeed.Helper.Report
 
         private static void Charts(PdfLayout pdf, ReportData d)
         {
-            pdf.SectionHeading(d.HasPlan ? "Download as % of plan, daily median" : "Download speed, daily median (Mbps)");
+            double chartHeight = pdf.Width * ChartHeight / ChartWidth;
+
+            pdf.SectionHeading(d.HasPlan ? "Download as % of plan, daily median" : "Download speed, daily median (Mbps)", chartHeight);
             using (var trend = new PlanTrendChart { Palette = ChartPalette.Print })
             {
                 trend.SetData(d.Daily, d.From, d.To.AddMinutes(-1), d.HasPlan);
@@ -82,7 +84,7 @@ namespace TestNetSpeed.Helper.Report
                 pdf.Image(bmp);
             }
 
-            pdf.SectionHeading(d.HasPlan ? "By hour of day, median % of plan" : "By hour of day, median Mbps");
+            pdf.SectionHeading(d.HasPlan ? "By hour of day, median % of plan" : "By hour of day, median Mbps", chartHeight);
             using (var hours = new HourBarChart { Palette = ChartPalette.Print })
             {
                 hours.SetData(d.ByHour, d.HasPlan, d.WorstHours);

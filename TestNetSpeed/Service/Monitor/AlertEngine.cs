@@ -9,7 +9,7 @@ namespace TestNetSpeed.Service.Monitor
     /// Smart alerts (T56, extends T23). Each alert fires once per incident
     /// and stays quiet during the user's quiet hours (the data is still
     /// logged). Free: internet down and back online. Pro adds:
-    ///   • slow — every scheduled test in the last N hours below X% of plan;
+    ///   • slow — 2+ tests in a row, over at least N hours, all below X% of plan;
     ///   • high latency — per-minute median above the limit for 10 minutes.
     /// MainForm shows the alerts as tray notifications.
     /// </summary>
@@ -48,15 +48,20 @@ namespace TestNetSpeed.Service.Monitor
             if (!result.Success || !HasSmartAlerts || !Settings.AlertSlow || !IspPlanStore.Current.IsSet) return;
 
             double limit = Settings.SlowPctOfPlan;
-            var since = DateTime.Now.AddHours(-Math.Max(1, Settings.SlowHours));
+
+            // Look back at least one schedule interval (+30 min slack): on the
+            // default 3 h schedule a 3 h window held only the latest test, so
+            // the "2 tests in a row" rule could never be met.
+            double hours = Math.Max(Math.Max(1, Settings.SlowHours), TestScheduler.IntervalHours) + 0.5;
+            var since = DateTime.Now.AddHours(-hours);
             var recent = TestHistoryStore.Load()
-                .Where(r => r.Success && r.Scheduled && r.TestedAt >= since && r.PctOfPlan != null)
+                .Where(r => r.Success && r.TestedAt >= since && r.PctOfPlan != null)
                 .ToList();
 
             bool slow = recent.Count >= 2 && recent.All(r => r.PctOfPlan < limit);
             if (slow && !_slowActive)
                 Raise("Internet is slow",
-                    $"Every test in the last {Settings.SlowHours} h was below {limit:0}% of your plan " +
+                    $"Your last {recent.Count} tests were all below {limit:0}% of your plan " +
                     $"(latest {result.PctOfPlan:0}%).");
             _slowActive = slow;
         }

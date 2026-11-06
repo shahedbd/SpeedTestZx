@@ -37,7 +37,7 @@ namespace TestNetSpeed.Helper
         /// <summary>Estimated monthly cost of undelivered speed (T52), or null without a priced plan.</summary>
         public double? UndeliveredCost =>
             HasPlan && Plan.MonthlyPrice > 0 && MedianDown is double down
-                ? Math.Round(Plan.MonthlyPrice * Math.Max(0, 1 - down / Plan.DownMbps), 2)
+                ? Math.Round(Plan.MonthlyPrice * Math.Max(0, 1 - down / Plan.DownMbps), 2, MidpointRounding.AwayFromZero)
                 : null;
     }
 
@@ -121,10 +121,47 @@ namespace TestNetSpeed.Helper
                 if (median < worstValue)
                 {
                     worstValue = median;
-                    worst = (start, start + 3);
+                    worst = Trim(start, tests);
                 }
             }
-            return worst;
+            return worst is { } w ? Extend(w, worstValue, tests, score) : null;
+        }
+
+        /// <summary>Longest slow stretch the worst window is part of (max 8 h).</summary>
+        private const int MaxWorstHours = 8;
+
+        /// <summary>Within this factor of the worst window's median, a neighbouring hour counts as "just as slow".</summary>
+        private const double SameSlowness = 1.15;
+
+        /// <summary>
+        /// Grows the worst window over neighbouring hours that are about as
+        /// slow, so a slump from 7 pm to midnight reads "7 pm–12 am" rather
+        /// than whichever 3 hours of it happened to score lowest.
+        /// </summary>
+        private static (int, int) Extend((int Start, int End) w, double worstValue, List<SpeedTestResult> tests,
+            Func<SpeedTestResult, double?> score)
+        {
+            double? HourMedian(int hour) => Stats.Median(tests.Where(r => r.TestedAt.Hour == ((hour % 24) + 24) % 24)
+                .Select(score).Where(v => v != null).Select(v => v!.Value));
+            bool Slow(int hour) => HourMedian(hour) is double m && m <= worstValue * SameSlowness;
+
+            int start = w.Start, end = w.End;
+            while (end - start < MaxWorstHours && Slow(start - 1)) start--;
+            while (end - start < MaxWorstHours && Slow(end)) end++;
+
+            // Keep Start in 0–23 for Format.HourRange; End may pass 24 (wraps past midnight).
+            int shift = start < 0 ? 24 : 0;
+            return (start + shift, end + shift);
+        }
+
+        /// <summary>
+        /// Shrinks a 3-hour window to the hours that actually have tests, so
+        /// tests only at 8 pm read "8–9 pm", not "6–9 pm".
+        /// </summary>
+        private static (int, int) Trim(int start, List<SpeedTestResult> tests)
+        {
+            var withData = Enumerable.Range(0, 3).Where(i => tests.Any(r => r.TestedAt.Hour == (start + i) % 24)).ToList();
+            return (start + withData.First(), start + withData.Last() + 1);
         }
     }
 }

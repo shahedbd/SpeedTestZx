@@ -127,12 +127,34 @@ namespace TestNetSpeed.Helper
                 return ReadJson<List<HourStat>>(HourlyFile) ?? new List<HourStat>();
         }
 
+        /// <summary>
+        /// Saves an hour's roll-up. When the hour already has one (the app
+        /// restarted mid-hour) the two are merged — minutes added, ping
+        /// weighted by minutes — so uptime never loses recorded time.
+        /// </summary>
         public static void SaveHour(HourStat stat)
         {
             lock (Gate)
             {
                 var list = ReadJson<List<HourStat>>(HourlyFile) ?? new List<HourStat>();
-                list.RemoveAll(h => h.Hour == stat.Hour);
+                var old = list.FirstOrDefault(h => h.Hour == stat.Hour);
+                if (old != null)
+                {
+                    list.Remove(old);
+                    int total = old.Minutes + stat.Minutes;
+                    stat = new HourStat
+                    {
+                        Hour = stat.Hour,
+                        Minutes = total,
+                        PingMs = (old.PingMs, stat.PingMs) switch
+                        {
+                            (double a, double b) => Math.Round((a * old.Minutes + b * stat.Minutes) / Math.Max(1, total), 1),
+                            (double a, null) => a,
+                            (null, var b) => b,
+                        },
+                        LossPct = Math.Round((old.LossPct * old.Minutes + stat.LossPct * stat.Minutes) / Math.Max(1, total), 1),
+                    };
+                }
                 list.Add(stat);
                 WriteJson(HourlyFile, list);
             }

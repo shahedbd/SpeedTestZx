@@ -28,7 +28,7 @@ namespace TestNetSpeed.UserControls.Pages.Monitor
         private const int CardRowHeight = 90;
         private const int HeatmapHeight = 230;
         private const int TimelineHeight = 200;
-        private const int BottomHeight = 330;
+        private const int BottomHeight = 420;   // fits every schedule & alert option without a scrollbar
         private const int Gap = 10;
         private const int Pad = 12;
         private const int TwoColumnMinWidth = 760;
@@ -41,6 +41,7 @@ namespace TestNetSpeed.UserControls.Pages.Monitor
         private ComboBox _cmbHeatMode = null!;
         private HeatmapControl _heatmap = null!;
         private ProUpsellCard? _heatUpsell;
+        private bool _heatAllowed;
 
         private Panel _timelineCard = null!;
         private Label _lblTimelineTitle = null!, _lblTimelineStatus = null!;
@@ -107,7 +108,8 @@ namespace TestNetSpeed.UserControls.Pages.Monitor
 
             _heatCard.Controls.AddRange(new Control[] { _lblHeatTitle, _cmbHeatMode, _heatmap });
 
-            if (!EntitlementManager.Instance.HasAccess(ProFeature.Heatmap))
+            _heatAllowed = EntitlementManager.Instance.HasAccess(ProFeature.Heatmap);
+            if (!_heatAllowed)
             {
                 _heatmap.Visible = false;
                 _cmbHeatMode.Visible = false;
@@ -117,7 +119,7 @@ namespace TestNetSpeed.UserControls.Pages.Monitor
 
             _heatCard.SizeChanged += (s, e) =>
             {
-                var body = LayoutTitled(_heatCard, _lblHeatTitle, _cmbHeatMode.Visible ? _cmbHeatMode : null);
+                var body = LayoutTitled(_heatCard, _lblHeatTitle, _heatAllowed ? _cmbHeatMode : null);
                 _heatmap.Bounds = body;
                 _heatUpsell?.SetBounds(body.X, body.Y, body.Width, body.Height);
             };
@@ -145,17 +147,7 @@ namespace TestNetSpeed.UserControls.Pages.Monitor
             _lblOutageTitle = PageCards.Title("Outages");
             _lblOutageFooter = PageCards.Info();
 
-            var t = themeManager.CurrentTheme;
-            _lvOutages = new ListView
-            {
-                View = View.Details,
-                FullRowSelect = true,
-                HeaderStyle = ColumnHeaderStyle.Nonclickable,
-                BorderStyle = BorderStyle.None,
-                BackColor = t.CardBackground,
-                ForeColor = t.TextColor,
-                Font = new Font("Segoe UI", 9f),
-            };
+            _lvOutages = PageCards.List();
             _lvOutages.Columns.Add("Start", Scale(120));
             _lvOutages.Columns.Add("End", Scale(70));
             _lvOutages.Columns.Add("Duration", Scale(80));
@@ -235,6 +227,11 @@ namespace TestNetSpeed.UserControls.Pages.Monitor
                 int needed = y - top + pad.Vertical;
                 var min = needed > ClientSize.Height ? new Size(0, needed) : Size.Empty;
                 if (AutoScrollMinSize != min) AutoScrollMinSize = min;
+
+                // Recompute the scroll extent: the first layout runs at the page's
+                // tiny pre-dock size (cards stacked, ~1400 px tall), and AutoScroll
+                // kept that stale extent, leaving a scrollbar with nothing below.
+                AdjustFormScrollbars(AutoScroll);
             }
             finally
             {

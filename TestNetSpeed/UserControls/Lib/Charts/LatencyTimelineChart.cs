@@ -55,9 +55,15 @@ namespace TestNetSpeed.UserControls.Lib.Charts
             for (int i = 0; i <= 4; i++)
             {
                 var t = _from + (_to - _from) * i / 4;
-                int x = X(t, plot);
-                DrawText(g, t.ToString("HH:mm"), font, new Rectangle(x - Px(g, 24), plot.Bottom + 2, Px(g, 48), lh),
-                    StringAlignment.Center, StringAlignment.Near);
+                int x = X(t, plot), w = Px(g, 48);
+                // Ends aligned inward so the first / last label is never clipped.
+                var (labelX, align) = i switch
+                {
+                    0 => (x - Px(g, 4), StringAlignment.Near),
+                    4 => (x - w + Px(g, 4), StringAlignment.Far),
+                    _ => (x - w / 2, StringAlignment.Center),
+                };
+                DrawText(g, t.ToString("HH:mm"), font, new Rectangle(labelX, plot.Bottom + 2, w, lh), align, StringAlignment.Near);
             }
 
             DrawLine(g, plot, max);

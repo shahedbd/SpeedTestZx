@@ -75,6 +75,7 @@ namespace TestNetSpeed.UserControls.Pages.Report
         private void ShowCustomPickers()
         {
             bool custom = _cmbRange.SelectedIndex == CustomIndex;
+            _showCustom = custom;
             _dtFrom.Visible = _dtTo.Visible = custom;
             LayoutTrendCard();
         }
@@ -147,7 +148,7 @@ namespace TestNetSpeed.UserControls.Pages.Report
 
             // Worst hours (Pro)
             if (!EntitlementManager.Instance.HasAccess(ProFeature.ReportWorstHours))
-                _cardWorst.SetData("Pro", d.WorstHours != null ? "Found in your data · unlock to see" : "Unlock to see");
+                _cardWorst.SetData("Pro", d.WorstHours != null ? "Found · unlock to see" : "Unlock to see");
             else if (d.WorstHours is { } wh)
                 _cardWorst.SetData(Format.HourRange(wh.Start, wh.End), "lowest median of the day");
             else
@@ -160,7 +161,8 @@ namespace TestNetSpeed.UserControls.Pages.Report
             else
                 _cardUptime.SetData("—", "Turn on the Connection Monitor");
 
-            _chkWired.Visible = d.MixedAdapters || _chkWired.Checked;
+            _showWired = d.MixedAdapters || _chkWired.Checked;
+            _chkWired.Visible = _showWired;
             LayoutTrendCard();
 
             _trend.Palette = palette;
