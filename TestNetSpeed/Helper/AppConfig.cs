@@ -29,12 +29,11 @@ namespace TestNetSpeed.Helper
         public static TestAccessMode TestAccess = TestAccessMode.FullAccess;
 
         // ── App identity ─────────────────────────────────────────────────────
-        public static string AppName = "Test Net Speed";
+        public static string AppName = "Speed Test ZX";
         public static string AppSubtitle = "Test your internet speed, anytime";
-        // Placeholder — this rebuild replaces an existing Store listing, so
-        // set this to match the actual next Store version before release,
-        // not 1.0.0.0.
-        public static string AppVersion = "Version 2.0.0.0";
+        public static string AppVersion = "Version 2.0.1.0";
+        public static int AppReleaseVersion = 2010;
+        public static string AppDataFolderName = "TestNetSpeed";
 
         public static string AppIconPath => Path.Combine(Application.StartupPath, "Resources", "180x180.png");
         public static string FaviconPath => Path.Combine(Application.StartupPath, "Resources", "favicon.ico");
@@ -44,8 +43,6 @@ namespace TestNetSpeed.Helper
         //Device Data Constants ─────────────────────────────────────────────────────
         // Same placeholder caveat as AppVersion above — set to the real next
         // Store release version (int form) before publishing.
-        public static int AppReleaseVersion = 2000;
-        public static string AppDataFolderName = "TestNetSpeed";
         public static string NetSpeedPlusMsStoreLink = "ms-windows-store://pdp/?productid=9P00PF8JTJ1L";
         public static string CPUZxMsStoreLink = "ms-windows-store://pdp/?productid=9P5G6W4FPNS2";
         public static string CPUZxProMsStoreLink = "ms-windows-store://pdp/?productid=9N5RXJCZB734";
