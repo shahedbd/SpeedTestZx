@@ -16,6 +16,10 @@
     <Copyright>Copyright © 2024 Zero Byte Software Solutions, zerobytebd.com. All rights reserved.</Copyright>
     <PackageTags>winforms;desktop-app-template;starter-template</PackageTags>
     <ApplicationIcon>Resources\favicon.ico</ApplicationIcon>
+    <!-- Precompiled (ReadyToRun) code: ~20% faster start-up, less JIT work.
+         Applies when publishing for a runtime, as the Store package's
+         x64 / ARM64 builds do; ignored for AnyCPU builds and F5. -->
+    <PublishReadyToRun Condition="'$(RuntimeIdentifier)' != ''">true</PublishReadyToRun>
   </PropertyGroup>
 
   <ItemGroup>

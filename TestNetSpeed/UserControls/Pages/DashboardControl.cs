@@ -574,7 +574,9 @@ namespace TestNetSpeed.UserControls.Pages
         {
             try
             {
-                string pubIp = await _networkService.GetPublicIpAsync();
+                // Task.Run: creating the HTTP client and starting TLS took ~45 ms
+                // on the UI thread at launch. The await still resumes here.
+                string pubIp = await Task.Run(() => _networkService.GetPublicIpAsync());
                 if (IsDisposed) return;
 
                 bool online = !string.IsNullOrEmpty(pubIp) && pubIp != "Unavailable";

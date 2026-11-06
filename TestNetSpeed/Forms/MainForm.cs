@@ -23,7 +23,7 @@ namespace TestNetSpeed.Forms
         private SidebarControl _sidebar;
         private NavigationManager _navigationManager;
         private ThemeManager themeManager;
-        private SystemTrayService _trayService;
+        private SystemTrayService? _trayService;   // created on first use — see Tray
 
         public MainForm()
         {
@@ -70,14 +70,38 @@ namespace TestNetSpeed.Forms
                 ApplyTheme();
                 _navigationManager.RefreshActivePage();
             };
+        }
 
-            if (AppConfig.EnableSystemTray)
+        /// <summary>
+        /// The tray icon, built the first time it is needed (hide to tray,
+        /// Monitor running, an alert). Building it at launch cost ~100 ms.
+        /// Null when EnableSystemTray is off.
+        /// </summary>
+        private SystemTrayService? Tray
+        {
+            get
             {
+                if (!AppConfig.EnableSystemTray) return null;
+                if (_trayService != null) return _trayService;
+
                 _trayService = new SystemTrayService();
                 _trayService.ShowAppRequested += (s, e) => RestoreFromTray();
                 _trayService.AboutRequested += (s, e) => new AboutForm().ShowDialog();
                 _trayService.ExitRequested += (s, e) => Application.Exit();
+                return _trayService;
             }
+        }
+
+        /// <summary>Runs once, when the message queue first empties (after the window has painted).</summary>
+        private static void RunWhenIdle(Action action)
+        {
+            EventHandler? handler = null;
+            handler = (s, e) =>
+            {
+                Application.Idle -= handler;
+                action();
+            };
+            Application.Idle += handler;
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -218,8 +242,8 @@ namespace TestNetSpeed.Forms
             {
                 e.Cancel = true;
                 Hide();
-                _trayService?.Show();
-                _trayService?.ShowBalloonTip(
+                Tray?.Show();
+                Tray?.ShowBalloonTip(
                     AppConfig.AppName,
                     "App is still running in the system tray.\nDouble-click to restore.",
                     2000,

@@ -52,6 +52,8 @@ namespace TestNetSpeed.Service
         private int _ticksSinceRefresh;
         private double _lastSec;
         private bool _disposed;
+        private bool _wantRunning;   // Start() called and not stopped since
+        private bool _baselining;    // baseline read in flight on a worker
 
         /// <summary>Raised once per tick with the combined rate.</summary>
         public event EventHandler<TrafficSample>? Sample;
@@ -66,24 +68,43 @@ namespace TestNetSpeed.Service
         }
 
         /// <summary>
-        /// Starts sampling. The first sample arrives one interval later —
-        /// the counters are read now only to set the baseline.
+        /// Starts sampling. The baseline read (adapter list + counters, ~120 ms
+        /// the first time) runs on a worker so it never holds up the UI; the
+        /// timer starts when it is done and the first sample arrives one
+        /// interval later. The timer is not running during the read, so
+        /// nothing else touches the counters meanwhile.
         /// </summary>
         public void Start()
         {
-            if (_disposed || _timer.Enabled) return;
+            if (_disposed) return;
+            _wantRunning = true;
+            if (_timer.Enabled || _baselining) return;
 
+            _baselining = true;
             _adaptersStale = true;
             _last.Clear();
-            _clock.Restart();
-            _lastSec = 0;
-            ReadCounters(out _, out _);   // baseline
 
-            _timer.Start();
+            var ui = SynchronizationContext.Current is null
+                ? TaskScheduler.Current
+                : TaskScheduler.FromCurrentSynchronizationContext();
+
+            Task.Run(() => ReadCounters(out _, out _)).ContinueWith(_ =>
+            {
+                _baselining = false;
+                if (_disposed || !_wantRunning) return;
+
+                _clock.Restart();
+                _lastSec = 0;
+                _timer.Start();
+            }, ui);
         }
 
         /// <summary>Stops sampling. Start() later begins a fresh baseline.</summary>
-        public void Stop() => _timer.Stop();
+        public void Stop()
+        {
+            _wantRunning = false;
+            _timer.Stop();
+        }
 
         // ══════════════════════════════════════════════════════════════════════
         //  SAMPLING

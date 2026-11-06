@@ -53,8 +53,14 @@ namespace TestNetSpeed.Service.Monitor
             catch (Exception ex) { Logger.Log($"Startup task disable failed: {ex.Message}"); }
         }
 
+        // The first WinRT call of the process costs ~65 ms, so Program reads
+        // this on a worker at launch and MainForm gets the cached answer.
+        private static readonly Lazy<bool> _startupActivation = new(ReadStartupActivation);
+
         /// <summary>True when Windows started the app at sign-in — MainForm then starts in the tray.</summary>
-        public static bool IsStartupActivation()
+        public static bool IsStartupActivation() => _startupActivation.Value;
+
+        private static bool ReadStartupActivation()
         {
             if (!IsSupported) return false;
             try

@@ -24,7 +24,6 @@ namespace TestNetSpeed.Forms
         private void InitializePro()
         {
             var entitlements = EntitlementManager.Instance;
-            entitlements.Initialize(Handle);
             _lastTier = entitlements.CurrentTier;
             entitlements.EntitlementChanged += OnEntitlementChanged;
 
@@ -40,8 +39,16 @@ namespace TestNetSpeed.Forms
 
         private void OnShownPro()
         {
-            _ = EntitlementManager.Instance.RefreshAsync(TimeSpan.FromSeconds(20));
-            StartMonitor();
+            // Creating the Store context (~65 ms) and starting the Monitor wait
+            // until the window has painted. Until then a purchase returns null
+            // and the price falls back to AppConfig, as before Initialize.
+            RunWhenIdle(() =>
+            {
+                if (IsDisposed) return;
+                EntitlementManager.Instance.Initialize(Handle);
+                _ = EntitlementManager.Instance.RefreshAsync(TimeSpan.FromSeconds(20));
+                StartMonitor();
+            });
 
             if (AppConfig.EnableSystemTray && WindowsStartup.IsStartupActivation())
                 BeginInvoke(new Action(HideToTraySilently));
@@ -82,7 +89,7 @@ namespace TestNetSpeed.Forms
         /// <summary>Keeps the tray icon up while the Monitor runs, with its status as the tooltip.</summary>
         private void UpdateTrayForMonitor()
         {
-            if (_trayService == null || IsDisposed) return;
+            if (!AppConfig.EnableSystemTray || IsDisposed) return;
             if (InvokeRequired)
             {
                 if (IsHandleCreated) BeginInvoke(new Action(UpdateTrayForMonitor));
@@ -90,10 +97,13 @@ namespace TestNetSpeed.Forms
             }
 
             var monitor = MonitorService.Instance;
-            _trayService.SetTooltip(monitor.TrayStatus());
+            if (!monitor.IsActive && _trayService == null) return;   // nothing to show or hide yet
 
-            if (monitor.IsActive) _trayService.Show();
-            else if (Visible) _trayService.Hide();
+            var tray = Tray!;
+            tray.SetTooltip(monitor.TrayStatus());
+
+            if (monitor.IsActive) tray.Show();
+            else if (Visible) tray.Hide();
         }
 
         private void OnMonitorAlert(object? sender, (string Title, string Text) alert)
@@ -102,14 +112,15 @@ namespace TestNetSpeed.Forms
 
             BeginInvoke(new Action(() =>
             {
-                if (_trayService == null)
+                var tray = Tray;
+                if (tray == null)
                 {
                     NotificationManager.Instance.ShowInfo(alert.Text, alert.Title);
                     return;
                 }
 
-                _trayService.Show();
-                _trayService.ShowBalloonTip(alert.Title, alert.Text, 5000, ToolTipIcon.Info);
+                tray.Show();
+                tray.ShowBalloonTip(alert.Title, alert.Text, 5000, ToolTipIcon.Info);
             }));
         }
 
@@ -120,7 +131,7 @@ namespace TestNetSpeed.Forms
                 return;
 
             Hide();
-            _trayService?.Show();
+            Tray?.Show();
         }
     }
 }
