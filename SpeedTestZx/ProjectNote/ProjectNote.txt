@@ -28,7 +28,7 @@ Dark BG #1C1917
 
 
 
-Old namespace: SpeedTestZx
+Old namespace: TestNetSpeed
 New namespace: SpeedTestZx
 
 
