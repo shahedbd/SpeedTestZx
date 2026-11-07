@@ -33,7 +33,7 @@ namespace SpeedTestZx.Helper
         public static string AppSubtitle = "Test your internet speed, anytime";
         public static string AppVersion = "Version 2.0.1.0";
         public static int AppReleaseVersion = 2010;
-        public static string AppDataFolderName = "SpeedTestZx";
+        public static string AppDataFolderName = "TestNetSpeed";  //SpeedTestZx
 
         public static string AppIconPath => Path.Combine(Application.StartupPath, "Resources", "180x180.png");
         public static string FaviconPath => Path.Combine(Application.StartupPath, "Resources", "favicon.ico");
