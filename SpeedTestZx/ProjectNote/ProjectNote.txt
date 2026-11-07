@@ -26,6 +26,10 @@ Dark BG #1C1917
 
 
 
+App name 01: Internet Speed Checker Plus
+App name 02: Test Net Speed
+App name 03: Speed Test ZX
+
 
 
 Old namespace: TestNetSpeed

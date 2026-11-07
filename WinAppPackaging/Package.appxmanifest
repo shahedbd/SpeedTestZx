@@ -11,7 +11,7 @@
   <Identity
     Name="4789ZeroByte.InternetSpeedCheckerPlus"
     Publisher="CN=8545CA03-A40F-42F8-9E80-790ABC2452FC"
-    Version="2.0.0.0" />
+    Version="2.0.1.0" />
 
   <Properties>
     <DisplayName>Internet Speed Checker Plus</DisplayName>
@@ -33,7 +33,7 @@
       Executable="$targetnametoken$.exe"
       EntryPoint="$targetentrypoint$">
       <uap:VisualElements
-        DisplayName="Test Net Speed"
+        DisplayName="Speed Test ZX"
         Description="Test your internet speed, anytime"
         BackgroundColor="transparent" Square44x44Logo="Images\Square44x44Logo.png"  Square150x150Logo="Images\Square150x150Logo.png">
         <uap:DefaultTile ShortName="Internet Speed Checker Plus"  Square310x310Logo="Images\Square310x310Logo.png" Wide310x150Logo="Images\Wide310x150Logo.png"    Square71x71Logo="Images\SmallTile.png">
@@ -54,7 +54,7 @@
           <uap5:StartupTask
             TaskId="SpeedTestAppStartupTaskChecker"
             Enabled="false"
-            DisplayName="Internet Speed Checker Plus" />
+            DisplayName="Speed Test ZX" />
         </uap5:Extension>
       </Extensions>
     </Application>
