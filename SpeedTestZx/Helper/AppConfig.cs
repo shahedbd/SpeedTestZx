@@ -26,7 +26,7 @@ namespace SpeedTestZx.Helper
         //
         // MUST be Off in every shipped build; FullAccess gives Pro away. A
         // release build logs a warning at startup when it is not Off.
-        public static TestAccessMode TestAccess = TestAccessMode.FullAccess;
+        public static TestAccessMode TestAccess = TestAccessMode.Off;
 
         // ── App identity ─────────────────────────────────────────────────────
         public static string AppName = "Speed Test ZX";
