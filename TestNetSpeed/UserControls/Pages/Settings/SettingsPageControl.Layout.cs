@@ -1,7 +1,7 @@
-using TestNetSpeed.UserControls.Lib;
-using TestNetSpeed.UserControls.Pages.Settings;
+using SpeedTestZx.UserControls.Lib;
+using SpeedTestZx.UserControls.Pages.Settings;
 
-namespace TestNetSpeed.UserControls.Pages
+namespace SpeedTestZx.UserControls.Pages
 {
     public partial class SettingsPageControl
     {

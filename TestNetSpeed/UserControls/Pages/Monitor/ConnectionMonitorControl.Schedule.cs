@@ -1,12 +1,12 @@
 using DeviceDataModule;
-using TestNetSpeed.Forms;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Managers;
-using TestNetSpeed.Model;
-using TestNetSpeed.Service.Monitor;
-using TestNetSpeed.UserControls.Lib;
+using SpeedTestZx.Forms;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Managers;
+using SpeedTestZx.Model;
+using SpeedTestZx.Service.Monitor;
+using SpeedTestZx.UserControls.Lib;
 
-namespace TestNetSpeed.UserControls.Pages.Monitor
+namespace SpeedTestZx.UserControls.Pages.Monitor
 {
     /// <summary>
     /// ConnectionMonitorControl — the "Schedule &amp; alerts" card: the

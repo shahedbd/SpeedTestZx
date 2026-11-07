@@ -3,7 +3,7 @@ using PdfSharp.Drawing;
 using PdfSharp.Fonts;
 using PdfSharp.Pdf;
 
-namespace TestNetSpeed.Helper.Report
+namespace SpeedTestZx.Helper.Report
 {
     /// <summary>
     /// Top-to-bottom flow layout over PDFsharp (T34): text with word wrap,

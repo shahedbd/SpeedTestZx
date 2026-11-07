@@ -1,7 +1,7 @@
-using TestNetSpeed.Managers;
+using SpeedTestZx.Managers;
 using DpiCommon.Helper;
 
-namespace TestNetSpeed.UserControls
+namespace SpeedTestZx.UserControls
 {
     /// <summary>
     /// Base class for DPI-aware user controls with proper scaling

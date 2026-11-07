@@ -1,8 +1,8 @@
 // UserControls/Layout/TitleBarControl.Theme.cs
-using TestNetSpeed.Helper;
+using SpeedTestZx.Helper;
 using DpiCommon.Helper;
 
-namespace TestNetSpeed.UserControls.Layout
+namespace SpeedTestZx.UserControls.Layout
 {
     /// <summary>
     /// TitleBarControl — gradient colours and DPI refresh.

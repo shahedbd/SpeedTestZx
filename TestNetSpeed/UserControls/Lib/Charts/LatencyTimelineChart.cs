@@ -1,7 +1,7 @@
 using System.Drawing.Drawing2D;
-using TestNetSpeed.Model;
+using SpeedTestZx.Model;
 
-namespace TestNetSpeed.UserControls.Lib.Charts
+namespace SpeedTestZx.UserControls.Lib.Charts
 {
     /// <summary>
     /// "Latency &amp; loss, last 24 h" (T57): per-minute median ping as a line,

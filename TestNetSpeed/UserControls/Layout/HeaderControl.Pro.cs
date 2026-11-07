@@ -1,11 +1,11 @@
 // UserControls/Layout/HeaderControl.Pro.cs
 using DpiCommon.Helper;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Managers;
-using TestNetSpeed.Model;
-using TestNetSpeed.UserControls.Lib;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Managers;
+using SpeedTestZx.Model;
+using SpeedTestZx.UserControls.Lib;
 
-namespace TestNetSpeed.UserControls.Layout
+namespace SpeedTestZx.UserControls.Layout
 {
     /// <summary>
     /// HeaderControl — the Go Pro button: a gradient pill with a gold crown

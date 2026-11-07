@@ -1,6 +1,6 @@
 using System.Drawing.Drawing2D;
 
-namespace TestNetSpeed.UserControls.Lib
+namespace SpeedTestZx.UserControls.Lib
 {
     /// <summary>
     /// The rounded-rectangle card surface (ported from PC Health Optimizer's

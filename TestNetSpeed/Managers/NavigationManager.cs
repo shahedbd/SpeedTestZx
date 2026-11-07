@@ -1,8 +1,8 @@
-using TestNetSpeed.Helper;
-using TestNetSpeed.UserControls.Layout;
-using TestNetSpeed.UserControls.Prompts;
+using SpeedTestZx.Helper;
+using SpeedTestZx.UserControls.Layout;
+using SpeedTestZx.UserControls.Prompts;
 
-namespace TestNetSpeed.Managers
+namespace SpeedTestZx.Managers
 {
     /// <summary>
     /// Owns sidebar nav-button rendering (from AppConfig.NavItems), the sidebar

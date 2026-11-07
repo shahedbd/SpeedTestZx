@@ -1,10 +1,10 @@
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using FontAwesome.Sharp;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Managers;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Managers;
 
-namespace TestNetSpeed.UserControls.Pages
+namespace SpeedTestZx.UserControls.Pages
 {
     /// <summary>
     /// One app in the Our Apps list (ported from NetSpeedMeterPlus): tinted

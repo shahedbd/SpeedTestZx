@@ -1,4 +1,4 @@
-namespace TestNetSpeed.Helper
+namespace SpeedTestZx.Helper
 {
     /// <summary>
     /// Small pure statistics used by the Report Card and the Monitor. The

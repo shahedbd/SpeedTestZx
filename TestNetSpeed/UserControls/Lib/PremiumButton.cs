@@ -1,9 +1,9 @@
 using System.Drawing.Drawing2D;
 using DpiCommon.Helper;
-using TestNetSpeed.Helper;
+using SpeedTestZx.Helper;
 using FontAwesome.Sharp;
 
-namespace TestNetSpeed.UserControls.Lib
+namespace SpeedTestZx.UserControls.Lib
 {
     /// <summary>
     /// The "Go Pro" call to action, in one place.

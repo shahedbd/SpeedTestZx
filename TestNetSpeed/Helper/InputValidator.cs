@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace TestNetSpeed.Helper
+namespace SpeedTestZx.Helper
 {
     /// <summary>
     /// Validates host/IP input before it's handed to Ping, DNS lookup, or a

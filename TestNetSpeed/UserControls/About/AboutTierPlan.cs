@@ -1,10 +1,10 @@
 using FontAwesome.Sharp;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Managers;
-using TestNetSpeed.Model;
-using TestNetSpeed.UserControls.Lib;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Managers;
+using SpeedTestZx.Model;
+using SpeedTestZx.UserControls.Lib;
 
-namespace TestNetSpeed.UserControls.About
+namespace SpeedTestZx.UserControls.About
 {
     /// <summary>One card on the About screen, as described by the tier plan.</summary>
     public sealed class AboutCardSpec

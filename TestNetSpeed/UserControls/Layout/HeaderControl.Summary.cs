@@ -1,7 +1,7 @@
 using DpiCommon.Helper;
 using FontAwesome.Sharp;
 
-namespace TestNetSpeed.UserControls.Layout
+namespace SpeedTestZx.UserControls.Layout
 {
     /// <summary>
     /// HeaderControl — the system summary strip on the left of the bar.

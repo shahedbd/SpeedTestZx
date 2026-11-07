@@ -1,9 +1,9 @@
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
-using TestNetSpeed.Model;
+using SpeedTestZx.Model;
 
-namespace TestNetSpeed.Helper
+namespace SpeedTestZx.Helper
 {
     /// <summary>
     /// Draws the shareable result card (T16): a fixed 1200 × 630 PNG (the

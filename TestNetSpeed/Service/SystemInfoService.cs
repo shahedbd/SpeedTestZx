@@ -1,7 +1,7 @@
 using System.Management;
-using TestNetSpeed.Model;
+using SpeedTestZx.Model;
 
-namespace TestNetSpeed.Service
+namespace SpeedTestZx.Service
 {
     /// <summary>
     /// Shared service backing the header bar's system summary — PC name,

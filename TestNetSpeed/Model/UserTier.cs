@@ -1,4 +1,4 @@
-namespace TestNetSpeed.Model;
+namespace SpeedTestZx.Model;
 
 /// <summary>
 /// The two product tiers. Ordered so a higher tier includes everything a

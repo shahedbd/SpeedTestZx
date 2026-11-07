@@ -3,7 +3,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 
-namespace TestNetSpeed.Service
+namespace SpeedTestZx.Service
 {
     /// <summary>
     /// Small, cheap round-trip probe used for idle latency, packet loss and

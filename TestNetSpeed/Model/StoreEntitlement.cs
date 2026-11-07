@@ -1,4 +1,4 @@
-namespace TestNetSpeed.Model;
+namespace SpeedTestZx.Model;
 
 /// <summary>
 /// The user's Microsoft Store entitlement. The default instance is the

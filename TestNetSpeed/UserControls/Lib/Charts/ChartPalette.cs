@@ -1,6 +1,6 @@
-using TestNetSpeed.Managers;
+using SpeedTestZx.Managers;
 
-namespace TestNetSpeed.UserControls.Lib.Charts
+namespace SpeedTestZx.UserControls.Lib.Charts
 {
     /// <summary>
     /// Colours the Report Card / Monitor charts draw with. The same chart code

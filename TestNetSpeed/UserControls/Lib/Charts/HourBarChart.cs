@@ -1,6 +1,6 @@
-using TestNetSpeed.Helper;
+using SpeedTestZx.Helper;
 
-namespace TestNetSpeed.UserControls.Lib.Charts
+namespace SpeedTestZx.UserControls.Lib.Charts
 {
     /// <summary>
     /// "By hour of day" (T51): 24 bars, each the median % of plan (or Mbps

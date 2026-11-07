@@ -1,6 +1,6 @@
-using TestNetSpeed.UserControls.Pages.Settings;
+using SpeedTestZx.UserControls.Pages.Settings;
 
-namespace TestNetSpeed.UserControls.Pages
+namespace SpeedTestZx.UserControls.Pages
 {
     /// <summary>
     /// The "Settings" sidebar page — its own category column (with APP / DATA

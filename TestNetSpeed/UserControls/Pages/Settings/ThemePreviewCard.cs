@@ -1,9 +1,9 @@
 using System.ComponentModel;
 using System.Drawing.Drawing2D;
-using TestNetSpeed.Managers;
-using TestNetSpeed.UserControls.Lib;
+using SpeedTestZx.Managers;
+using SpeedTestZx.UserControls.Lib;
 
-namespace TestNetSpeed.UserControls.Pages.Settings
+namespace SpeedTestZx.UserControls.Pages.Settings
 {
     /// <summary>
     /// A clickable mini-window preview for one app theme: sidebar + content

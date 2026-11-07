@@ -1,12 +1,12 @@
 // Helper/AppConfig.cs
-using TestNetSpeed.Forms;
-using TestNetSpeed.Model;
-using TestNetSpeed.UserControls.Pages;
-using TestNetSpeed.UserControls.Pages.Monitor;
-using TestNetSpeed.UserControls.Pages.Report;
+using SpeedTestZx.Forms;
+using SpeedTestZx.Model;
+using SpeedTestZx.UserControls.Pages;
+using SpeedTestZx.UserControls.Pages.Monitor;
+using SpeedTestZx.UserControls.Pages.Report;
 using FontAwesome.Sharp;
 
-namespace TestNetSpeed.Helper
+namespace SpeedTestZx.Helper
 {
     /// <summary>
     /// Single source of truth for everything that changes when bootstrapping a
@@ -33,7 +33,7 @@ namespace TestNetSpeed.Helper
         public static string AppSubtitle = "Test your internet speed, anytime";
         public static string AppVersion = "Version 2.0.1.0";
         public static int AppReleaseVersion = 2010;
-        public static string AppDataFolderName = "TestNetSpeed";
+        public static string AppDataFolderName = "SpeedTestZx";
 
         public static string AppIconPath => Path.Combine(Application.StartupPath, "Resources", "180x180.png");
         public static string FaviconPath => Path.Combine(Application.StartupPath, "Resources", "favicon.ico");

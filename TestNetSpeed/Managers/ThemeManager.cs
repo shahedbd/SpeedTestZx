@@ -1,9 +1,9 @@
 using System;
 using System.Drawing;
 using DeviceDataModule;
-using TestNetSpeed.Helper;
+using SpeedTestZx.Helper;
 
-namespace TestNetSpeed.Managers
+namespace SpeedTestZx.Managers
 {
     /// <summary>
     /// Manages application-wide theme settings using the Singleton pattern.

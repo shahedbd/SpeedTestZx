@@ -1,9 +1,9 @@
 using DpiCommon.Helper;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Managers;
-using TestNetSpeed.UserControls.About;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Managers;
+using SpeedTestZx.UserControls.About;
 
-namespace TestNetSpeed.Forms
+namespace SpeedTestZx.Forms
 {
     /// <summary>
     /// The About dialog, for both tiers — layout ported from CPU ZX Pro's About

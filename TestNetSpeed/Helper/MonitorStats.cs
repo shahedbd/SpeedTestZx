@@ -1,6 +1,6 @@
-using TestNetSpeed.Model;
+using SpeedTestZx.Model;
 
-namespace TestNetSpeed.Helper
+namespace SpeedTestZx.Helper
 {
     /// <summary>
     /// Uptime and outage figures over a time range, from the Monitor's files.

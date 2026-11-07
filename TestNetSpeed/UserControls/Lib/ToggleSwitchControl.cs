@@ -1,9 +1,9 @@
-using TestNetSpeed.Managers;
+using SpeedTestZx.Managers;
 using DpiCommon.Helper;
 using System.Drawing.Drawing2D;
 using System.ComponentModel;
 
-namespace TestNetSpeed.UserControls.Lib
+namespace SpeedTestZx.UserControls.Lib
 {
     /// <summary>
     /// Modern iOS/Android-style on/off switch — a themed, custom-drawn

@@ -1,10 +1,10 @@
 using Windows.ApplicationModel;
 using Windows.Services.Store;
 using WinRT.Interop;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Model;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Model;
 
-namespace TestNetSpeed.Service.Store
+namespace SpeedTestZx.Service.Store
 {
     /// <summary>
     /// Thin StoreContext wrapper: entitlement, product, price, purchase.

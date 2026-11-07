@@ -1,4 +1,4 @@
-namespace TestNetSpeed.Model;
+namespace SpeedTestZx.Model;
 
 public class NetworkToolResult
 {

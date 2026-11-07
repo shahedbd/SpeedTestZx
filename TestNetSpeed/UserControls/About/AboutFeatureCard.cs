@@ -1,9 +1,9 @@
 using DpiCommon.Helper;
 using FontAwesome.Sharp;
-using TestNetSpeed.Managers;
-using TestNetSpeed.UserControls.Lib;
+using SpeedTestZx.Managers;
+using SpeedTestZx.UserControls.Lib;
 
-namespace TestNetSpeed.UserControls.About
+namespace SpeedTestZx.UserControls.About
 {
     /// <summary>
     /// One About-screen card: accented header with a left accent bar, a list of

@@ -1,8 +1,8 @@
 using DpiCommon.Helper;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Managers;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Managers;
 
-namespace TestNetSpeed.UserControls.Lib
+namespace SpeedTestZx.UserControls.Lib
 {
     /// <summary>
     /// One Quality Score line: "Streaming   GREAT   Plenty of headroom" —

@@ -1,7 +1,7 @@
-using TestNetSpeed.Helper;
-using TestNetSpeed.Model;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Model;
 
-namespace TestNetSpeed.UserControls.Pages
+namespace SpeedTestZx.UserControls.Pages
 {
     /// <summary>
     /// "Test History" nav page — a scrollable log of completed speed tests,

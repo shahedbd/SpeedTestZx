@@ -1,10 +1,10 @@
 using System.Diagnostics;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Helper.Report;
-using TestNetSpeed.Managers;
-using TestNetSpeed.Model;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Helper.Report;
+using SpeedTestZx.Managers;
+using SpeedTestZx.Model;
 
-namespace TestNetSpeed.UserControls.Pages.Report
+namespace SpeedTestZx.UserControls.Pages.Report
 {
     /// <summary>IspReportCardControl — "Export PDF report" (T34, Pro).</summary>
     public partial class IspReportCardControl

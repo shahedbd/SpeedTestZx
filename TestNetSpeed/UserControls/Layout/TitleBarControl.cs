@@ -1,10 +1,10 @@
 // UserControls/Layout/TitleBarControl.cs
 using System.Runtime.InteropServices;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Managers;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Managers;
 using DpiCommon.Helper;
 
-namespace TestNetSpeed.UserControls.Layout
+namespace SpeedTestZx.UserControls.Layout
 {
     /// <summary>
     /// Part 01 — custom-drawn title bar. Shows AppConfig.AppName + AppSubtitle

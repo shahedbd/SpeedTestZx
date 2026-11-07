@@ -1,8 +1,8 @@
-using TestNetSpeed.Forms;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Managers;
+using SpeedTestZx.Forms;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Managers;
 
-namespace TestNetSpeed.UserControls.Pages.Settings
+namespace SpeedTestZx.UserControls.Pages.Settings
 {
     /// <summary>
     /// Test History — clearing saved speed test results. Moved here from the

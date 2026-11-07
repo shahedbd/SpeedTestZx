@@ -1,6 +1,6 @@
-using TestNetSpeed.Model;
+using SpeedTestZx.Model;
 
-namespace TestNetSpeed.Helper
+namespace SpeedTestZx.Helper
 {
     /// <summary>Everything the ISP Report Card and its PDF show for one range.</summary>
     public sealed class ReportData

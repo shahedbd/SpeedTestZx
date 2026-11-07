@@ -1,9 +1,9 @@
 using DeviceDataModule;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Managers;
-using TestNetSpeed.Model;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Managers;
+using SpeedTestZx.Model;
 
-namespace TestNetSpeed.Service.Monitor
+namespace SpeedTestZx.Service.Monitor
 {
     /// <summary>
     /// Smart alerts (T56, extends T23). Each alert fires once per incident

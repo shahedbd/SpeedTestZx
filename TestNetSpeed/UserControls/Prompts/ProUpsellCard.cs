@@ -1,12 +1,12 @@
 using System.Drawing.Drawing2D;
 using DpiCommon.Helper;
 using FontAwesome.Sharp;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Managers;
-using TestNetSpeed.Model;
-using TestNetSpeed.UserControls.Lib;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Managers;
+using SpeedTestZx.Model;
+using SpeedTestZx.UserControls.Lib;
 
-namespace TestNetSpeed.UserControls.Prompts
+namespace SpeedTestZx.UserControls.Prompts
 {
     /// <summary>
     /// The inline Pro upsell (T50) that stands in for a Pro-only part of a

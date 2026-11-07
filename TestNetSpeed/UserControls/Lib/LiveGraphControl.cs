@@ -1,10 +1,10 @@
 using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using DpiCommon.Helper;
-using TestNetSpeed.Managers;
-using TestNetSpeed.Model;
+using SpeedTestZx.Managers;
+using SpeedTestZx.Model;
 
-namespace TestNetSpeed.UserControls.Lib
+namespace SpeedTestZx.UserControls.Lib
 {
     /// <summary>
     /// Live throughput + latency graph for the Speed Test page (T25).

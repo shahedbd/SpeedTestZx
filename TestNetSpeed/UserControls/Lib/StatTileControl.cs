@@ -1,7 +1,7 @@
 ﻿using DpiCommon.Helper;
 using System.Drawing.Drawing2D;
 
-namespace TestNetSpeed.UserControls.Lib
+namespace SpeedTestZx.UserControls.Lib
 {
     public class StatTileControl : DpiAwareUserControl
     {

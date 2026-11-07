@@ -1,6 +1,6 @@
 using FontAwesome.Sharp;
 
-namespace TestNetSpeed.UserControls.Prompts
+namespace SpeedTestZx.UserControls.Prompts
 {
     /// <summary>
     /// ProPromptCard — the unlock list: one chip per benefit, folding into a

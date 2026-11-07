@@ -1,7 +1,7 @@
 using FontAwesome.Sharp;
-using TestNetSpeed.Service;
+using SpeedTestZx.Service;
 
-namespace TestNetSpeed.UserControls.Layout
+namespace SpeedTestZx.UserControls.Layout
 {
     /// <summary>
     /// HeaderControl — loads the system summary (PC name, processor, RAM, OS

@@ -1,8 +1,8 @@
 using DpiCommon.Helper;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Managers;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Managers;
 
-namespace TestNetSpeed.UserControls.About
+namespace SpeedTestZx.UserControls.About
 {
     /// <summary>
     /// About screen header: app icon, name, version and edition badges, the

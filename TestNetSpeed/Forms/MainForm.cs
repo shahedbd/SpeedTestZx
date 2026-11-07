@@ -1,12 +1,12 @@
 using DeviceDataModule;
 using DpiCommon.Helper;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Managers;
-using TestNetSpeed.Service;
-using TestNetSpeed.Service.Monitor;
-using TestNetSpeed.UserControls.Layout;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Managers;
+using SpeedTestZx.Service;
+using SpeedTestZx.Service.Monitor;
+using SpeedTestZx.UserControls.Layout;
 
-namespace TestNetSpeed.Forms
+namespace SpeedTestZx.Forms
 {
     /// <summary>
     /// Application shell. Hosts TitleBarControl, HeaderControl, SidebarControl

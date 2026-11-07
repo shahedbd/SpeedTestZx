@@ -1,4 +1,4 @@
-namespace TestNetSpeed.Model;
+namespace SpeedTestZx.Model;
 
 /// <summary>
 /// Everything the one-time Pro purchase unlocks (doc/App_improvement_plan/

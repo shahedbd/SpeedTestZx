@@ -1,10 +1,10 @@
 using DeviceDataModule;
 using Microsoft.Win32;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Managers;
-using TestNetSpeed.Model;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Managers;
+using SpeedTestZx.Model;
 
-namespace TestNetSpeed.Service.Monitor
+namespace SpeedTestZx.Service.Monitor
 {
     /// <summary>
     /// Scheduled light tests (T53). Free: once a day. Pro: every 1, 3 or 6 h

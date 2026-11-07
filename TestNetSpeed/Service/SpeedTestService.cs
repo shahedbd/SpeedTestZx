@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using System.Net;
-using TestNetSpeed.Model;
+using SpeedTestZx.Model;
 
-namespace TestNetSpeed.Service
+namespace SpeedTestZx.Service
 {
     public class SpeedTestService
     {

@@ -1,6 +1,6 @@
-using TestNetSpeed.Model;
+using SpeedTestZx.Model;
 
-namespace TestNetSpeed.Helper
+namespace SpeedTestZx.Helper
 {
     /// <summary>Average / best / worst over a set of tests.</summary>
     public record HistorySummary(

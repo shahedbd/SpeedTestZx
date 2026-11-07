@@ -1,6 +1,6 @@
 using FontAwesome.Sharp;
 
-namespace TestNetSpeed.Helper
+namespace SpeedTestZx.Helper
 {
     /// <summary>
     /// The portfolio the Our Apps tab lists — the one place to edit when an app

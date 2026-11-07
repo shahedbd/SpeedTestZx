@@ -55,14 +55,14 @@ Now write development plan on:
 3. Advanced Test Lab (new Pro menu) - will implement later.
 
 Write doc here:
-G:\src\MS_Store_App\TestNetSpeed\doc\App_improvement_plan
+G:\src\MS_Store_App\SpeedTestZx\doc\App_improvement_plan
 
 
 
 
 
 Now analize app current featuers and doc:
-G:\src\MS_Store_App\TestNetSpeed\doc\App_improvement_plan
+G:\src\MS_Store_App\SpeedTestZx\doc\App_improvement_plan
 
 And suggest me what exclusive 2-3 pro features we can add(menu item)?
 
@@ -83,7 +83,7 @@ Now write a dashbaod impoevement development plan.
 
 Ask me question if any things decision related or missing.
 Write doc here:
-G:\src\MS_Store_App\TestNetSpeed\doc\App_improvement_plan\
+G:\src\MS_Store_App\SpeedTestZx\doc\App_improvement_plan\
 
 
 
@@ -141,12 +141,12 @@ Now write a simple app improvement task management plan table doc.
 
 
 Write doc here:
-G:\src\MS_Store_App\TestNetSpeed\doc\App_improvement_plan
+G:\src\MS_Store_App\SpeedTestZx\doc\App_improvement_plan
 
 
 
 Review this app improvement plan:
-G:\src\MS_Store_App\TestNetSpeed\doc\App_improvement_plan\Initial_draft.txt
+G:\src\MS_Store_App\SpeedTestZx\doc\App_improvement_plan\Initial_draft.txt
 
 Now write a app improvement development plan phase by phase.
 
@@ -170,7 +170,7 @@ G:\src\MS_Store_App\NetSpeedMeterPlus\NetSpeedMeterPlus
 
 
 App full docs:
-G:\src\MS_Store_App\TestNetSpeed\doc\Requirements
+G:\src\MS_Store_App\SpeedTestZx\doc\Requirements
 
 1. Update header, title bar based on updated project:
 G:\src\MS_Store_App\NetSpeedMeterPlus\NetSpeedMeterPlus

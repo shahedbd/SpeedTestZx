@@ -1,7 +1,7 @@
 // UserControls/Lib/DataCard/DataCardControl.Paint.cs
 using System.Drawing.Drawing2D;
 
-namespace TestNetSpeed.UserControls.Lib.DataCard
+namespace SpeedTestZx.UserControls.Lib.DataCard
 {
     /// <summary>Rendering for <see cref="DataCardControl"/>.</summary>
     public partial class DataCardControl

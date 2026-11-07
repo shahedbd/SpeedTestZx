@@ -1,9 +1,9 @@
 using System.Drawing.Drawing2D;
 using DpiCommon.Helper;
-using TestNetSpeed.Managers;
-using TestNetSpeed.Model;
+using SpeedTestZx.Managers;
+using SpeedTestZx.Model;
 
-namespace TestNetSpeed.UserControls.Lib
+namespace SpeedTestZx.UserControls.Lib
 {
     /// <summary>
     /// Small owner-drawn bar chart for the Dashboard's Recent tests card

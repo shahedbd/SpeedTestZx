@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Text;
 using System.Text.Json;
-using TestNetSpeed.Helper;
+using SpeedTestZx.Helper;
 
 namespace DeviceDataModule
 {

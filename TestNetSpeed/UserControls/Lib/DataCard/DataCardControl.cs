@@ -2,7 +2,7 @@
 using FontAwesome.Sharp;
 using System.ComponentModel;
 
-namespace TestNetSpeed.UserControls.Lib.DataCard
+namespace SpeedTestZx.UserControls.Lib.DataCard
 {
     /// <summary>
     /// Reusable dashboard data card: accent strip, gradient icon badge,

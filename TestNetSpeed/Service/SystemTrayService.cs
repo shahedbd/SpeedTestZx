@@ -1,7 +1,7 @@
-using TestNetSpeed.Helper;
+using SpeedTestZx.Helper;
 using FontAwesome.Sharp;
 
-namespace TestNetSpeed.Service
+namespace SpeedTestZx.Service
 {
     /// <summary>
     /// Wraps a NotifyIcon with a right-click menu (Show App / About / Exit)

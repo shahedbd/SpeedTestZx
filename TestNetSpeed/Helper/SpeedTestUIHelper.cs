@@ -1,8 +1,8 @@
 using System.Drawing.Drawing2D;
 using DpiCommon.Helper;
-using TestNetSpeed.Model;
+using SpeedTestZx.Model;
 
-namespace TestNetSpeed.Helper
+namespace SpeedTestZx.Helper
 {
     /// <summary>
     /// All drawing, layout, and stat-box factory logic for the Speed Test

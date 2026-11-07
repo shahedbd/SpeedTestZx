@@ -1,9 +1,9 @@
 using DeviceDataModule;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Managers;
-using TestNetSpeed.Model;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Managers;
+using SpeedTestZx.Model;
 
-namespace TestNetSpeed.Service.Monitor
+namespace SpeedTestZx.Service.Monitor
 {
     /// <summary>
     /// Connection Monitor engine (Pro_plan.md Phase 2). Runs in the app

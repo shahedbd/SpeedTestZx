@@ -1,9 +1,9 @@
 using System.Text;
 using System.Text.Json;
 using DeviceDataModule;
-using TestNetSpeed.Model;
+using SpeedTestZx.Model;
 
-namespace TestNetSpeed.Helper
+namespace SpeedTestZx.Helper
 {
     /// <summary>
     /// Connection Monitor storage (Pro_plan.md T49, "Storage design"). JSON

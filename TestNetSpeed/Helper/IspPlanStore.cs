@@ -1,8 +1,8 @@
 using System.Text.Json;
 using DeviceDataModule;
-using TestNetSpeed.Model;
+using SpeedTestZx.Model;
 
-namespace TestNetSpeed.Helper
+namespace SpeedTestZx.Helper
 {
     /// <summary>
     /// The user's internet plan (T33) in IspPlan.json — its own file, so

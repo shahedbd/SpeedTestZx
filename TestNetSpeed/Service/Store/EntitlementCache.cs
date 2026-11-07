@@ -4,10 +4,10 @@ using System.Text;
 using System.Text.Json;
 using DeviceDataModule;
 using Microsoft.Win32;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Model;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Model;
 
-namespace TestNetSpeed.Service.Store
+namespace SpeedTestZx.Service.Store
 {
     /// <summary>
     /// Last Store-verified entitlement, on disk, for offline starts. A

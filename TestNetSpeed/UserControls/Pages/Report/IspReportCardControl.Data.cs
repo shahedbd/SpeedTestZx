@@ -1,11 +1,11 @@
-using TestNetSpeed.Forms;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Managers;
-using TestNetSpeed.Model;
-using TestNetSpeed.UserControls.Lib.Charts;
-using TestNetSpeed.UserControls.Prompts;
+using SpeedTestZx.Forms;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Managers;
+using SpeedTestZx.Model;
+using SpeedTestZx.UserControls.Lib.Charts;
+using SpeedTestZx.UserControls.Prompts;
 
-namespace TestNetSpeed.UserControls.Pages.Report
+namespace SpeedTestZx.UserControls.Pages.Report
 {
     /// <summary>
     /// IspReportCardControl — range selection, loading the report and

@@ -1,11 +1,11 @@
 using System.Drawing.Drawing2D;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Managers;
-using TestNetSpeed.Model;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Managers;
+using SpeedTestZx.Model;
 using DpiCommon.Helper;
 using FontAwesome.Sharp;
 
-namespace TestNetSpeed.UserControls.Prompts
+namespace SpeedTestZx.UserControls.Prompts
 {
     /// <summary>
     /// Small "PRO" pill on a gated sidebar item, so the upgrade path stays

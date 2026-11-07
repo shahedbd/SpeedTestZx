@@ -1,10 +1,10 @@
 using System.Drawing.Drawing2D;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Managers;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Managers;
 using FontAwesome.Sharp;
-using TestNetSpeed.UserControls.Lib;
+using SpeedTestZx.UserControls.Lib;
 
-namespace TestNetSpeed.UserControls.Prompts
+namespace SpeedTestZx.UserControls.Prompts
 {
     /// <summary>
     /// The upgrade card shown by ProPromptOverlay — badge, headline, unlock

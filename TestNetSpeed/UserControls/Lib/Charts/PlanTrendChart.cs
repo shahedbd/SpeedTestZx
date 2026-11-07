@@ -1,6 +1,6 @@
 using System.Drawing.Drawing2D;
 
-namespace TestNetSpeed.UserControls.Lib.Charts
+namespace SpeedTestZx.UserControls.Lib.Charts
 {
     /// <summary>
     /// "% of plan over time" (T51): one point per day — the daily median

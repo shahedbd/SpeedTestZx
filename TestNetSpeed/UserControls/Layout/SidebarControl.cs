@@ -1,11 +1,11 @@
 // UserControls/Layout/SidebarControl.cs
 using DeviceDataModule;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Managers;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Managers;
 using DpiCommon.Helper;
 using FontAwesome.Sharp;
 
-namespace TestNetSpeed.UserControls.Layout
+namespace SpeedTestZx.UserControls.Layout
 {
     /// <summary>
     /// Part 03 — collapsible sidebar. Top-most: expand/collapse toggle icon,

@@ -1,6 +1,6 @@
-using TestNetSpeed.Model;
+using SpeedTestZx.Model;
 
-namespace TestNetSpeed.Helper
+namespace SpeedTestZx.Helper
 {
     public enum QualityLevel { Great, Good, Fair, Poor }
 

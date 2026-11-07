@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using System.Net.NetworkInformation;
 
-namespace TestNetSpeed.Service
+namespace SpeedTestZx.Service
 {
     /// <summary>One reading from <see cref="TrafficMonitor"/>.</summary>
     /// <param name="DownMbps">Combined receive rate of the counted adapters.</param>

@@ -1,12 +1,12 @@
 using FontAwesome.Sharp;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Managers;
-using TestNetSpeed.Model;
-using TestNetSpeed.Service;
-using TestNetSpeed.UserControls.Lib;
-using TestNetSpeed.UserControls.Lib.DataCard;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Managers;
+using SpeedTestZx.Model;
+using SpeedTestZx.Service;
+using SpeedTestZx.UserControls.Lib;
+using SpeedTestZx.UserControls.Lib.DataCard;
 
-namespace TestNetSpeed.UserControls.Pages
+namespace SpeedTestZx.UserControls.Pages
 {
     /// <summary>
     /// "Dashboard" nav page — the landing page (see doc/App_improvement_plan/

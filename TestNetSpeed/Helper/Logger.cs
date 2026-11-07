@@ -1,4 +1,4 @@
-namespace TestNetSpeed.Helper
+namespace SpeedTestZx.Helper
 {
     public static class Logger
     {

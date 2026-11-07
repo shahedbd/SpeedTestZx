@@ -1,7 +1,7 @@
 using FontAwesome.Sharp;
-using TestNetSpeed.Helper;
+using SpeedTestZx.Helper;
 
-namespace TestNetSpeed.UserControls.Pages
+namespace SpeedTestZx.UserControls.Pages
 {
     /// <summary>
     /// "Our Apps" nav page — cross-promotion for the rest of the portfolio

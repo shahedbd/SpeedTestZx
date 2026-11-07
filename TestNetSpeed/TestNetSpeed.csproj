@@ -6,8 +6,8 @@
     <UseWindowsForms>true</UseWindowsForms>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyName>TestNetSpeed</AssemblyName>
-    <RootNamespace>TestNetSpeed</RootNamespace>
+    <AssemblyName>SpeedTestZx</AssemblyName>
+    <RootNamespace>SpeedTestZx</RootNamespace>
     <Version>1.2.0</Version>
     <Authors>Zero Byte Software Solutions, zerobytebd.com</Authors>
     <Company>Zero Byte Software Solutions, zerobytebd.com</Company>

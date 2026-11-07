@@ -1,7 +1,7 @@
-using TestNetSpeed.Helper;
-using TestNetSpeed.Model;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Model;
 
-namespace TestNetSpeed.Service
+namespace SpeedTestZx.Service
 {
     /// <summary>
     /// Runs speed tests outside any page (T06), so the Connection Monitor can

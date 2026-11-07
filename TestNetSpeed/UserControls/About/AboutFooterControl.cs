@@ -1,10 +1,10 @@
 using System.Diagnostics;
 using DpiCommon.Helper;
 using FontAwesome.Sharp;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Managers;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Managers;
 
-namespace TestNetSpeed.UserControls.About
+namespace SpeedTestZx.UserControls.About
 {
     /// <summary>
     /// About screen footer: divider, website link, support address with a copy

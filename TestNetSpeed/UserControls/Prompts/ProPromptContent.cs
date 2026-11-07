@@ -1,8 +1,8 @@
 using FontAwesome.Sharp;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Model;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Model;
 
-namespace TestNetSpeed.UserControls.Prompts
+namespace SpeedTestZx.UserControls.Prompts
 {
     /// <summary>
     /// The copy the upgrade card renders:

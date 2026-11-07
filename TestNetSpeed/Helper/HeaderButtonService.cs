@@ -2,7 +2,7 @@
 using DpiCommon.Helper;
 using FontAwesome.Sharp;
 
-namespace TestNetSpeed.Helper
+namespace SpeedTestZx.Helper
 {
     /// <summary>
     /// Factory service for building consistently styled header action buttons.

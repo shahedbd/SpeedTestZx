@@ -2,7 +2,7 @@ using DpiCommon.Helper;
 using FontAwesome.Sharp;
 using Timer = System.Windows.Forms.Timer;
 
-namespace TestNetSpeed.Managers
+namespace SpeedTestZx.Managers
 {
     /// <summary>
     /// Reusable in-app toast service — call ShowSuccess/ShowError/ShowWarning/

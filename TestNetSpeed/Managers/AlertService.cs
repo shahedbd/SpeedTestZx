@@ -1,6 +1,6 @@
-using TestNetSpeed.Forms;
+using SpeedTestZx.Forms;
 
-namespace TestNetSpeed.Managers
+namespace SpeedTestZx.Managers
 {
     /// <summary>
     /// Reusable modal alert/confirm service — replaces raw MessageBox.Show

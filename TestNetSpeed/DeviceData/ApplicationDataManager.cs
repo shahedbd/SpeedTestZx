@@ -4,7 +4,7 @@ using System.Diagnostics;
 using System.Security.AccessControl;
 using System.Security.Principal;
 using System.Text;
-using TestNetSpeed.Helper;
+using SpeedTestZx.Helper;
 
 
 namespace DeviceDataModule
@@ -35,7 +35,7 @@ namespace DeviceDataModule
 
         #region Constants
 
-        //private const string DEFAULT_APP_NAME = "TestNetSpeed";
+        //private const string DEFAULT_APP_NAME = "SpeedTestZx";
         private const int MAX_RETRIES = 3;
         private const int RETRY_DELAY_MS = 500;
         private const int MAX_PATH_LENGTH = 240; // Windows MAX_PATH is 260, leave buffer

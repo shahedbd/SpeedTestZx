@@ -1,4 +1,4 @@
-﻿using TestNetSpeed.Helper;
+﻿using SpeedTestZx.Helper;
 
 namespace DeviceDataModule
 {

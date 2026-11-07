@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace TestNetSpeed.Model;
+namespace SpeedTestZx.Model;
 
 /// <summary>
 /// One minute of the latency and loss log (T54), one JSON line in

@@ -1,7 +1,7 @@
-using TestNetSpeed.Managers;
-using TestNetSpeed.UserControls.Lib.DataCard;
+using SpeedTestZx.Managers;
+using SpeedTestZx.UserControls.Lib.DataCard;
 
-namespace TestNetSpeed.UserControls.Lib
+namespace SpeedTestZx.UserControls.Lib
 {
     /// <summary>
     /// The Dashboard's card look (bordered panel, bold title, small info

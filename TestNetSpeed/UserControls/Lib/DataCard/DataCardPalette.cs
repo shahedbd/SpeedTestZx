@@ -1,5 +1,5 @@
 // UserControls/Lib/DataCard/DataCardPalette.cs
-namespace TestNetSpeed.UserControls.Lib.DataCard
+namespace SpeedTestZx.UserControls.Lib.DataCard
 {
     /// <summary>
     /// Surface colors for a <see cref="DataCardControl"/>. Kept independent of

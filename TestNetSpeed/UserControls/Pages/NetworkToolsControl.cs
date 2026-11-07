@@ -1,7 +1,7 @@
-using TestNetSpeed.Model;
-using TestNetSpeed.Service;
+using SpeedTestZx.Model;
+using SpeedTestZx.Service;
 
-namespace TestNetSpeed.UserControls.Pages
+namespace SpeedTestZx.UserControls.Pages
 {
     /// <summary>
     /// "Network Tools" nav page — Ping, DNS Lookup, IP Lookup and Traceroute,

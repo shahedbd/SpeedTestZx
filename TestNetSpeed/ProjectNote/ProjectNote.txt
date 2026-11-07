@@ -3,7 +3,7 @@ https://partner.microsoft.com/en-us/dashboard/products/9N6FRDSDXM8C/overview
 
 
 Repo:
-https://github.com/shahedbd/TestNetSpeed
+https://github.com/shahedbd/SpeedTestZx
 
 
 Speed Test ZX Pro | Durable overview
@@ -28,7 +28,8 @@ Dark BG #1C1917
 
 
 
-
+Old namespace: SpeedTestZx
+New namespace: SpeedTestZx
 
 
 
@@ -46,7 +47,7 @@ Create each app card with app logo, app name, app description and a button to op
 
 
 Use Store protocol link to open App in Microsoft Store.
-C:\Users\Public\src\MS_Store_App\TestNetSpeed\doc\MS App Product Identity.md
+C:\Users\Public\src\MS_Store_App\SpeedTestZx\doc\MS App Product Identity.md
 
 *********************************************
 In our App UI: 
@@ -78,7 +79,7 @@ can we add more endpoints to this list for better ping testing and backup option
 
 Write SpeedTestService, short precise and effective md file documentation.
 Here:
-C:\Users\Public\src\MS_Store_App\TestNetSpeed\doc
+C:\Users\Public\src\MS_Store_App\SpeedTestZx\doc
 
 
 
@@ -89,19 +90,19 @@ Both dark and light mode.
 
 *********************************************************************************************************************************************************
 
-I have created app: TestNetSpeed, using Wifi Password Viewer
+I have created app: SpeedTestZx, using Wifi Password Viewer
 Full Scource: 
-C:\Users\Public\src\MS_Store_App\TestNetSpeed\TestNetSpeed
+C:\Users\Public\src\MS_Store_App\SpeedTestZx\SpeedTestZx
 
 
 By following this doc now start implementing project.
-C:\Users\Public\src\MS_Store_App\TestNetSpeed\doc\Internet Speed Checker Plus - Development Plan.md
+C:\Users\Public\src\MS_Store_App\SpeedTestZx\doc\Internet Speed Checker Plus - Development Plan.md
 
-Project Namespcae name: TestNetSpeed
+Project Namespcae name: SpeedTestZx
 Project Title: Test Net Speed
 
 
--for documentation, always write doc here: C:\Users\Public\src\MS_Store_App\TestNetSpeed\doc\
+-for documentation, always write doc here: C:\Users\Public\src\MS_Store_App\SpeedTestZx\doc\
 -get approval after each tab feature implementaion is done.
 
 - Skip build, test, publish, deployment, migration, and package commands unless explicitly requested; I will handle them.
@@ -138,14 +139,14 @@ which is must have for this type of app.
 
 
 *********************************************************************************************************************************************************
-Using DesktopAppTemplate Project I rewrite my TestNetSpeed Project.
+Using DesktopAppTemplate Project I rewrite my SpeedTestZx Project.
 I have added Dashboard full module. Dashboard is working as expected.
 
-Updatedate TestNetSpeed Source:
-C:\Users\Public\src\MS_Store_App\TestNetSpeed\TestNetSpeed
+Updatedate SpeedTestZx Source:
+C:\Users\Public\src\MS_Store_App\SpeedTestZx\SpeedTestZx
 
-Old TestNetSpeed Project Source:
-C:\Users\Public\src\MS_Store_App\test_code\Wifi_old\TestNetSpeed
+Old SpeedTestZx Project Source:
+C:\Users\Public\src\MS_Store_App\test_code\Wifi_old\SpeedTestZx
 
 Now you task is implement left over side menu tab feature one by one.
 Tab 01: Dashboard: Done 
@@ -157,10 +158,10 @@ Tab 06: Export
 Tab 07: About 
 
 Follow Project Structure and coding patterns.
-C:\Users\Public\src\MS_Store_App\TestNetSpeed\doc\Project Folder Structure.md
+C:\Users\Public\src\MS_Store_App\SpeedTestZx\doc\Project Folder Structure.md
 
--get left over tab feature from Old TestNetSpeed. If required refactor and imprve it. Unless same things implement by follow just project folder Structure.
--for documentation, always write doc here: C:\Users\Public\src\MS_Store_App\TestNetSpeed\doc\
+-get left over tab feature from Old SpeedTestZx. If required refactor and imprve it. Unless same things implement by follow just project folder Structure.
+-for documentation, always write doc here: C:\Users\Public\src\MS_Store_App\SpeedTestZx\doc\
 -get approval after each tab feature implementaion is done.
 
 - Skip build, test, publish, deployment, migration, and package commands unless explicitly requested; I will handle them.
@@ -174,20 +175,20 @@ C:\Users\Public\src\MS_Store_App\TestNetSpeed\doc\Project Folder Structure.md
 
 Now implement Wifi Profile Cashe service.
 By following my another project code:
-C:\Users\Public\src\MS_Store_App\TestNetSpeed\TestNetSpeed\Helper\PowerHistoryDataCache.cs
-C:\Users\Public\src\MS_Store_App\TestNetSpeed\TestNetSpeed\Service\PowerHistoryService
-C:\Users\Public\src\MS_Store_App\TestNetSpeed\TestNetSpeed\UserControls\PowerHistoryControl.cs 
+C:\Users\Public\src\MS_Store_App\SpeedTestZx\SpeedTestZx\Helper\PowerHistoryDataCache.cs
+C:\Users\Public\src\MS_Store_App\SpeedTestZx\SpeedTestZx\Service\PowerHistoryService
+C:\Users\Public\src\MS_Store_App\SpeedTestZx\SpeedTestZx\UserControls\PowerHistoryControl.cs 
 
 I have added project data service: \DeviceData\ApplicationDataManager.cs
 Model: \DeviceData\AppSettingsVm.cs
 
-create new json file: C:\Users\User\AppData\Local\TestNetSpeed\WifiProfileCache.json
+create new json file: C:\Users\User\AppData\Local\SpeedTestZx\WifiProfileCache.json
 
 *********************************************************************************************************************************************************
 
 
 Now implement app settings:
--add dark mode and light mode feature. just save user preference in json file: C:\Users\User\AppData\Local\TestNetSpeed\appsettings.json
+-add dark mode and light mode feature. just save user preference in json file: C:\Users\User\AppData\Local\SpeedTestZx\appsettings.json
 Add a new boolean property in AppSettingsVm.cs: IsDarkMode.
 - add other must have app settings only. Do not add any extra settings.
 
@@ -233,19 +234,19 @@ Fix StatTileControl.cs
 
 
 Read all Project Docs:
-C:\Users\Public\src\MS_Store_App\TestNetSpeed\Doc\
+C:\Users\Public\src\MS_Store_App\SpeedTestZx\Doc\
 
 
 
-I have created project: TestNetSpeed, from my existing app. 
+I have created project: SpeedTestZx, from my existing app. 
 Project Source:
-C:\Users\Public\src\MS_Store_App\TestNetSpeed\TestNetSpeed
+C:\Users\Public\src\MS_Store_App\SpeedTestZx\SpeedTestZx
 The goal is to build once, configure fast — so that spinning up a new app requires only editing a single central configuration file, with zero structural changes needed.
 
 
 
 Now you task is follow doc: 
-C:\Users\Public\src\MS_Store_App\TestNetSpeed\Doc
+C:\Users\Public\src\MS_Store_App\SpeedTestZx\Doc
 Specially: Project UI Structure.md
 
 And update project. Remove unused and extra code.
@@ -253,7 +254,7 @@ Make this project 100% Desktop App Starter Template.
 
 
 *If required write doc always here:
-C:\Users\Public\src\MS_Store_App\TestNetSpeed\Doc
+C:\Users\Public\src\MS_Store_App\SpeedTestZx\Doc
 
 
 - Skip build, test, publish, deployment, migration, and package commands unless explicitly requested; I will handle them.

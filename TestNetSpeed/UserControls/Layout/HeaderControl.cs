@@ -1,11 +1,11 @@
 // UserControls/Layout/HeaderControl.cs
-using TestNetSpeed.Forms;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Managers;
+using SpeedTestZx.Forms;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Managers;
 using DpiCommon.Helper;
 using FontAwesome.Sharp;
 
-namespace TestNetSpeed.UserControls.Layout
+namespace SpeedTestZx.UserControls.Layout
 {
     /// <summary>
     /// Part 02 — header bar, laid out like Net Speed Meter Plus's. Left: PC

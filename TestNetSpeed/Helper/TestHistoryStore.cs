@@ -1,8 +1,8 @@
 using DeviceDataModule;
 using System.Text.Json;
-using TestNetSpeed.Model;
+using SpeedTestZx.Model;
 
-namespace TestNetSpeed.Helper
+namespace SpeedTestZx.Helper
 {
     /// <summary>
     /// Local JSON log of completed speed tests. Same JSON-in-AppData shape

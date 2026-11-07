@@ -1,9 +1,9 @@
 using System.Net;
 using System.Net.NetworkInformation;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Model;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Model;
 
-namespace TestNetSpeed.Service.Monitor
+namespace SpeedTestZx.Service.Monitor
 {
     /// <summary>
     /// Latency and loss log (T54). Every 10 s it probes 1.1.1.1 (ICMP, TCP

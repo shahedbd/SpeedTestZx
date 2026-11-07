@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace TestNetSpeed.Model;
+namespace SpeedTestZx.Model;
 
 public class SpeedTestResult
 {

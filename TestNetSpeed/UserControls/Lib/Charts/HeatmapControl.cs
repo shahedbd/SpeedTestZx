@@ -1,6 +1,6 @@
-using TestNetSpeed.Helper;
+using SpeedTestZx.Helper;
 
-namespace TestNetSpeed.UserControls.Lib.Charts
+namespace SpeedTestZx.UserControls.Lib.Charts
 {
     /// <summary>
     /// Weekday × hour heatmap (T55). Colour scale:

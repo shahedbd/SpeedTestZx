@@ -1,8 +1,8 @@
 using System.Drawing.Drawing2D;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Managers;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Managers;
 
-namespace TestNetSpeed.UserControls.Prompts
+namespace SpeedTestZx.UserControls.Prompts
 {
     /// <summary>
     /// ProPromptCard — live Store price, CTA busy state and the rounded card

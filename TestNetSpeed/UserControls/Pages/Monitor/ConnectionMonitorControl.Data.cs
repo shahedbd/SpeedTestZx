@@ -1,10 +1,10 @@
-using TestNetSpeed.Helper;
-using TestNetSpeed.Managers;
-using TestNetSpeed.Model;
-using TestNetSpeed.Service.Monitor;
-using TestNetSpeed.UserControls.Lib.Charts;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Managers;
+using SpeedTestZx.Model;
+using SpeedTestZx.Service.Monitor;
+using SpeedTestZx.UserControls.Lib.Charts;
 
-namespace TestNetSpeed.UserControls.Pages.Monitor
+namespace SpeedTestZx.UserControls.Pages.Monitor
 {
     /// <summary>
     /// ConnectionMonitorControl — loads the Monitor's files and fills the

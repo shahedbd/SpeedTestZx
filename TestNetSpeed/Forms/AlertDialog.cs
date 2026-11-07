@@ -1,8 +1,8 @@
-using TestNetSpeed.Managers;
+using SpeedTestZx.Managers;
 using DpiCommon.Helper;
 using FontAwesome.Sharp;
 
-namespace TestNetSpeed.Forms
+namespace SpeedTestZx.Forms
 {
     public enum AlertType { Info, Success, Warning, Error }
 

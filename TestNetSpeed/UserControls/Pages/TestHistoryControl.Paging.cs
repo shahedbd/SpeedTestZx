@@ -1,6 +1,6 @@
-using TestNetSpeed.Helper;
+using SpeedTestZx.Helper;
 
-namespace TestNetSpeed.UserControls.Pages
+namespace SpeedTestZx.UserControls.Pages
 {
     /// <summary>
     /// TestHistoryControl — paging (Pro_plan.md T49 / T21). Every test is now

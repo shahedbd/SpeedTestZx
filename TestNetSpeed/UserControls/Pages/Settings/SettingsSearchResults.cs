@@ -1,7 +1,7 @@
-using TestNetSpeed.Managers;
-using TestNetSpeed.UserControls.Lib;
+using SpeedTestZx.Managers;
+using SpeedTestZx.UserControls.Lib;
 
-namespace TestNetSpeed.UserControls.Pages.Settings
+namespace SpeedTestZx.UserControls.Pages.Settings
 {
     /// <summary>
     /// Search results across every category, grouped by category (ported from

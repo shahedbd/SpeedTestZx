@@ -68,7 +68,7 @@
     <GenerateTestArtifacts>True</GenerateTestArtifacts>
     <AppxBundlePlatforms>neutral</AppxBundlePlatforms>
     <HoursBetweenUpdateChecks>0</HoursBetweenUpdateChecks>
-    <EntryPointProjectUniqueName>..\TestNetSpeed\TestNetSpeed.csproj</EntryPointProjectUniqueName>
+    <EntryPointProjectUniqueName>..\SpeedTestZx\SpeedTestZx.csproj</EntryPointProjectUniqueName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <AppxBundle>Always</AppxBundle>
@@ -170,6 +170,6 @@
     <Content Include="Images\Wide310x150Logo.scale-400.png" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TestNetSpeed\TestNetSpeed.csproj" />
+    <ProjectReference Include="..\SpeedTestZx\SpeedTestZx.csproj" />
   </ItemGroup>
 </Project>

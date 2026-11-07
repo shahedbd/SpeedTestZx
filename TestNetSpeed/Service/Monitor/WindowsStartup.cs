@@ -1,9 +1,9 @@
-using TestNetSpeed.Helper;
-using TestNetSpeed.Service.Store;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Service.Store;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 
-namespace TestNetSpeed.Service.Monitor
+namespace SpeedTestZx.Service.Monitor
 {
     /// <summary>
     /// "Start with Windows" through the MSIX StartupTask declared in

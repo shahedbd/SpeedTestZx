@@ -1,10 +1,10 @@
-using TestNetSpeed.Helper;
-using TestNetSpeed.Managers;
-using TestNetSpeed.Model;
-using TestNetSpeed.Service.Monitor;
-using TestNetSpeed.UserControls.Lib;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Managers;
+using SpeedTestZx.Model;
+using SpeedTestZx.Service.Monitor;
+using SpeedTestZx.UserControls.Lib;
 
-namespace TestNetSpeed.UserControls.Pages.Settings
+namespace SpeedTestZx.UserControls.Pages.Settings
 {
     /// <summary>
     /// Behavior — what the close button does, Start with Windows (T58) and,

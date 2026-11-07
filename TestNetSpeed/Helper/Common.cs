@@ -1,6 +1,6 @@
 using System.Diagnostics;
 
-namespace TestNetSpeed.Helper
+namespace SpeedTestZx.Helper
 {
     public static class Common
     {

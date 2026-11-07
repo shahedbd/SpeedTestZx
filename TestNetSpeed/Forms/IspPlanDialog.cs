@@ -1,11 +1,11 @@
 using System.Globalization;
 using DpiCommon.Helper;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Managers;
-using TestNetSpeed.Model;
-using TestNetSpeed.UserControls.Lib;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Managers;
+using SpeedTestZx.Model;
+using SpeedTestZx.UserControls.Lib;
 
-namespace TestNetSpeed.Forms
+namespace SpeedTestZx.Forms
 {
     /// <summary>
     /// Plan entry for the ISP Report Card (T33): ISP, download / upload Mbps,

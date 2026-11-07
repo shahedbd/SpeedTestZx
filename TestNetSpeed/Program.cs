@@ -1,11 +1,11 @@
-using TestNetSpeed.Forms;
-using TestNetSpeed.Helper;
+using SpeedTestZx.Forms;
+using SpeedTestZx.Helper;
 using DpiCommon.Helper;
 using DeviceDataModule;
 using FontAwesome.Sharp;
-using TestNetSpeed.Service.Monitor;
+using SpeedTestZx.Service.Monitor;
 
-namespace TestNetSpeed
+namespace SpeedTestZx
 {
     internal static class Program
     {
@@ -47,7 +47,7 @@ namespace TestNetSpeed
         }
 
         private static string SingleInstanceName() =>
-            @"Local\TestNetSpeed-" + (Environment.ProcessPath ?? AppConfig.AppName)
+            @"Local\SpeedTestZx-" + (Environment.ProcessPath ?? AppConfig.AppName)
                 .ToLowerInvariant().Replace('\\', '_').Replace(':', '_');
 
         private static void WarmUpData()

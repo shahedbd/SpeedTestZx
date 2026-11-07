@@ -2,7 +2,7 @@
 using FontAwesome.Sharp;
 using System.Drawing.Drawing2D;
 
-namespace TestNetSpeed.UserControls.Lib.DataCard
+namespace SpeedTestZx.UserControls.Lib.DataCard
 {
     /// <summary>Visual style of an <see cref="IconBadgeRenderer"/> badge.</summary>
     public enum IconBadgeStyle

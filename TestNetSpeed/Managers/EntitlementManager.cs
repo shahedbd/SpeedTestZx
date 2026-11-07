@@ -1,9 +1,9 @@
 using Windows.Services.Store;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Model;
-using TestNetSpeed.Service.Store;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Model;
+using SpeedTestZx.Service.Store;
 
-namespace TestNetSpeed.Managers
+namespace SpeedTestZx.Managers
 {
     /// <summary>
     /// App-wide singleton that owns the current Microsoft Store entitlement and

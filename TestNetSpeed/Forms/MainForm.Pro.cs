@@ -1,10 +1,10 @@
 using DeviceDataModule;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Managers;
-using TestNetSpeed.Model;
-using TestNetSpeed.Service.Monitor;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Managers;
+using SpeedTestZx.Model;
+using SpeedTestZx.Service.Monitor;
 
-namespace TestNetSpeed.Forms
+namespace SpeedTestZx.Forms
 {
     /// <summary>
     /// MainForm — Pro and Connection Monitor wiring (Pro_plan.md Phases 0 / 2):

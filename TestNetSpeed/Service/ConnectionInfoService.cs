@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace TestNetSpeed.Service
+namespace SpeedTestZx.Service
 {
     /// <summary>ISP and test-location details for the current connection (T05).</summary>
     public record ConnectionInfo(string Isp, string City, string Country, string Colo)

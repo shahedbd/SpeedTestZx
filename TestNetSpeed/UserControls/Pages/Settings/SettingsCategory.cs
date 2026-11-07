@@ -1,8 +1,8 @@
 using DeviceDataModule;
-using TestNetSpeed.Managers;
-using TestNetSpeed.UserControls.Lib;
+using SpeedTestZx.Managers;
+using SpeedTestZx.UserControls.Lib;
 
-namespace TestNetSpeed.UserControls.Pages.Settings
+namespace SpeedTestZx.UserControls.Pages.Settings
 {
     /// <summary>
     /// Base for one Settings category (Appearance, Behavior, ...): title,

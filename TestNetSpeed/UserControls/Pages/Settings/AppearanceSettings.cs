@@ -1,6 +1,6 @@
-using TestNetSpeed.Managers;
+using SpeedTestZx.Managers;
 
-namespace TestNetSpeed.UserControls.Pages.Settings
+namespace SpeedTestZx.UserControls.Pages.Settings
 {
     /// <summary>
     /// Appearance — the app window's Dark / Light theme, as two preview cards.

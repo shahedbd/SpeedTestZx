@@ -1,7 +1,7 @@
-using TestNetSpeed.Model;
-using TestNetSpeed.UserControls.Lib.Charts;
+using SpeedTestZx.Model;
+using SpeedTestZx.UserControls.Lib.Charts;
 
-namespace TestNetSpeed.Helper.Report
+namespace SpeedTestZx.Helper.Report
 {
     /// <summary>
     /// The PDF complaint report (T34, Pro), in the order Pro_plan.md lists:

@@ -1,7 +1,7 @@
-using TestNetSpeed.Model;
-using TestNetSpeed.UserControls.Prompts;
+using SpeedTestZx.Model;
+using SpeedTestZx.UserControls.Prompts;
 
-namespace TestNetSpeed.Managers
+namespace SpeedTestZx.Managers
 {
     /// <summary>
     /// Owns the Pro upgrade overlay and every "may the user do this" UI gate.

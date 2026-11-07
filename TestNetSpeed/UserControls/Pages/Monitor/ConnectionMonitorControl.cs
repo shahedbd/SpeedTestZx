@@ -1,13 +1,13 @@
 using FontAwesome.Sharp;
-using TestNetSpeed.Helper;
-using TestNetSpeed.Managers;
-using TestNetSpeed.Model;
-using TestNetSpeed.UserControls.Lib;
-using TestNetSpeed.UserControls.Lib.Charts;
-using TestNetSpeed.UserControls.Lib.DataCard;
-using TestNetSpeed.UserControls.Prompts;
+using SpeedTestZx.Helper;
+using SpeedTestZx.Managers;
+using SpeedTestZx.Model;
+using SpeedTestZx.UserControls.Lib;
+using SpeedTestZx.UserControls.Lib.Charts;
+using SpeedTestZx.UserControls.Lib.DataCard;
+using SpeedTestZx.UserControls.Prompts;
 
-namespace TestNetSpeed.UserControls.Pages.Monitor
+namespace SpeedTestZx.UserControls.Pages.Monitor
 {
     /// <summary>
     /// "Connection Monitor" nav page (Pro_plan.md Phase 2, T57): "When is my

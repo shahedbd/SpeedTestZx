@@ -1,4 +1,4 @@
-namespace TestNetSpeed.Model;
+namespace SpeedTestZx.Model;
 
 /// <summary>
 /// Test-only tier override for <see cref="Helper.AppConfig.TestAccess"/>.

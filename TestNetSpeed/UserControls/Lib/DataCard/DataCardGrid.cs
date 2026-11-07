@@ -1,7 +1,7 @@
 // UserControls/Lib/DataCard/DataCardGrid.cs
 using System.ComponentModel;
 
-namespace TestNetSpeed.UserControls.Lib.DataCard
+namespace SpeedTestZx.UserControls.Lib.DataCard
 {
     /// <summary>
     /// Single-row strip of equally sized <see cref="DataCardControl"/>s with a

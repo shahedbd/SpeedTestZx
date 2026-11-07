@@ -1,6 +1,6 @@
-using TestNetSpeed.Service;
+using SpeedTestZx.Service;
 
-namespace TestNetSpeed.UserControls.Pages
+namespace SpeedTestZx.UserControls.Pages
 {
     /// <summary>
     /// "Network Info" nav page — a dedicated, full-width home for

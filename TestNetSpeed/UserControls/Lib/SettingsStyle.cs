@@ -1,7 +1,7 @@
-using TestNetSpeed.Managers;
+using SpeedTestZx.Managers;
 using DpiCommon.Helper;
 
-namespace TestNetSpeed.UserControls.Lib
+namespace SpeedTestZx.UserControls.Lib
 {
     /// <summary>
     /// Shared styling helpers for the Settings page (ported from Net Speed

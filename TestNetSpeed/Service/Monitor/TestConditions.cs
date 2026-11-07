@@ -1,10 +1,10 @@
 using System.Net.NetworkInformation;
 using DeviceDataModule;
-using TestNetSpeed.Helper;
+using SpeedTestZx.Helper;
 using Windows.Networking.Connectivity;
 using Windows.System.Power;
 
-namespace TestNetSpeed.Service.Monitor
+namespace SpeedTestZx.Service.Monitor
 {
     /// <summary>
     /// "Is now a good time for a scheduled test?" (Pro_plan.md "Data safety").

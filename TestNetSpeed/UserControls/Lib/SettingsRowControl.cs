@@ -1,6 +1,6 @@
-using TestNetSpeed.Managers;
+using SpeedTestZx.Managers;
 
-namespace TestNetSpeed.UserControls.Lib
+namespace SpeedTestZx.UserControls.Lib
 {
     /// <summary>
     /// One settings row: a title (with an optional description on a second

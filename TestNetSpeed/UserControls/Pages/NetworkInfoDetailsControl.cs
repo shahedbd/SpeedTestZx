@@ -1,7 +1,7 @@
-using TestNetSpeed.Model;
-using TestNetSpeed.Service;
+using SpeedTestZx.Model;
+using SpeedTestZx.Service;
 
-namespace TestNetSpeed.UserControls.Pages
+namespace SpeedTestZx.UserControls.Pages
 {
     /// <summary>
     /// Renders the current connection's adapter/IP/gateway/DNS/etc. as a

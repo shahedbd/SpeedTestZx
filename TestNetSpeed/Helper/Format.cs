@@ -1,4 +1,4 @@
-namespace TestNetSpeed.Helper
+namespace SpeedTestZx.Helper
 {
     /// <summary>Display formatting shared by the Report Card and the Monitor.</summary>
     public static class Format

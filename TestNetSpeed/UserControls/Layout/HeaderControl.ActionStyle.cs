@@ -1,7 +1,7 @@
 using FontAwesome.Sharp;
-using TestNetSpeed.Helper;
+using SpeedTestZx.Helper;
 
-namespace TestNetSpeed.UserControls.Layout
+namespace SpeedTestZx.UserControls.Layout
 {
     /// <summary>
     /// HeaderControl — colours of the action buttons on the right. Same
