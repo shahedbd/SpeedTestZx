@@ -281,7 +281,6 @@ namespace SpeedTestZx.Service
         /// <summary>Leading share of the window treated as TCP ramp-up and left out of the result.</summary>
         private const double RampUpShare = 0.2;
 
-        private const int DownloadRequestBytes = 50 * 1024 * 1024;
         private const int UploadRequestBytes = 4 * 1024 * 1024;
 
         // ── Download ─────────────────────────────────────────────────────────
@@ -293,7 +292,7 @@ namespace SpeedTestZx.Service
             Report(progress, SpeedTestPhase.Download, 5, 0, "Warming up...");
             try
             {
-                await DownloadOnceAsync(DownloadBaseUrl + (512 * 1024), _ => { }, ct);
+                await DownloadOnceAsync(512 * 1024, _ => { }, ct);
             }
             catch (Exception) when (!ct.IsCancellationRequested)
             {
@@ -303,10 +302,9 @@ namespace SpeedTestZx.Service
 
             Report(progress, SpeedTestPhase.Download, 10, 0, "Measuring download...");
 
-            string url = DownloadBaseUrl + DownloadRequestBytes;
             return await MeasureThroughputAsync(
                 SpeedTestPhase.Download, "Download",
-                (onBytes, token) => DownloadOnceAsync(url, onBytes, token),
+                (onBytes, token) => DownloadChunkAsync(onBytes, token),
                 progress, transferWindow, byteCap, ct);
         }
 
@@ -392,10 +390,14 @@ namespace SpeedTestZx.Service
 
             ct.ThrowIfCancellationRequested();
 
-            // Nothing got through at all and a stream hit a real error: fail
-            // the test with that error instead of reporting 0 Mbps as success.
-            if (counter.Total == 0 && errors.FirstOrDefault(e => e != null) is Exception first)
-                throw first;
+            // Nothing got through: fail the test (with the stream's error when
+            // there is one) instead of reporting 0 Mbps as a success.
+            if (counter.Total == 0)
+            {
+                if (errors.FirstOrDefault(e => e != null) is Exception first)
+                    throw first;
+                throw new HttpRequestException($"The {label.ToLowerInvariant()} test couldn't reach the speed test server.");
+            }
 
             double result = SteadyMbps(points);
             Report(progress, phase, 100, result, $"{label}: {result:F1} Mbps");
@@ -470,14 +472,77 @@ namespace SpeedTestZx.Service
             return Math.Round(Math.Clamp(100 - stddev / mean * 100, 0, 100), 0);
         }
 
+        // ── Chunk fix: download in sizes Cloudflare still serves ────────────
+        //    Cloudflare now answers large single downloads (≥ ~10 MB) with
+        //    429 and "Retry-After: 3600". Waiting that out stalled the whole
+        //    window. Instead, step down to a smaller size at once.
+
+        /// <summary>
+        /// Per-request download sizes, largest first. Large requests keep a
+        /// fast line busy with few round trips; after a 429 the next request
+        /// uses the next size down. The working size is remembered for the
+        /// rest of the session.
+        /// </summary>
+        public static readonly int[] DownloadChunkSizes =
+        {
+            25 * 1024 * 1024,
+            10 * 1024 * 1024,
+            5 * 1024 * 1024,
+            2 * 1024 * 1024,
+            1024 * 1024,
+        };
+
+        private static int _downloadChunkIndex;
+
+        /// <summary>Size used for the next download request.</summary>
+        public static int CurrentDownloadChunk => DownloadChunkSizes[Volatile.Read(ref _downloadChunkIndex)];
+
+        /// <summary>
+        /// Moves to the next smaller size after a 429 at <paramref name="refusedSize"/>.
+        /// Returns false when already at the smallest. Two streams refusing
+        /// the same size step down once, not twice.
+        /// </summary>
+        public static bool StepDownFrom(int refusedSize)
+        {
+            int index = Array.IndexOf(DownloadChunkSizes, refusedSize);
+            if (index < 0 || index >= DownloadChunkSizes.Length - 1) return false;
+
+            Interlocked.CompareExchange(ref _downloadChunkIndex, index + 1, index);
+            return true;
+        }
+
+        public static void ResetDownloadChunk() => Volatile.Write(ref _downloadChunkIndex, 0);
+
+        /// <summary>One download request at the current chunk size, stepping down on 429.</summary>
+        private static async Task DownloadChunkAsync(Action<long> onBytes, CancellationToken ct)
+        {
+            while (true)
+            {
+                int size = CurrentDownloadChunk;
+                try
+                {
+                    await DownloadOnceAsync(size, onBytes, ct);
+                    return;
+                }
+                catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.TooManyRequests
+                                                      && StepDownFrom(size))
+                {
+                    // Refused at this size: retry straight away, smaller.
+                }
+            }
+        }
+
         // ── Low-level: one download request, counting bytes as they arrive ──
         private static async Task DownloadOnceAsync(
-            string url,
+            int bytes,
             Action<long> onBytes,
             CancellationToken ct)
         {
+            // No waiting on a refused large size (DownloadChunkAsync steps
+            // down instead); one short retry at the smallest size.
             using var res = await SendWithRetryAsync(
-                c => _http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, c), ct);
+                c => _http.GetAsync(DownloadBaseUrl + bytes, HttpCompletionOption.ResponseHeadersRead, c),
+                ct, maxRetries: bytes == DownloadChunkSizes[^1] ? 1 : 0);
             res.EnsureSuccessStatusCode();
 
             var buffer = new byte[65536];
@@ -553,6 +618,16 @@ namespace SpeedTestZx.Service
         //    become a hard failure. Honors the server's Retry-After header
         //    when present, otherwise a short fixed backoff; gives up after
         //    maxRetries and returns the last (failing) response as-is.
+        /// <summary>Longest wait for one retry, whatever Retry-After says
+        /// (Cloudflare sends 3600 s, which outlasts the whole test).</summary>
+        public static readonly TimeSpan MaxRetryWait = TimeSpan.FromSeconds(2);
+
+        public static TimeSpan RetryWait(TimeSpan? retryAfter, int attempt)
+        {
+            var wait = retryAfter ?? TimeSpan.FromSeconds(1.5 * (attempt + 1));
+            return wait > MaxRetryWait ? MaxRetryWait : wait;
+        }
+
         private static async Task<HttpResponseMessage> SendWithRetryAsync(
             Func<CancellationToken, Task<HttpResponseMessage>> send,
             CancellationToken ct,
@@ -564,7 +639,7 @@ namespace SpeedTestZx.Service
                 if (res.StatusCode != HttpStatusCode.TooManyRequests || attempt >= maxRetries)
                     return res;
 
-                var wait = res.Headers.RetryAfter?.Delta ?? TimeSpan.FromSeconds(1.5 * (attempt + 1));
+                var wait = RetryWait(res.Headers.RetryAfter?.Delta, attempt);
                 res.Dispose();
                 await Task.Delay(wait, ct);
             }
